@@ -1,0 +1,107 @@
+{
+  "homeCamera": {
+    "north": 44.5,
+    "east": 5.0,
+    "south": 35.0,
+    "west": -10.0
+  },
+  "catalog": [
+    {
+      "id": "atlas-2021",
+      "name": "Índice de Privación 2021",
+      "description": "Distribución de la privación en España dividida en Quintiles basados en los datos actuales.",
+      "type": "geojson",
+      "url": "data/secciones_unified.geojson",
+      "opacity": 0.9,
+      "splitDirection": 1,
+      "activeStyle": "Q21_Label",
+      "columns": [
+        { "name": "Q21_Label", "title": "Nivel de Privación (2021)" },
+        { "name": "IP2021",    "type": "hidden" },
+        { "name": "IP2011",    "type": "hidden" },
+        { "name": "Q11_Label", "type": "hidden" },
+        { "name": "Q21_num",   "type": "hidden" },
+        { "name": "CUSEC",     "type": "hidden" },
+        { "name": "NMUN",      "type": "hidden" },
+        { "name": "NPRO",      "type": "hidden" }
+      ],
+      "featureInfoTemplate": {
+        "name": "{{NMUN}} — {{CUSEC}}",
+        "template": "<div style='font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:300px;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.15)'><div style='background:#f3f4f6;color:#111827;padding:10px 14px;border-bottom:1px solid #e5e7eb'><div style='font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px'>{{NPRO}}</div><div style='font-size:16px;font-weight:700;margin:2px 0;color:#111827'>{{NMUN}}</div><div style='font-size:11px;color:#9ca3af'>Sección: {{CUSEC}}</div></div><div style='padding:12px 14px;background:white'><table style='width:100%;border-collapse:collapse;font-size:13px'><tr style='border-bottom:2px solid #eee'><td style='padding:6px 0;color:#999;font-size:11px'> </td><td style='text-align:center;padding:6px;color:#999;font-size:11px;font-weight:600'>2011</td><td style='text-align:center;padding:6px;color:#999;font-size:11px;font-weight:600'>2021</td></tr><tr><td style='padding:8px 0 4px;color:#555;font-size:12px'>Índice bruto</td><td style='text-align:center;padding:8px 6px 4px;font-weight:700;font-size:15px;color:#222'>{{IP2011}}</td><td style='text-align:center;padding:8px 6px 4px;font-weight:700;font-size:15px;color:#222'>{{IP2021}}</td></tr><tr><td style='padding:2px 0 10px;color:#777;font-size:11px'>Quintil</td><td style='text-align:center;padding:2px 6px 10px;font-size:11px;color:#555'>{{Q11_Label}}</td><td style='text-align:center;padding:2px 6px 10px;font-size:11px;color:#555'>{{Q21_Label}}</td></tr></table><div style='border-top:1px solid #eee;padding-top:8px'><div style='font-size:10px;color:#bbb;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px'>Escala de privación</div><div style='height:8px;border-radius:4px;background:linear-gradient(to right,#1a9850 0%,#91cf60 25%,#ffffbf 50%,#fc8d59 75%,#d73027 100%)'></div><div style='font-size:10px;color:#bbb;margin-top:3px'><span style='float:left'>Inferior</span><span style='float:right'>Superior</span></div></div></div></div>"
+      },
+      "defaultStyle": {
+        "outline": { "null": { "color": "rgba(0,0,0,0)", "width": 0 } },
+        "color": {
+          "colorColumn": "Q21_Label",
+          "nullColor": "#d3d3d3",
+          "enumColors": [
+            { "value": "1. Inferior [-2,82/-0,82]",        "color": "#1a9850" },
+            { "value": "2. Intermedio bajo [-0,82/-0,26]", "color": "#91cf60" },
+            { "value": "3. Intermedio [-0,26/0,20]",       "color": "#ffffbf" },
+            { "value": "4. Intermedio alto [0,20/0,76]",   "color": "#fc8d59" },
+            { "value": "5. Superior [0,76/7,29]",          "color": "#d73027" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "atlas-2011",
+      "name": "Índice de Privación 2011",
+      "description": "Distribución histórica de la privación según rangos fijos de la SEE (2011).",
+      "type": "geojson",
+      "url": "data/secciones_unified.geojson",
+      "opacity": 0.9,
+      "show": false,
+      "splitDirection": -1,
+      "activeStyle": "Q11_Label",
+      "columns": [
+        { "name": "Q11_Label", "title": "Nivel de Privación (2011)" },
+        { "name": "IP2011",    "type": "hidden" },
+        { "name": "IP2021",    "type": "hidden" },
+        { "name": "Q21_Label", "type": "hidden" },
+        { "name": "Q21_num",   "type": "hidden" },
+        { "name": "CUSEC",     "type": "hidden" },
+        { "name": "NMUN",      "type": "hidden" },
+        { "name": "NPRO",      "type": "hidden" }
+      ],
+      "featureInfoTemplate": {
+        "name": "{{NMUN}} — {{CUSEC}}",
+        "template": "<div style='font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:300px;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.15)'><div style='background:#f3f4f6;color:#111827;padding:10px 14px;border-bottom:1px solid #e5e7eb'><div style='font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px'>{{NPRO}}</div><div style='font-size:16px;font-weight:700;margin:2px 0;color:#111827'>{{NMUN}}</div><div style='font-size:11px;color:#9ca3af'>Sección: {{CUSEC}}</div></div><div style='padding:12px 14px;background:white'><table style='width:100%;border-collapse:collapse;font-size:13px'><tr style='border-bottom:2px solid #eee'><td style='padding:6px 0;color:#999;font-size:11px'> </td><td style='text-align:center;padding:6px;color:#999;font-size:11px;font-weight:600'>2011</td><td style='text-align:center;padding:6px;color:#999;font-size:11px;font-weight:600'>2021</td></tr><tr><td style='padding:8px 0 4px;color:#555;font-size:12px'>Índice bruto</td><td style='text-align:center;padding:8px 6px 4px;font-weight:700;font-size:15px;color:#222'>{{IP2011}}</td><td style='text-align:center;padding:8px 6px 4px;font-weight:700;font-size:15px;color:#222'>{{IP2021}}</td></tr><tr><td style='padding:2px 0 10px;color:#777;font-size:11px'>Quintil</td><td style='text-align:center;padding:2px 6px 10px;font-size:11px;color:#555'>{{Q11_Label}}</td><td style='text-align:center;padding:2px 6px 10px;font-size:11px;color:#555'>{{Q21_Label}}</td></tr></table><div style='border-top:1px solid #eee;padding-top:8px'><div style='font-size:10px;color:#bbb;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px'>Escala de privación</div><div style='height:8px;border-radius:4px;background:linear-gradient(to right,#1a9850 0%,#91cf60 25%,#ffffbf 50%,#fc8d59 75%,#d73027 100%)'></div><div style='font-size:10px;color:#bbb;margin-top:3px'><span style='float:left'>Inferior</span><span style='float:right'>Superior</span></div></div></div></div>"
+      },
+      "defaultStyle": {
+        "outline": { "null": { "color": "rgba(0,0,0,0)", "width": 0 } },
+        "color": {
+          "colorColumn": "Q11_Label",
+          "nullColor": "#d3d3d3",
+          "enumColors": [
+            { "value": "1. Inferior [-2,58/-0,86]",        "color": "#1a9850" },
+            { "value": "2. Intermedio bajo [-0,87/-0,27]", "color": "#91cf60" },
+            { "value": "3. Intermedio [-0,28/-0,21]",      "color": "#ffffbf" },
+            { "value": "4. Intermedio alto [0,22/0,82]",   "color": "#fc8d59" },
+            { "value": "5. Superior [0,83/4,88]",          "color": "#d73027" }
+          ]
+        }
+      }
+    }
+  ],
+  "workbench": [
+    "atlas-2021",
+    "atlas-2011"
+  ],
+  "viewerMode": "3dSmooth",
+  "baseMaps": {
+    "defaultBaseMapId": "basemap-positron",
+    "previewBaseMapId": "basemap-positron",
+    "items": [
+      {
+        "item": {
+          "id": "basemap-positron",
+          "name": "Carto Positron (Light)",
+          "type": "url-template-imagery",
+          "url": "https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+          "attribution": "© OpenStreetMap contributors © CARTO"
+        }
+      }
+    ]
+  }
+}

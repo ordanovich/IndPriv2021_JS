@@ -1,0 +1,73 @@
+{
+  /* Archivo de inicialización del catálogo de capas */
+  "initializationUrls": ["simple"],
+
+  "parameters": {
+    "googleUrlShortenerKey": null,
+    "googleAnalyticsKey": null,
+    "googleAnalyticsOptions": null,
+
+    /* Texto informativo en la parte inferior del mapa */
+    "disclaimer": {
+      "text": "Este mapa tiene carácter informativo y no debe utilizarse para análisis espaciales de precisión.",
+      "url": ""
+    },
+
+    /* Nombre interno de la aplicación (aparece en algunos mensajes de la interfaz) */
+    "appName": "Atlas de Privación de España",
+
+    /*
+      Barra superior: tres posiciones (izquierda, centro, derecha).
+      Coloca el archivo logo.png en wwwroot/images/logo.jpg.
+      Ajusta el atributo height según las dimensiones de tu logo.
+    */
+    "brandBarElements": [
+      "<div style='display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px 16px;gap:3px;background:#ffffff'><span style='color:#111827;font-size:12px;font-weight:700;letter-spacing:0.3px;white-space:nowrap;line-height:1.2'>Atlas de Privación de España</span><img src='images/logo.jpg' style='height:28px;width:auto;object-fit:contain;display:block;max-width:180px' alt='Logo institucional' onerror=\"this.style.display='none'\"/></div>",
+      "",
+      ""
+    ],
+
+    /* Desactiva el botón de feedback (no hay endpoint de servidor) */
+    "feedbackUrl": null,
+
+    "proj4ServiceBaseUrl": "proj4def/",
+
+    /* Vista por defecto en dispositivos móviles */
+    "mobileDefaultViewerMode": "2d",
+
+    "experimentalFeatures": true,
+
+    /* Internacionalización — desactivada, la interfaz está en español */
+    "languageConfiguration": {
+      "enabled": false,
+      "debug": false,
+      "languages": { "en": "English" },
+      "fallbackLanguage": "en"
+    },
+
+    "searchBarConfig": {},
+
+    /* Buscador de localidades (servicio público de Cesium Ion, sin clave) */
+    "searchProviders": [
+      {
+        "id": "search-provider/cesium-ion",
+        "type": "cesium-ion-search-provider",
+        "name": "Buscar localidad…",
+        "flightDurationSeconds": 1.5,
+        "minCharacters": 3
+      }
+    ],
+
+    /* Contenido del panel de ayuda — solo información del proyecto */
+    "helpContent": [
+      {
+        "title": "Acerca del mapa",
+        "itemName": "acercadelmapa",
+        "icon": "info",
+        "markdownText": "## Atlas de Privación de España\n\nEste visor compara el **Índice de Privación** (IP) a nivel de sección censal entre 2011 y 2021, permitiendo analizar la evolución de la desigualdad socioeconómica en España.\n\n---\n\n### Escala de colores\n\n<table style='width:100%;border-collapse:collapse;font-size:13px;margin:12px 0'><thead><tr style='background:#f0f0f0'><th style='padding:8px 10px;text-align:left;border:1px solid #ddd'>Color</th><th style='padding:8px 10px;text-align:left;border:1px solid #ddd'>Quintil</th><th style='padding:8px 10px;text-align:left;border:1px solid #ddd'>Categoría</th><th style='padding:8px 10px;text-align:left;border:1px solid #ddd'>% población</th></tr></thead><tbody><tr><td style='padding:8px 10px;border:1px solid #ddd;background:#1a9850'> </td><td style='padding:8px 10px;border:1px solid #ddd'>Q1</td><td style='padding:8px 10px;border:1px solid #ddd'>Inferior</td><td style='padding:8px 10px;border:1px solid #ddd'>~20 %</td></tr><tr><td style='padding:8px 10px;border:1px solid #ddd;background:#91cf60'> </td><td style='padding:8px 10px;border:1px solid #ddd'>Q2</td><td style='padding:8px 10px;border:1px solid #ddd'>Intermedio bajo</td><td style='padding:8px 10px;border:1px solid #ddd'>~20 %</td></tr><tr><td style='padding:8px 10px;border:1px solid #ddd;background:#ffffbf'> </td><td style='padding:8px 10px;border:1px solid #ddd'>Q3</td><td style='padding:8px 10px;border:1px solid #ddd'>Intermedio</td><td style='padding:8px 10px;border:1px solid #ddd'>~20 %</td></tr><tr><td style='padding:8px 10px;border:1px solid #ddd;background:#fc8d59'> </td><td style='padding:8px 10px;border:1px solid #ddd'>Q4</td><td style='padding:8px 10px;border:1px solid #ddd'>Intermedio alto</td><td style='padding:8px 10px;border:1px solid #ddd'>~20 %</td></tr><tr><td style='padding:8px 10px;border:1px solid #ddd;background:#d73027;color:white'> </td><td style='padding:8px 10px;border:1px solid #ddd'>Q5</td><td style='padding:8px 10px;border:1px solid #ddd'>Superior</td><td style='padding:8px 10px;border:1px solid #ddd'>~20 %</td></tr></tbody></table>\n\n---\n\n### Cómo usar el mapa\n\n- **Pulsar Comparar** (botón superior derecho) para activar la vista dividida 2011 / 2021\n- **Activar la capa 2011** usando el icono del ojo en el panel izquierdo\n- **Clic en cualquier sección** para ver ambos índices y quintiles simultáneamente\n- **Mover el divisor** central para comparar visualmente las dos épocas\n\n---\n\n### Metodología\n\n- **Unidad espacial**: secciones censales (~35 000 en España peninsular e islas)\n- **2011**: quintiles basados en rangos fijos del Atlas de Privación\n- **2021**: quintiles calculados sobre la distribución actual del IP (cada quintil ≈ 20 % de secciones)"
+      }
+    ],
+
+    "helpContentTerms": []
+  }
+}
