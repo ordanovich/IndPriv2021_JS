@@ -184,9 +184,9 @@ export const Loader: React.FC<LoaderProps> = ({ overlay = false, terria }) => {
           {/* Key numbers */}
           <div style={{ display: "flex", justifyContent: "space-around",
                         width: "100%", marginTop: 26 }}>
-            {([ ["36.333",  "secciones censales"],
-                ["9",       "variables del modelo"],
-                ["R² = 0,95","validación predictiva"],
+            {([ ["36.333", "secciones censales"],
+                ["9",      "variables del modelo"],
+                ["52",     "provincias cartografiadas"],
             ] as [string, string][]).map(([val, lbl], i) => (
               <div key={i} style={{
                 textAlign: "center",
