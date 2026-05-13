@@ -179,12 +179,6 @@ export const Loader: React.FC<LoaderProps> = ({ overlay = false, terria }) => {
                 }} />
               ))}
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between",
-                          fontSize: 10, color: "#9ca3af", marginTop: 6,
-                          letterSpacing: "0.2px" }}>
-              <span>← Menor privación</span>
-              <span>Mayor privación →</span>
-            </div>
           </div>
 
           {/* Key numbers */}
@@ -192,7 +186,7 @@ export const Loader: React.FC<LoaderProps> = ({ overlay = false, terria }) => {
                         width: "100%", marginTop: 26 }}>
             {([ ["36.333", "secciones censales"],
                 ["9",      "variables del modelo"],
-                ["47,3 %", "varianza explicada"],
+                ["ML",     "validación externa"],
             ] as [string, string][]).map(([val, lbl], i) => (
               <div key={i} style={{
                 textAlign: "center",
