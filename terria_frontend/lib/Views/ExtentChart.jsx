@@ -52,6 +52,49 @@ function computeDist(terria) {
   return { counts, total, year };
 }
 
+function computeStats(terria, quintileIndex, year) {
+  const gj = getCachedData();
+  if (!gj) return null;
+  const rect = getViewRect(terria);
+  if (!rect) return null;
+
+  const values = [];
+  gj.features.forEach(f => {
+    const c = centroid(f.geometry);
+    if (!c || !inRect(rect, c[0], c[1])) return;
+    let q, ip;
+    if (year === "2021") {
+      q  = f.properties.Q21_num;
+      ip = f.properties.IP2021;
+    } else {
+      const lbl = f.properties.Q11_Label;
+      q  = lbl ? parseInt(lbl.charAt(0), 10) : null;
+      ip = f.properties.IP2011;
+    }
+    if (q === quintileIndex + 1 && ip != null && isFinite(ip)) values.push(ip);
+  });
+
+  if (values.length < 2) return null;
+  values.sort((a, b) => a - b);
+
+  const n      = values.length;
+  const min    = values[0];
+  const max    = values[n - 1];
+  const mean   = values.reduce((s, v) => s + v, 0) / n;
+  const median = n % 2 === 0
+    ? (values[n / 2 - 1] + values[n / 2]) / 2
+    : values[Math.floor(n / 2)];
+  const std    = Math.sqrt(values.reduce((s, v) => s + (v - mean) ** 2, 0) / n);
+
+  const BINS   = 12;
+  const span   = max - min || 1;
+  const bins   = Array(BINS).fill(0);
+  values.forEach(v => bins[Math.min(Math.floor((v - min) / span * BINS), BINS - 1)]++);
+  const maxBin = Math.max(...bins);
+
+  return { n, min, max, mean, median, std, bins, maxBin };
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function ExtentChart({ terria, selectedQuintile = null, onQuintileToggle = () => {} }) {
@@ -62,6 +105,7 @@ export default function ExtentChart({ terria, selectedQuintile = null, onQuintil
   const [dist,    setDist]    = useState(null);
   const [hovered, setHovered] = useState(null);
   const [visible, setVisible] = useState(true);
+  const [stats,   setStats]   = useState(null);
   const cleanupRef = useRef(null);
 
   const refresh = useCallback(() => {
@@ -98,6 +142,12 @@ export default function ExtentChart({ terria, selectedQuintile = null, onQuintil
     const poll = setInterval(refresh, 1500);
     return () => { unsubData(); cleanupRef.current?.(); clearInterval(poll); };
   }, [terria, refresh]);
+
+  // Recompute per-quintile stats whenever the view or selection changes
+  useEffect(() => {
+    if (selectedQuintile === null || !dist) { setStats(null); return; }
+    setStats(computeStats(terria, selectedQuintile, dist.year));
+  }, [dist, selectedQuintile, terria]);
 
   if (!dist || dist.total === 0) return null;
 
@@ -231,22 +281,91 @@ export default function ExtentChart({ terria, selectedQuintile = null, onQuintil
         );
       })}
 
-      {/* Clear filter button */}
+      {/* Clear filter + distribution stats */}
       {selectedQuintile !== null && (
-        <button
-          onClick={() => onQuintileToggle(selectedQuintile)}
-          style={{
-            display: "block", width: "100%", marginTop: 8,
-            padding: "4px 0", borderRadius: 6,
-            border: `1px solid ${COLORS[selectedQuintile]}50`,
-            background: `${COLORS[selectedQuintile]}10`,
-            color: COLORS[selectedQuintile],
-            fontSize: 11, fontWeight: 600,
-            cursor: "pointer", letterSpacing: "0.2px",
-          }}
-        >
-          {tr.clearFilter}
-        </button>
+        <>
+          <button
+            onClick={() => onQuintileToggle(selectedQuintile)}
+            style={{
+              display: "block", width: "100%", marginTop: 8,
+              padding: "4px 0", borderRadius: 6,
+              border: `1px solid ${COLORS[selectedQuintile]}50`,
+              background: `${COLORS[selectedQuintile]}10`,
+              color: COLORS[selectedQuintile],
+              fontSize: 11, fontWeight: 600,
+              cursor: "pointer", letterSpacing: "0.2px",
+            }}
+          >
+            {tr.clearFilter}
+          </button>
+
+          {stats && (() => {
+            const col  = COLORS[selectedQuintile];
+            const loc  = lang === "es" ? "es-ES" : "en-GB";
+            const fmt2 = v => v.toFixed(2);
+            const BAR_W = 100 / stats.bins.length;
+            const meanPct = stats.max > stats.min
+              ? (stats.mean - stats.min) / (stats.max - stats.min) * 100 : 50;
+            return (
+              <div style={{
+                marginTop: 7,
+                padding: "9px 10px 7px",
+                background: "#f9fafb",
+                border: `1px solid ${col}28`,
+                borderLeft: `3px solid ${col}`,
+                borderRadius: 7,
+              }}>
+                {/* Key stats row */}
+                <div style={{
+                  display: "flex", justifyContent: "space-between",
+                  fontSize: 10, color: "#6b7280", marginBottom: 7,
+                }}>
+                  <span>
+                    <strong style={{ color: "#111827", fontSize: 11 }}>
+                      {stats.n.toLocaleString(loc)}
+                    </strong>{" "}{tr.sectionsUnit}
+                  </span>
+                  <span>μ = <strong style={{ color: "#111827" }}>{fmt2(stats.mean)}</strong></span>
+                  <span>med = <strong style={{ color: "#111827" }}>{fmt2(stats.median)}</strong></span>
+                  <span>σ = <strong style={{ color: "#111827" }}>{fmt2(stats.std)}</strong></span>
+                </div>
+
+                {/* Histogram */}
+                <svg
+                  viewBox="0 0 100 32"
+                  preserveAspectRatio="none"
+                  style={{ display: "block", width: "100%", height: 42 }}
+                >
+                  {stats.bins.map((count, i) => {
+                    const barH = stats.maxBin > 0 ? (count / stats.maxBin) * 28 : 0;
+                    return (
+                      <rect key={i}
+                        x={i * BAR_W + 0.3} y={29 - barH}
+                        width={BAR_W - 0.6} height={barH}
+                        fill={col} fillOpacity={0.72} rx={0.4}
+                      />
+                    );
+                  })}
+                  {/* Mean marker */}
+                  <line
+                    x1={meanPct} y1={0} x2={meanPct} y2={29}
+                    stroke="#374151" strokeWidth={0.9} strokeDasharray="2,1.5"
+                  />
+                </svg>
+
+                {/* Axis labels */}
+                <div style={{
+                  display: "flex", justifyContent: "space-between",
+                  fontSize: 9, color: "#9ca3af", marginTop: 2,
+                }}>
+                  <span>{fmt2(stats.min)}</span>
+                  <span>IP {year}</span>
+                  <span>{fmt2(stats.max)}</span>
+                </div>
+              </div>
+            );
+          })()}
+        </>
       )}
 
       {/* Hover tooltip */}

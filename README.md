@@ -151,6 +151,7 @@ Al hacer clic en cualquier sección censal, aparece un popup con:
 - Barra apilada interactiva + filas con mini-barras y porcentajes
 - Hover resalta el quintil seleccionado y muestra el recuento exacto
 - **Filtro por quintil:** al hacer clic en una fila, los polígonos de ese quintil se resaltan en el mapa (los demás pasan a gris claro); se puede desactivar clicando de nuevo o con el botón «× Quitar filtro»
+- **Descriptivos del quintil seleccionado:** al activar el filtro, aparece un panel con estadísticos del índice bruto (IP) para las secciones del quintil en la vista actual: n, media (μ), mediana, desviación típica (σ), rango mínimo/máximo e histograma de distribución con 12 intervalos y línea de la media; se actualiza en tiempo real al mover el mapa
 
 ### Interfaz bilingüe y accesibilidad
 - Botón **ES / EN** en la barra superior para cambiar el idioma de toda la interfaz en tiempo real
