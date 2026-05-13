@@ -8,7 +8,7 @@ const FACTS = [
   "Explora la distribución del Índice de Privación a lo largo de más de 36.000 secciones censales de toda España.",
   "Filtra por comunidad autónoma o provincia, dibuja una selección sobre el mapa y exporta los datos a Excel o GeoJSON.",
   "Haz clic en cualquier sección censal para ver el mapa provincial correspondiente del atlas estático.",
-  "La validez predictiva del índice fue contrastada mediante aprendizaje automático. Compara los resultados de 2021 con los de 2011 usando la vista dividida.",
+  "La robustez del índice fue verificada mediante Random Forest (R² = 0,95) y Bootstrap PCA, confirmando su estabilidad estructural.",
 ];
 
 interface LoaderProps {
@@ -184,9 +184,9 @@ export const Loader: React.FC<LoaderProps> = ({ overlay = false, terria }) => {
           {/* Key numbers */}
           <div style={{ display: "flex", justifyContent: "space-around",
                         width: "100%", marginTop: 26 }}>
-            {([ ["36.333",    "secciones censales"],
-                ["9",         "variables del modelo"],
-                ["2011 · 2021","censos comparados"],
+            {([ ["36.333",  "secciones censales"],
+                ["9",       "variables del modelo"],
+                ["R² = 0,95","validación predictiva"],
             ] as [string, string][]).map(([val, lbl], i) => (
               <div key={i} style={{
                 textAlign: "center",
