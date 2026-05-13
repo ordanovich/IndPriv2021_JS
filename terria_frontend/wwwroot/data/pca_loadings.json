@@ -1,0 +1,60 @@
+{
+  "note": "PCA loadings from final model (i2_29_final). Variables are z-scored indicators included in the deprivation index.",
+  "dims": ["Dim.1", "Dim.2", "Dim.3", "Dim.4", "Dim.5"],
+  "variables": [
+    {
+      "code": "IE03_i",
+      "label_es": "Desempleo",
+      "label_en": "Unemployment",
+      "loadings": [0.0527, 0.5261, -0.3534, 0.3526, 0.2082]
+    },
+    {
+      "code": "IE06_i",
+      "label_es": "Pob. extranjera",
+      "label_en": "Foreign-born",
+      "loadings": [0.5275, 0.1397, 0.0783, 0.2963, -0.0746]
+    },
+    {
+      "code": "IE28_i",
+      "label_es": "Bajo nivel educ.",
+      "label_en": "Low education",
+      "loadings": [-0.121, 0.5584, 0.3098, 0.1059, -0.2375]
+    },
+    {
+      "code": "IE07a_e2_i",
+      "label_es": "Hacinamiento",
+      "label_en": "Overcrowding",
+      "loadings": [0.4312, 0.2576, 0.1628, -0.4424, 0.1828]
+    },
+    {
+      "code": "IE33_i",
+      "label_es": "Sin calefacción",
+      "label_en": "No heating",
+      "loadings": [-0.4862, -0.0305, -0.0999, 0.0364, 0.6621]
+    },
+    {
+      "code": "IE35_i",
+      "label_es": "Pob. mayor (65+)",
+      "label_en": "Pop. aged 65+",
+      "loadings": [-0.3146, 0.0762, 0.3337, 0.5610, -0.1876]
+    },
+    {
+      "code": "IE36_i",
+      "label_es": "Monoparentales",
+      "label_en": "Single-parent",
+      "loadings": [-0.1461, 0.4116, 0.4644, -0.2981, 0.3122]
+    },
+    {
+      "code": "IE40_i",
+      "label_es": "Jóvenes NINI",
+      "label_en": "Youth NEET",
+      "loadings": [0.0354, -0.3818, 0.6378, 0.0783, 0.0762]
+    },
+    {
+      "code": "REPRUCON_20_est_i",
+      "label_es": "Carga vivienda",
+      "label_en": "Housing cost",
+      "loadings": [0.4237, -0.1467, 0.1093, 0.4167, 0.5349]
+    }
+  ]
+}

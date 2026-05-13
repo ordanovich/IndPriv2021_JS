@@ -6,6 +6,8 @@ import StandardUserInterface from "terriajs/lib/ReactViews/StandardUserInterface
 import version from "../../version";
 import ExportPanel from "./ExportPanel";
 import ExtentChart from "./ExtentChart";
+import AboutPanel from "./AboutPanel";
+import ProvinceAtlasPanel from "./ProvinceAtlasPanel";
 import { AppProvider, useApp } from "./AppContext";
 import { TR } from "./translations";
 
@@ -76,9 +78,15 @@ const LIGHT_THEME = {
 };
 
 // ── Sync TerriaJS catalog items with current lang + colorblind state ──────────
-function updateCatalogItems(terria, lang, colorblind) {
+function updateCatalogItems(terria, lang, colorblind, selectedQ = null) {
   const colors = colorblind ? CB_COLORS : STD_COLORS;
   const tr = TR[lang];
+
+  // When a quintile is selected, grey out all others on the map
+  const dimColor = "#d0d0d0";
+  const mapColors = selectedQ === null
+    ? colors
+    : colors.map((c, i) => i === selectedQ ? c : dimColor);
 
   const ITEM_DEFS = {
     "atlas-2021": { name: tr.layer2021, cols: COLS_2021(tr.column2021), col: "Q21_Label", enums: ENUM_2021 },
@@ -96,11 +104,11 @@ function updateCatalogItems(terria, lang, colorblind) {
         color: {
           colorColumn: def.col,
           nullColor: "#d3d3d3",
-          enumColors: def.enums.map((value, i) => ({ value, color: colors[i] })),
+          enumColors: def.enums.map((value, i) => ({ value, color: mapColors[i] })),
         },
       });
       item.setTrait("user", "legends", [{
-        items: tr.legendItems.map((title, i) => ({ color: colors[i], title })),
+        items: tr.legendItems.map((title, i) => ({ color: mapColors[i], title })),
       }]);
     });
   });
@@ -136,22 +144,29 @@ function ToggleBtn({ active, onClick, title, children }) {
 // ── Inner component (has access to context) ────────────────────────────────────
 function TerriaUIInner({ terria, viewState }) {
   const { lang, toggleLang, colorblind, toggleColorblind } = useApp();
-  const [exportOpen, setExportOpen] = useState(false);
+  const [exportOpen,       setExportOpen]       = useState(false);
+  const [aboutOpen,        setAboutOpen]         = useState(false);
+  const [selectedQuintile, setSelectedQuintile]  = useState(null);
   const openExport  = useCallback(() => setExportOpen(true),  []);
   const closeExport = useCallback(() => setExportOpen(false), []);
   const tr = TR[lang];
 
+  const toggleQuintile = useCallback(
+    i => setSelectedQuintile(q => (q === i ? null : i)),
+    []
+  );
+
   // MobX autorun: re-runs when workbench items change (e.g. on initial load)
-  // and re-creates when lang / colorblind state changes.
+  // and re-creates when lang / colorblind / selectedQuintile state changes.
   useEffect(() => {
     const dispose = autorun(() => {
       const items = terria.workbench?.items ?? [];
       if (items.length > 0) {
-        updateCatalogItems(terria, lang, colorblind);
+        updateCatalogItems(terria, lang, colorblind, selectedQuintile);
       }
     });
     return dispose;
-  }, [terria, lang, colorblind]);
+  }, [terria, lang, colorblind, selectedQuintile]);
 
   return (
     <>
@@ -222,6 +237,10 @@ function TerriaUIInner({ terria, viewState }) {
         version={version}
       >
         <MenuLeft>
+          <ToggleBtn active={aboutOpen} onClick={() => setAboutOpen(o => !o)}
+                     title={tr.aboutTitle}>
+            {tr.aboutBtn}
+          </ToggleBtn>
           <ToggleBtn onClick={toggleLang} title={tr.langTitle}>
             {tr.langBtn}
           </ToggleBtn>
@@ -278,8 +297,18 @@ function TerriaUIInner({ terria, viewState }) {
           {tr.exportBtnLabel.replace("⬇ ", "")}
         </button>
 
-        <ExtentChart terria={terria} />
+        <ExtentChart
+          terria={terria}
+          selectedQuintile={selectedQuintile}
+          onQuintileToggle={toggleQuintile}
+        />
       </div>
+
+      {/* ── About panel ─────────────────────────────────────────────────────── */}
+      <AboutPanel
+        isOpen={aboutOpen}
+        onClose={() => setAboutOpen(false)}
+      />
 
       {/* ── Export panel ────────────────────────────────────────────────────── */}
       <ExportPanel
@@ -288,6 +317,9 @@ function TerriaUIInner({ terria, viewState }) {
         onClose={closeExport}
         onReopen={openExport}
       />
+
+      {/* ── Province atlas panel (appears on feature click) ──────────────── */}
+      <ProvinceAtlasPanel terria={terria} />
     </>
   );
 }

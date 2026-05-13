@@ -54,7 +54,7 @@ function computeDist(terria) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function ExtentChart({ terria }) {
+export default function ExtentChart({ terria, selectedQuintile = null, onQuintileToggle = () => {} }) {
   const { lang, colorblind } = useApp();
   const tr = TR[lang];
   const COLORS = colorblind ? CB_COLORS : STD_COLORS;
@@ -151,65 +151,103 @@ export default function ExtentChart({ terria }) {
       {/* Stacked proportion bar */}
       <div style={{ display: "flex", height: 12, borderRadius: 6,
                     overflow: "hidden", marginBottom: 13, gap: 1 }}>
-        {pcts.map((pct, i) => (
-          <div key={i} style={{
-            flex: Math.max(pct, 0.01),
-            background: COLORS[i],
-            opacity: hovered === null || hovered === i ? 1 : 0.25,
-            transition: "flex 0.55s cubic-bezier(.4,0,.2,1), opacity 0.18s",
-            minWidth: pct > 0 ? 2 : 0,
-            cursor: "default",
-          }}
-            onMouseEnter={() => setHovered(i)}
-            onMouseLeave={() => setHovered(null)}
-          />
-        ))}
+        {pcts.map((pct, i) => {
+          const isActiveBar = selectedQuintile !== null
+            ? selectedQuintile === i
+            : (hovered === null || hovered === i);
+          return (
+            <div key={i} style={{
+              flex: Math.max(pct, 0.01),
+              background: COLORS[i],
+              opacity: isActiveBar ? 1 : 0.2,
+              transition: "flex 0.55s cubic-bezier(.4,0,.2,1), opacity 0.18s",
+              minWidth: pct > 0 ? 2 : 0,
+              cursor: "pointer",
+            }}
+              onClick={() => onQuintileToggle(i)}
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(null)}
+            />
+          );
+        })}
       </div>
 
       {/* Quintile rows */}
-      {pcts.map((pct, i) => (
-        <div key={i}
-          onMouseEnter={() => setHovered(i)}
-          onMouseLeave={() => setHovered(null)}
+      {pcts.map((pct, i) => {
+        const isSelected = selectedQuintile === i;
+        const isDimmed   = selectedQuintile !== null && !isSelected;
+        return (
+          <div key={i}
+            onClick={() => onQuintileToggle(i)}
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered(null)}
+            title={isSelected
+              ? (lang === "es" ? "Clic para quitar filtro" : "Click to clear filter")
+              : (lang === "es" ? "Clic para resaltar en el mapa" : "Click to highlight on map")}
+            style={{
+              display: "flex", alignItems: "center", gap: 7,
+              padding: "5px 6px", borderRadius: 6, marginBottom: 2,
+              background: isSelected
+                ? `${COLORS[i]}18`
+                : hovered === i ? "rgba(0,0,0,0.04)" : "transparent",
+              borderLeft: isSelected ? `3px solid ${COLORS[i]}` : "3px solid transparent",
+              opacity: isDimmed ? 0.45 : 1,
+              cursor: "pointer",
+              transition: "background 0.15s, opacity 0.15s",
+            }}
+          >
+            <div style={{
+              width: 8, height: 8, borderRadius: "50%",
+              background: COLORS[i], flexShrink: 0,
+              boxShadow: (isSelected || hovered === i) ? `0 0 5px ${COLORS[i]}80` : "none",
+              transition: "box-shadow 0.2s",
+            }} />
+            <span style={{
+              fontSize: 11,
+              color: (isSelected || hovered === i) ? "#111827" : "#6b7280",
+              flex: 1, transition: "color 0.15s",
+              fontWeight: isSelected ? 600 : 400,
+            }}>
+              {tr.quintileLabels[i]}
+            </span>
+            <div style={{ width: 68, height: 5, borderRadius: 3, flexShrink: 0,
+                          background: "rgba(0,0,0,0.07)" }}>
+              <div style={{
+                height: "100%", borderRadius: 3,
+                width: `${pct}%`,
+                background: COLORS[i],
+                transition: "width 0.55s cubic-bezier(.4,0,.2,1)",
+              }} />
+            </div>
+            <span style={{
+              fontSize: 12, fontWeight: 700,
+              color: (isSelected || hovered === i) ? "#111827" : "#374151",
+              width: 40, textAlign: "right", flexShrink: 0,
+              transition: "color 0.15s",
+            }}>
+              {pct.toFixed(1)}%
+            </span>
+          </div>
+        );
+      })}
+
+      {/* Clear filter button */}
+      {selectedQuintile !== null && (
+        <button
+          onClick={() => onQuintileToggle(selectedQuintile)}
           style={{
-            display: "flex", alignItems: "center", gap: 7,
-            padding: "5px 6px", borderRadius: 6, marginBottom: 2,
-            background: hovered === i ? "rgba(0,0,0,0.04)" : "transparent",
-            transition: "background 0.15s", cursor: "default",
+            display: "block", width: "100%", marginTop: 8,
+            padding: "4px 0", borderRadius: 6,
+            border: `1px solid ${COLORS[selectedQuintile]}50`,
+            background: `${COLORS[selectedQuintile]}10`,
+            color: COLORS[selectedQuintile],
+            fontSize: 11, fontWeight: 600,
+            cursor: "pointer", letterSpacing: "0.2px",
           }}
         >
-          <div style={{
-            width: 8, height: 8, borderRadius: "50%",
-            background: COLORS[i], flexShrink: 0,
-            boxShadow: hovered === i ? `0 0 5px ${COLORS[i]}80` : "none",
-            transition: "box-shadow 0.2s",
-          }} />
-          <span style={{
-            fontSize: 11,
-            color: hovered === i ? "#111827" : "#6b7280",
-            flex: 1, transition: "color 0.15s",
-          }}>
-            {tr.quintileLabels[i]}
-          </span>
-          <div style={{ width: 68, height: 5, borderRadius: 3, flexShrink: 0,
-                        background: "rgba(0,0,0,0.07)" }}>
-            <div style={{
-              height: "100%", borderRadius: 3,
-              width: `${pct}%`,
-              background: COLORS[i],
-              transition: "width 0.55s cubic-bezier(.4,0,.2,1)",
-            }} />
-          </div>
-          <span style={{
-            fontSize: 12, fontWeight: 700,
-            color: hovered === i ? "#111827" : "#374151",
-            width: 40, textAlign: "right", flexShrink: 0,
-            transition: "color 0.15s",
-          }}>
-            {pct.toFixed(1)}%
-          </span>
-        </div>
-      ))}
+          {tr.clearFilter}
+        </button>
+      )}
 
       {/* Hover tooltip */}
       {hovered !== null && (

@@ -91,10 +91,14 @@ IndPriv2021_terriaJS/
     │
     ├── lib/
     │   └── Views/
-    │       ├── UserInterface.jsx   # UI principal: monta los componentes custom
-    │       ├── ExportPanel.jsx     # Panel lateral de filtrado y exportación
-    │       ├── ExtentChart.jsx     # Gráfico de distribución en vista actual
-    │       └── geoDataStore.js     # Caché compartida del GeoJSON + helpers
+    │       ├── UserInterface.jsx       # UI principal: monta todos los componentes custom
+    │       ├── AppContext.js           # Contexto React: idioma (ES/EN) y paleta daltónica
+    │       ├── translations.js         # Textos bilingües (ES/EN) para toda la interfaz
+    │       ├── ExportPanel.jsx         # Panel lateral de filtrado y exportación
+    │       ├── ExtentChart.jsx         # Gráfico de distribución en vista actual (con filtro de quintil)
+    │       ├── AboutPanel.jsx          # Panel de metodología: variables ACP, estructura factorial, atlas
+    │       ├── ProvinceAtlasPanel.jsx  # Panel de atlas provincial (se abre al clicar una sección)
+    │       └── geoDataStore.js         # Caché compartida del GeoJSON + helpers
     │
     └── wwwroot/                    # Archivos servidos estáticamente
         ├── index.html
@@ -104,8 +108,11 @@ IndPriv2021_terriaJS/
         │   └── logo.png            # Logo institucional (reemplazable)
         ├── init/
         │   └── simple.json         # Catálogo: capas, estilos, cámara inicial
-        └── data/
-            └── secciones_unified.geojson   # Datos principales (~145 MB)
+        ├── data/
+        │   └── secciones_unified.geojson   # Datos principales (~145 MB, excluido de git)
+        └── atlas/                  # Imágenes estáticas del atlas (excluidas de git, servidas localmente)
+            ├── national/           # Diccionario de variables, mapa nacional, matriz de variables
+            └── provinces/          # Mapas continuo + quintiles para las 52 provincias
 ```
 
 ### Flujo de datos
@@ -143,6 +150,24 @@ Al hacer clic en cualquier sección censal, aparece un popup con:
 - Detecta automáticamente si el usuario tiene la capa 2011 o 2021 activa
 - Barra apilada interactiva + filas con mini-barras y porcentajes
 - Hover resalta el quintil seleccionado y muestra el recuento exacto
+- **Filtro por quintil:** al hacer clic en una fila, los polígonos de ese quintil se resaltan en el mapa (los demás pasan a gris claro); se puede desactivar clicando de nuevo o con el botón «× Quitar filtro»
+
+### Interfaz bilingüe y accesibilidad
+- Botón **ES / EN** en la barra superior para cambiar el idioma de toda la interfaz en tiempo real
+- Botón **◑** para activar una paleta de colores apta para personas con daltonismo (escala azul-amarillo-rojo)
+
+### Panel de metodología (`AboutPanel`)
+Accesible mediante el botón **ℹ Índice** en la barra superior. Contiene tres pestañas:
+- **Variables** — lista de las 9 variables del modelo final con sus correlaciones de Spearman (ρ) con el CP1, representadas como barras de color (azul = factor de riesgo, ámbar = factor protector); imagen del diccionario de variables y panel de mapas nacionales (puntuaciones Z)
+- **ACP** — estructura factorial del modelo: gráfico de loadings, estadísticos (varianza explicada, KMO, contraste de Bartlett) e imagen del proceso de selección de variables
+- **Atlas** — acceso a los 5 volúmenes del atlas cartográfico estático (nacional, provincias, ciudades, conurbaciones, AUF) con enlace a DOI en Zenodo (pendiente de publicación)
+
+Las imágenes del panel son ampliables (clic → lightbox) y enlazables en nueva pestaña.
+
+### Panel de atlas provincial (`ProvinceAtlasPanel`)
+- Se abre automáticamente al clicar sobre cualquier sección censal en el mapa
+- Muestra el mapa provincial correspondiente en dos representaciones: continuo e por quintiles
+- Botón para cambiar entre ambas vistas; botón × para cerrar
 
 ### Panel de exportación (`ExportPanel`)
 Accesible mediante el botón azul **⬇ Exportar / Seleccionar datos**:
@@ -482,10 +507,14 @@ Una vez desplegado, comprueba:
 
 - [ ] La página carga en el navegador y aparece el mapa de España
 - [ ] El logo institucional es visible en la barra superior
-- [ ] Al hacer clic en una sección censal aparece el popup con los datos
+- [ ] Al hacer clic en una sección censal aparece el popup con los datos y el panel de atlas provincial
 - [ ] El botón "Exportar / Seleccionar datos" abre el panel lateral
 - [ ] La exportación a Excel funciona (descarga un `.xlsx`)
 - [ ] El botón "Comparar" activa la vista dividida 2011/2021
+- [ ] El botón **ES/EN** cambia el idioma de la interfaz
+- [ ] El botón **◑** activa la paleta para daltonismo
+- [ ] El botón **ℹ Índice** abre el panel de metodología con las tres pestañas
+- [ ] Al hacer clic en un quintil del gráfico de distribución, los polígonos del mapa se filtran visualmente
 - [ ] En las herramientas del navegador (Network), el GeoJSON se sirve comprimido (cabecera `Content-Encoding: gzip`)
 
 ---
@@ -531,4 +560,4 @@ rsync -avz \
 
 ---
 
-*Documentación actualizada en mayo 2026.*
+*Documentación actualizada en mayo 2026 · v0.2.*
