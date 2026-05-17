@@ -8,6 +8,7 @@ import ExportPanel from "./ExportPanel";
 import ExtentChart from "./ExtentChart";
 import AboutPanel from "./AboutPanel";
 import ProvinceAtlasPanel from "./ProvinceAtlasPanel";
+import SearchPanel from "./SearchPanel";
 import { AppProvider, useApp } from "./AppContext";
 import { TR } from "./translations";
 import { DEMO_MODE } from "./buildConfig";
@@ -387,6 +388,9 @@ function TerriaUIInner({ terria, viewState }) {
 
       {/* ── Province atlas panel (appears on feature click) ──────────────── */}
       <ProvinceAtlasPanel terria={terria} />
+
+      {/* ── Search panel (top-right) ─────────────────────────────────────── */}
+      <SearchPanel terria={terria} />
 
       {/* ── Demo banner (only when DEMO_MODE or ?demo=1) ─────────────────── */}
       <DemoBanner />
