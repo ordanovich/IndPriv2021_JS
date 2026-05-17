@@ -94,6 +94,38 @@ export function computeStats(terria, quintileIndex, year) {
   return { n, min, max, mean, median, std, bins, maxBin };
 }
 
+/** Collect (IP2011, IP2021, Q21) tuples for features inside the current
+ *  viewport. Used by the scatterplot view in ExtentChart. */
+export function computeScatterPoints(terria) {
+  const gj = getCachedData();
+  if (!gj) return null;
+  const rect = getViewRect(terria);
+  if (!rect) return null;
+  const points = [];
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const f of gj.features) {
+    const c = centroid(f.geometry);
+    if (!c || !inRect(rect, c[0], c[1])) continue;
+    const p = f.properties || {};
+    const ip11 = p.IP2011;
+    const ip21 = p.IP2021;
+    if (ip11 == null || !isFinite(ip11) || ip21 == null || !isFinite(ip21)) continue;
+    const q = p.Q21_num;
+    points.push({
+      x: ip11, y: ip21,
+      q: q >= 1 && q <= 5 ? q : null,
+      nmun: p.NMUN || "",
+      cusec: p.CUSEC || "",
+    });
+    if (ip11 < x0) x0 = ip11;
+    if (ip11 > x1) x1 = ip11;
+    if (ip21 < y0) y0 = ip21;
+    if (ip21 > y1) y1 = ip21;
+  }
+  if (points.length === 0) return null;
+  return { points, xMin: x0, xMax: x1, yMin: y0, yMax: y1 };
+}
+
 /** Build a JSON-ready snapshot of the viewport: distribution + per-quintile
  *  stats (n / mean / median / σ / min / max) for the active year. */
 export function computeViewSnapshot(terria) {

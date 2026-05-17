@@ -3,7 +3,7 @@ import { ensureDataLoaded, onDataReady } from "./geoDataStore";
 import { useApp } from "./AppContext";
 import { TR } from "./translations";
 import { STD_COLORS, CB_COLORS } from "./UserInterface";
-import { computeDist, computeStats } from "./viewStats";
+import { computeDist, computeStats, computeScatterPoints } from "./viewStats";
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -17,12 +17,15 @@ export default function ExtentChart({ terria, selectedQuintile = null, onQuintil
   const [visible, setVisible] = useState(true);
   const [stats,   setStats]   = useState(null);
   const [copied,  setCopied]  = useState(false);
+  const [viewMode, setViewMode] = useState("dist"); // "dist" | "scatter"
+  const [scatter,  setScatter]  = useState(null);
   const cleanupRef = useRef(null);
 
   const refresh = useCallback(() => {
     const d = computeDist(terria);
     if (d) setDist(d);
-  }, [terria]);
+    if (viewMode === "scatter") setScatter(computeScatterPoints(terria));
+  }, [terria, viewMode]);
 
   useEffect(() => {
     ensureDataLoaded();
@@ -60,6 +63,11 @@ export default function ExtentChart({ terria, selectedQuintile = null, onQuintil
     setStats(computeStats(terria, selectedQuintile, dist.year));
   }, [dist, selectedQuintile, terria]);
 
+  // Compute scatter on demand the first time the user switches to it.
+  useEffect(() => {
+    if (viewMode === "scatter") setScatter(computeScatterPoints(terria));
+  }, [viewMode, dist, terria]);
+
   if (!dist || dist.total === 0) return null;
 
   const { counts, total, year } = dist;
@@ -90,6 +98,38 @@ export default function ExtentChart({ terria, selectedQuintile = null, onQuintil
           {tr.currentView} · {total.toLocaleString(lang === "es" ? "es-ES" : "en-GB")} {tr.sectionsUnit}
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          {/* View-mode segmented control */}
+          <div style={{
+            display: "inline-flex", border: "1px solid #e5e7eb",
+            borderRadius: 6, overflow: "hidden",
+          }}>
+            <button
+              type="button"
+              onClick={() => setViewMode("dist")}
+              title={tr.extentViewDist}
+              style={{
+                padding: "2px 7px", fontSize: 10, fontWeight: 600,
+                border: "none", cursor: "pointer", lineHeight: 1.4,
+                background: viewMode === "dist" ? "#eff6ff" : "#ffffff",
+                color:      viewMode === "dist" ? "#2563eb" : "#6b7280",
+              }}
+            >
+              ▦
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("scatter")}
+              title={tr.extentViewScatter}
+              style={{
+                padding: "2px 7px", fontSize: 10, fontWeight: 600,
+                border: "none", borderLeft: "1px solid #e5e7eb", cursor: "pointer", lineHeight: 1.4,
+                background: viewMode === "scatter" ? "#eff6ff" : "#ffffff",
+                color:      viewMode === "scatter" ? "#2563eb" : "#6b7280",
+              }}
+            >
+              ✦
+            </button>
+          </div>
           <span style={{
             fontSize: 10, fontWeight: 700,
             background: year === "2021" ? "rgba(37,99,235,0.1)"  : "rgba(22,163,74,0.1)",
@@ -109,6 +149,7 @@ export default function ExtentChart({ terria, selectedQuintile = null, onQuintil
         </div>
       </div>
 
+      {viewMode === "dist" && (<>
       {/* Stacked proportion bar */}
       <div style={{ display: "flex", height: 12, borderRadius: 6,
                     overflow: "hidden", marginBottom: 13, gap: 1 }}>
@@ -339,6 +380,165 @@ export default function ExtentChart({ terria, selectedQuintile = null, onQuintil
           <strong style={{ color: "#111827" }}>{tr.quintileLabels[hovered]}</strong>
         </div>
       )}
+      </>)}
+
+      {/* Scatterplot view */}
+      {viewMode === "scatter" && (
+        <ScatterView
+          data={scatter}
+          colors={COLORS}
+          lang={lang}
+          tr={tr}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── ScatterView ──────────────────────────────────────────────────────────────
+function ScatterView({ data, colors, lang, tr }) {
+  const [hover, setHover] = useState(null);
+  if (!data || data.points.length === 0) {
+    return (
+      <div style={{
+        padding: "10px 4px",
+        fontSize: 11, color: "#9ca3af", textAlign: "center",
+      }}>
+        {tr.scatterEmpty}
+      </div>
+    );
+  }
+  const { points, xMin, xMax, yMin, yMax } = data;
+  // viewBox 100 x 70 with margins for axis labels
+  const W = 100, H = 70;
+  const ML = 9, MR = 2, MT = 2, MB = 9;        // chart margins
+  const plotW = W - ML - MR, plotH = H - MT - MB;
+  const xRange = xMax - xMin || 1;
+  const yRange = yMax - yMin || 1;
+  const xToSvg = (v) => ML + ((v - xMin) / xRange) * plotW;
+  const yToSvg = (v) => MT + plotH - ((v - yMin) / yRange) * plotH;
+
+  // Diagonal reference line: crosses the visible square from bottom-left to
+  // top-right of the plot box (relative reference, not absolute equality).
+  const diagX1 = ML, diagY1 = MT + plotH;
+  const diagX2 = ML + plotW, diagY2 = MT;
+
+  const loc = lang === "es" ? "es-ES" : "en-GB";
+  const fmt2 = v => v.toLocaleString(loc, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // Render: optionally one large circle for hovered point on top.
+  const hoverPoint = hover != null ? points[hover] : null;
+
+  return (
+    <div style={{ marginTop: 4 }}>
+      <div style={{ position: "relative" }}>
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          preserveAspectRatio="none"
+          style={{ display: "block", width: "100%", height: 210 }}
+          onMouseLeave={() => setHover(null)}
+        >
+          {/* Plot frame */}
+          <rect
+            x={ML} y={MT} width={plotW} height={plotH}
+            fill="#fafafa" stroke="#e5e7eb" strokeWidth={0.25}
+          />
+          {/* Diagonal reference line */}
+          <line
+            x1={diagX1} y1={diagY1} x2={diagX2} y2={diagY2}
+            stroke="#9ca3af" strokeWidth={0.4} strokeDasharray="1.5,1.2"
+          />
+          {/* Points */}
+          {points.map((p, idx) => {
+            const cx = xToSvg(p.x);
+            const cy = yToSvg(p.y);
+            const c  = p.q != null ? colors[p.q - 1] : "#9ca3af";
+            return (
+              <circle
+                key={idx}
+                cx={cx} cy={cy} r={0.7}
+                fill={c} fillOpacity={0.65}
+                onMouseEnter={() => setHover(idx)}
+              />
+            );
+          })}
+          {/* Hovered marker */}
+          {hoverPoint && (
+            <circle
+              cx={xToSvg(hoverPoint.x)} cy={yToSvg(hoverPoint.y)}
+              r={1.4} fill="none"
+              stroke="#111827" strokeWidth={0.5}
+            />
+          )}
+          {/* Axis labels */}
+          <text x={ML + plotW / 2} y={H - 1}
+                fontSize={3.4} fill="#6b7280" textAnchor="middle">
+            {tr.scatterXLabel}
+          </text>
+          <text x={2.6} y={MT + plotH / 2}
+                fontSize={3.4} fill="#6b7280" textAnchor="middle"
+                transform={`rotate(-90 2.6 ${MT + plotH / 2})`}>
+            {tr.scatterYLabel}
+          </text>
+          {/* Min/max labels */}
+          <text x={ML} y={H - 5} fontSize={2.6} fill="#9ca3af" textAnchor="start">
+            {fmt2(xMin)}
+          </text>
+          <text x={ML + plotW} y={H - 5} fontSize={2.6} fill="#9ca3af" textAnchor="end">
+            {fmt2(xMax)}
+          </text>
+          <text x={ML - 0.8} y={MT + 2.3} fontSize={2.6} fill="#9ca3af" textAnchor="end">
+            {fmt2(yMax)}
+          </text>
+          <text x={ML - 0.8} y={MT + plotH} fontSize={2.6} fill="#9ca3af" textAnchor="end">
+            {fmt2(yMin)}
+          </text>
+        </svg>
+
+        {hoverPoint && (
+          <div style={{
+            position: "absolute", top: 4, right: 4,
+            background: "rgba(255,255,255,0.97)",
+            border: "1px solid #e5e7eb",
+            borderRadius: 6, padding: "5px 8px",
+            fontSize: 10.5, color: "#374151",
+            pointerEvents: "none",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+            maxWidth: 180,
+          }}>
+            <div style={{ fontWeight: 700, color: "#111827", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {hoverPoint.nmun || "—"}
+            </div>
+            <div style={{ fontSize: 9.5, color: "#6b7280", fontFamily: "monospace", marginBottom: 2 }}>
+              {hoverPoint.cusec}
+            </div>
+            <div>IP 2011: <strong style={{ color: "#111827" }}>{fmt2(hoverPoint.x)}</strong></div>
+            <div>IP 2021: <strong style={{ color: "#111827" }}>{fmt2(hoverPoint.y)}</strong></div>
+          </div>
+        )}
+      </div>
+
+      <div style={{
+        display: "flex", alignItems: "center", gap: 5,
+        marginTop: 5, fontSize: 9.5, color: "#9ca3af",
+      }}>
+        <span style={{
+          display: "inline-block", width: 14, height: 0,
+          borderTop: "1px dashed #9ca3af", flexShrink: 0,
+        }} />
+        <span>{tr.scatterRefLine}</span>
+      </div>
+
+      <p style={{
+        marginTop: 6, padding: "6px 8px",
+        background: "#fff7ed",
+        border: "1px solid #fed7aa",
+        borderRadius: 6,
+        fontSize: 10, color: "#9a3412",
+        lineHeight: 1.45,
+      }}>
+        {tr.scatterDisclaimer}
+      </p>
     </div>
   );
 }

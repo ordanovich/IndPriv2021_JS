@@ -20,6 +20,14 @@ export const TR = {
     exportStatsNoView: "Espera a que el mapa cargue para exportar estadísticas.",
     exportStatsCopied: "¡Copiado!",
     extentCopy:      "📋 Copiar resumen",
+    // ── Scatterplot view ──────────────────────────────────────────────────────
+    extentViewDist:    "Distribución",
+    extentViewScatter: "Dispersión",
+    scatterXLabel:     "IP 2011",
+    scatterYLabel:     "IP 2021",
+    scatterRefLine:    "Línea de referencia",
+    scatterDisclaimer: "Los ejes IP 2011 e IP 2021 usan escalas diferentes (distribuciones independientes); la posición absoluta de los puntos no es comparable. Solo es informativa la posición relativa entre conglomerados.",
+    scatterEmpty:      "No hay secciones con ambos índices en la vista actual.",
     // ── Search panel ──────────────────────────────────────────────────────────
     searchPlaceholder: "Buscar municipio o provincia…",
     searchGroupProv: "Provincias",
@@ -173,6 +181,14 @@ export const TR = {
     exportStatsNoView: "Wait for the map to load before exporting stats.",
     exportStatsCopied: "Copied!",
     extentCopy:      "📋 Copy summary",
+    // ── Scatterplot view ──────────────────────────────────────────────────────
+    extentViewDist:    "Distribution",
+    extentViewScatter: "Scatter",
+    scatterXLabel:     "IP 2011",
+    scatterYLabel:     "IP 2021",
+    scatterRefLine:    "Reference line",
+    scatterDisclaimer: "The IP 2011 and IP 2021 axes use different scales (independent distributions); the absolute position of points is not comparable. Only the relative position between clusters is informative.",
+    scatterEmpty:      "No tracts with both indices in the current view.",
     // ── Search panel ──────────────────────────────────────────────────────────
     searchPlaceholder: "Search municipality or province…",
     searchGroupProv: "Provinces",
