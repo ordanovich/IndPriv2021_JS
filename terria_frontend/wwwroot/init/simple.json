@@ -45,6 +45,47 @@
       }
     },
     {
+      "id": "atlas-delta",
+      "name": "Cambio de quintil 2011 → 2021",
+      "description": "Cambio de categoría de quintil entre 2011 y 2021. Los índices 2011 y 2021 no son directamente comparables en valores absolutos; esta capa usa únicamente el cambio relativo de quintil.",
+      "type": "geojson",
+      "url": "data/secciones_unified.geojson",
+      "opacity": 0.9,
+      "show": false,
+      "splitDirection": 1,
+      "activeStyle": "DeltaLabel",
+      "columns": [
+        { "name": "DeltaLabel", "title": "Cambio 2011 → 2021" },
+        { "name": "deltaQ",     "type": "hidden" },
+        { "name": "IP2011",     "type": "hidden" },
+        { "name": "IP2021",     "type": "hidden" },
+        { "name": "Q11_Label",  "type": "hidden" },
+        { "name": "Q21_Label",  "type": "hidden" },
+        { "name": "Q21_num",    "type": "hidden" },
+        { "name": "CUSEC",      "type": "hidden" },
+        { "name": "NMUN",       "type": "hidden" },
+        { "name": "NPRO",       "type": "hidden" }
+      ],
+      "featureInfoTemplate": {
+        "name": "{{NMUN}} — {{CUSEC}}",
+        "template": "<div style='font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:300px;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.15)'><div style='background:#f3f4f6;color:#111827;padding:10px 14px;border-bottom:1px solid #e5e7eb'><div style='font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px'>{{NPRO}}</div><div style='font-size:16px;font-weight:700;margin:2px 0;color:#111827'>{{NMUN}}</div><div style='font-size:11px;color:#9ca3af'>Sección: {{CUSEC}}</div></div><div style='padding:12px 14px;background:white'><table style='width:100%;border-collapse:collapse;font-size:13px'><tr><td style='padding:4px 0;color:#555;font-size:12px'>Quintil 2011</td><td style='text-align:right;padding:4px 0;color:#222;font-size:12px;font-weight:600'>{{Q11_Label}}</td></tr><tr><td style='padding:4px 0;color:#555;font-size:12px'>Quintil 2021</td><td style='text-align:right;padding:4px 0;color:#222;font-size:12px;font-weight:600'>{{Q21_Label}}</td></tr><tr><td style='padding:6px 0 4px;color:#555;font-size:12px;font-weight:600'>Cambio</td><td style='text-align:right;padding:6px 0 4px;color:#111827;font-size:13px;font-weight:700'>{{DeltaLabel}}</td></tr></table><div style='margin-top:10px;padding:8px 10px;background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;font-size:10px;color:#9a3412;line-height:1.45'>Comparación basada en cambio de quintil. Los índices 2011 y 2021 no son directamente comparables en valores absolutos.</div></div></div>"
+      },
+      "defaultStyle": {
+        "outline": { "null": { "color": "rgba(0,0,0,0)", "width": 0 } },
+        "color": {
+          "colorColumn": "DeltaLabel",
+          "nullColor": "#d3d3d3",
+          "enumColors": [
+            { "value": "1. Mejora notable",         "color": "#1a9850" },
+            { "value": "2. Mejora leve",            "color": "#91cf60" },
+            { "value": "3. Estable",                "color": "#ffffbf" },
+            { "value": "4. Empeoramiento leve",     "color": "#fc8d59" },
+            { "value": "5. Empeoramiento notable",  "color": "#d73027" }
+          ]
+        }
+      }
+    },
+    {
       "id": "atlas-2011",
       "name": "Índice de Privación 2011",
       "description": "Distribución histórica de la privación según rangos fijos de la SEE (2011).",
@@ -86,7 +127,8 @@
   ],
   "workbench": [
     "atlas-2021",
-    "atlas-2011"
+    "atlas-2011",
+    "atlas-delta"
   ],
   "viewerMode": "3dSmooth",
   "baseMaps": {

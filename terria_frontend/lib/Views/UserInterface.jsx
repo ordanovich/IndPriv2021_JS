@@ -11,6 +11,7 @@ import AboutPanel from "./AboutPanel";
 import ProvinceAtlasPanel from "./ProvinceAtlasPanel";
 import SearchPanel from "./SearchPanel";
 import RankingsPanel from "./RankingsPanel";
+import { DELTA_ENUMS } from "./geoDataStore";
 import { AppProvider, useApp } from "./AppContext";
 import { TR } from "./translations";
 import { DEMO_MODE } from "./buildConfig";
@@ -85,6 +86,10 @@ function DemoBanner() {
 // ── Color palettes ─────────────────────────────────────────────────────────────
 export const STD_COLORS = ["#1a9850", "#91cf60", "#ffffbf", "#fc8d59", "#d73027"];
 export const CB_COLORS  = ["#4575b4", "#91bfdb", "#ffffbf", "#fc8d59", "#d73027"];
+// Delta layer palette: the standard one matches the IP scale; the
+// colorblind variant uses ColorBrewer RdBu-5 (cb-safe diverging).
+export const DELTA_COLORS    = ["#1a9850", "#91cf60", "#ffffbf", "#fc8d59", "#d73027"];
+export const CB_DELTA_COLORS = ["#2166ac", "#92c5de", "#f7f7f7", "#f4a582", "#d6604d"];
 
 // Exact data values in the GeoJSON (must match precisely)
 const ENUM_2021 = [
@@ -122,6 +127,18 @@ const COLS_2011 = title => [
   { name: "NMUN",      type: "hidden" },
   { name: "NPRO",      type: "hidden" },
 ];
+const COLS_DELTA = title => [
+  { name: "DeltaLabel", title },
+  { name: "deltaQ",     type: "hidden" },
+  { name: "IP2011",     type: "hidden" },
+  { name: "IP2021",     type: "hidden" },
+  { name: "Q11_Label",  type: "hidden" },
+  { name: "Q21_Label",  type: "hidden" },
+  { name: "Q21_num",    type: "hidden" },
+  { name: "CUSEC",      type: "hidden" },
+  { name: "NMUN",       type: "hidden" },
+  { name: "NPRO",       type: "hidden" },
+];
 
 // ── Light theme overrides ──────────────────────────────────────────────────────
 const LIGHT_THEME = {
@@ -150,18 +167,33 @@ const LIGHT_THEME = {
 
 // ── Sync TerriaJS catalog items with current lang + colorblind state ──────────
 function updateCatalogItems(terria, lang, colorblind, selectedQ = null) {
-  const colors = colorblind ? CB_COLORS : STD_COLORS;
+  const ipColors    = colorblind ? CB_COLORS       : STD_COLORS;
+  const deltaColors = colorblind ? CB_DELTA_COLORS : DELTA_COLORS;
   const tr = TR[lang];
 
-  // When a quintile is selected, grey out all others on the map
+  // When a quintile is selected, grey out all others on the map (IP layers
+  // only — the delta layer's categories are an independent dimension).
   const dimColor = "#d0d0d0";
-  const mapColors = selectedQ === null
-    ? colors
-    : colors.map((c, i) => i === selectedQ ? c : dimColor);
+  const ipMapColors = selectedQ === null
+    ? ipColors
+    : ipColors.map((c, i) => i === selectedQ ? c : dimColor);
 
   const ITEM_DEFS = {
-    "atlas-2021": { name: tr.layer2021, cols: COLS_2021(tr.column2021), col: "Q21_Label", enums: ENUM_2021 },
-    "atlas-2011": { name: tr.layer2011, cols: COLS_2011(tr.column2011), col: "Q11_Label", enums: ENUM_2011 },
+    "atlas-2021": {
+      name: tr.layer2021, cols: COLS_2021(tr.column2021),
+      col:  "Q21_Label",  enums: ENUM_2021,
+      palette: ipMapColors, legend: tr.legendItems,
+    },
+    "atlas-2011": {
+      name: tr.layer2011, cols: COLS_2011(tr.column2011),
+      col:  "Q11_Label",  enums: ENUM_2011,
+      palette: ipMapColors, legend: tr.legendItems,
+    },
+    "atlas-delta": {
+      name: tr.layerDelta, cols: COLS_DELTA(tr.columnDelta),
+      col:  "DeltaLabel",  enums: DELTA_ENUMS,
+      palette: deltaColors, legend: tr.deltaLegendItems,
+    },
   };
 
   (terria.workbench?.items ?? []).forEach(item => {
@@ -175,11 +207,11 @@ function updateCatalogItems(terria, lang, colorblind, selectedQ = null) {
         color: {
           colorColumn: def.col,
           nullColor: "#d3d3d3",
-          enumColors: def.enums.map((value, i) => ({ value, color: mapColors[i] })),
+          enumColors: def.enums.map((value, i) => ({ value, color: def.palette[i] })),
         },
       });
       item.setTrait("user", "legends", [{
-        items: tr.legendItems.map((title, i) => ({ color: mapColors[i], title })),
+        items: def.legend.map((title, i) => ({ color: def.palette[i], title })),
       }]);
     });
   });

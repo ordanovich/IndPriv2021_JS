@@ -30,6 +30,31 @@ export const PROV_TO_CCAA = {
 
 export const CCAA_LIST = [...new Set(Object.values(PROV_TO_CCAA))].sort();
 
+// ── Delta categories (used by the atlas-delta catalog item) ───────────────────
+// The DeltaLabel string is the enum value the GeoJSON styler matches on; the
+// numeric prefix is purely so the five categories sort green → red.
+export const DELTA_ENUMS = [
+  "1. Mejora notable",
+  "2. Mejora leve",
+  "3. Estable",
+  "4. Empeoramiento leve",
+  "5. Empeoramiento notable",
+];
+
+export function deltaCategoryLabel(d) {
+  if (d <= -2) return DELTA_ENUMS[0];
+  if (d === -1) return DELTA_ENUMS[1];
+  if (d === 0)  return DELTA_ENUMS[2];
+  if (d === 1)  return DELTA_ENUMS[3];
+  return DELTA_ENUMS[4]; // d >= 2
+}
+
+function parseQuintileFromLabel(label) {
+  const c = String(label || "").charAt(0);
+  const n = parseInt(c, 10);
+  return n >= 1 && n <= 5 ? n : null;
+}
+
 // Module-level cache — shared across all components
 let _cachedGeoData = null;
 const _listeners = new Set();
@@ -48,19 +73,45 @@ export function onDataReady(fn) {
   return () => _listeners.delete(fn);
 }
 
-/** Load and cache the GeoJSON, enriching it with _CCAA. No-op if already loaded. */
+/** Load and cache the GeoJSON, enriching it with _CCAA, deltaQ and
+ *  DeltaLabel. No-op if already loaded. The url is left flexible so the
+ *  demo build (which serves secciones_demo.geojson) can override it via
+ *  the catalog. We probe the demo file first by checking which one the
+ *  page bootstrap chose; if it's not reachable, fall back to the full
+ *  GeoJSON. */
 export function ensureDataLoaded() {
   if (_cachedGeoData) return Promise.resolve(_cachedGeoData);
-  return fetch("data/secciones_unified.geojson")
+  const url = pickDataUrl();
+  return fetch(url)
     .then(r => r.json())
     .then(gj => {
       gj.features.forEach(f => {
-        const prov = provCode(f.properties.CUSEC);
-        f.properties._CCAA = PROV_TO_CCAA[prov] || "—";
+        const p = f.properties;
+        const prov = provCode(p.CUSEC);
+        p._CCAA = PROV_TO_CCAA[prov] || "—";
+
+        // Derived delta classification — only added when both quintiles
+        // are present and parseable. Mutating the in-memory geojson is
+        // intentional and matches the existing _CCAA pattern.
+        const q21 = p.Q21_num;
+        const q11 = parseQuintileFromLabel(p.Q11_Label);
+        if (q21 != null && q11 != null) {
+          const d = q21 - q11;
+          p.deltaQ = d;
+          p.DeltaLabel = deltaCategoryLabel(d);
+        }
       });
       setCachedData(gj);
       return gj;
     });
+}
+
+function pickDataUrl() {
+  if (typeof window !== "undefined") {
+    const isDemo = window.location.search.includes("demo=1");
+    if (isDemo) return "data/secciones_demo.geojson";
+  }
+  return "data/secciones_unified.geojson";
 }
 
 export function provCode(cusec) {

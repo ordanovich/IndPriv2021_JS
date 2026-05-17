@@ -72,8 +72,10 @@ export const TR = {
     // ── Workbench catalog items ───────────────────────────────────────────────
     layer2021:       "Índice de Privación 2021",
     layer2011:       "Índice de Privación 2011",
+    layerDelta:      "Cambio de quintil 2011 → 2021",
     column2021:      "Nivel de Privación (2021)",
     column2011:      "Nivel de Privación (2011)",
+    columnDelta:     "Cambio 2011 → 2021",
     // ── Legend labels (override the auto-generated Spanish data values) ───────
     legendItems: [
       "Q1 · Inferior",
@@ -82,6 +84,14 @@ export const TR = {
       "Q4 · Intermedio alto",
       "Q5 · Superior",
     ],
+    deltaLegendItems: [
+      "Mejora notable",
+      "Mejora leve",
+      "Estable",
+      "Empeoramiento leve",
+      "Empeoramiento notable",
+    ],
+    deltaDisclaimer: "Comparación basada en cambio de quintil. Los índices 2011 y 2021 no son directamente comparables en valores absolutos.",
     // ── Controls ─────────────────────────────────────────────────────────────
     langBtn:         "EN",
     langTitle:       "Switch to English",
@@ -233,8 +243,10 @@ export const TR = {
     // ── Workbench catalog items ───────────────────────────────────────────────
     layer2021:       "Deprivation Index 2021",
     layer2011:       "Deprivation Index 2011",
+    layerDelta:      "Quintile change 2011 → 2021",
     column2021:      "Deprivation Level (2021)",
     column2011:      "Deprivation Level (2011)",
+    columnDelta:     "Change 2011 → 2021",
     // ── Legend labels ─────────────────────────────────────────────────────────
     legendItems: [
       "Q1 · Lower deprivation",
@@ -243,6 +255,14 @@ export const TR = {
       "Q4 · Upper-medium",
       "Q5 · Higher deprivation",
     ],
+    deltaLegendItems: [
+      "Strong improvement",
+      "Slight improvement",
+      "Stable",
+      "Slight worsening",
+      "Strong worsening",
+    ],
+    deltaDisclaimer: "Comparison based on quintile change. The 2011 and 2021 indices are not directly comparable in absolute terms.",
     // ── Controls ─────────────────────────────────────────────────────────────
     langBtn:         "ES",
     langTitle:       "Cambiar a español",

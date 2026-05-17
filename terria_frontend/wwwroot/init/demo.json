@@ -45,6 +45,43 @@
       }
     },
     {
+      "id": "atlas-delta",
+      "name": "Cambio de quintil 2011 → 2021 (demo)",
+      "description": "Cambio de categoría de quintil entre 2011 y 2021 sobre el subconjunto demostrativo. Los índices 2011 y 2021 no son directamente comparables en valores absolutos.",
+      "type": "geojson",
+      "url": "data/secciones_demo.geojson",
+      "opacity": 0.9,
+      "show": false,
+      "splitDirection": 1,
+      "activeStyle": "DeltaLabel",
+      "columns": [
+        { "name": "DeltaLabel", "title": "Cambio 2011 → 2021" },
+        { "name": "deltaQ",     "type": "hidden" },
+        { "name": "IP2011",     "type": "hidden" },
+        { "name": "IP2021",     "type": "hidden" },
+        { "name": "Q11_Label",  "type": "hidden" },
+        { "name": "Q21_Label",  "type": "hidden" },
+        { "name": "Q21_num",    "type": "hidden" },
+        { "name": "CUSEC",      "type": "hidden" },
+        { "name": "NMUN",       "type": "hidden" },
+        { "name": "NPRO",       "type": "hidden" }
+      ],
+      "defaultStyle": {
+        "outline": { "null": { "color": "rgba(0,0,0,0)", "width": 0 } },
+        "color": {
+          "colorColumn": "DeltaLabel",
+          "nullColor": "#d3d3d3",
+          "enumColors": [
+            { "value": "1. Mejora notable",         "color": "#1a9850" },
+            { "value": "2. Mejora leve",            "color": "#91cf60" },
+            { "value": "3. Estable",                "color": "#ffffbf" },
+            { "value": "4. Empeoramiento leve",     "color": "#fc8d59" },
+            { "value": "5. Empeoramiento notable",  "color": "#d73027" }
+          ]
+        }
+      }
+    },
+    {
       "id": "atlas-2011",
       "name": "Índice de Privación 2011 (demo)",
       "description": "Subconjunto demostrativo (5 provincias) de la distribución histórica de privación 2011.",
@@ -86,7 +123,8 @@
   ],
   "workbench": [
     "atlas-2021",
-    "atlas-2011"
+    "atlas-2011",
+    "atlas-delta"
   ],
   "viewerMode": "3dSmooth",
   "baseMaps": {
