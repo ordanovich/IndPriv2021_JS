@@ -280,6 +280,76 @@ gulp.task("terriajs-server", terriajsServerGulpTask(3001));
 
 gulp.task("build", gulp.series("copy-terriajs-assets", "build-app"));
 gulp.task("release", gulp.series("copy-terriajs-assets", "release-app"));
+
+// ── Demo / GitHub Pages bundle ────────────────────────────────────────────────
+// Sets DEMO_MODE=true in buildConfig.js, runs a production build, and
+// assembles a self-contained static folder at <repo-root>/dist. The
+// `dist/` directory is .gitignored — the project owner deploys it with
+//   npx gh-pages -d dist --dotfiles
+// This task never invokes git push and does NOT install gh-pages.
+const BUILD_CONFIG_PATH = path.join(__dirname, "lib", "Views", "buildConfig.js");
+function setDemoMode(value) {
+  var contents = fs.readFileSync(BUILD_CONFIG_PATH, "utf8");
+  var next = contents.replace(
+    /(export const DEMO_MODE\s*=\s*)(true|false)/,
+    "$1" + (value ? "true" : "false")
+  );
+  fs.writeFileSync(BUILD_CONFIG_PATH, next);
+}
+gulp.task("set-demo-mode-on",  function (done) { setDemoMode(true);  done(); });
+gulp.task("set-demo-mode-off", function (done) { setDemoMode(false); done(); });
+
+function copyDistAssets(done) {
+  var fse = require("fs-extra");
+  var DIST = path.join(__dirname, "..", "dist");
+  fse.emptyDirSync(DIST);
+
+  // The webpack bundle (index.html + JS/CSS). Goes flat at dist/ root.
+  fse.copySync(path.join(__dirname, "wwwroot", "build"), DIST);
+
+  // Static assets referenced from the bundle: province images, logos,
+  // favicons, and the build version stamp.
+  ["atlas", "images", "favicons"].forEach(function (dir) {
+    var src = path.join(__dirname, "wwwroot", dir);
+    if (fs.existsSync(src)) fse.copySync(src, path.join(DIST, dir));
+  });
+  var versionFile = path.join(__dirname, "wwwroot", "version.json");
+  if (fs.existsSync(versionFile)) fse.copySync(versionFile, path.join(DIST, "version.json"));
+
+  // Demo-specific runtime files: trimmed GeoJSON, demo init, demo config.
+  fse.ensureDirSync(path.join(DIST, "data"));
+  fse.copySync(
+    path.join(__dirname, "wwwroot", "data", "secciones_demo.geojson"),
+    path.join(DIST, "data", "secciones_demo.geojson")
+  );
+  fse.ensureDirSync(path.join(DIST, "init"));
+  fse.copySync(
+    path.join(__dirname, "wwwroot", "init", "demo.json"),
+    path.join(DIST, "init", "demo.json")
+  );
+  fse.copySync(
+    path.join(__dirname, "wwwroot", "config_demo.json"),
+    path.join(DIST, "config_demo.json")
+  );
+  done();
+}
+gulp.task("copy-dist-assets", copyDistAssets);
+
+gulp.task("build-demo-dist", function (done) {
+  // Run the demo build inside a try/finally-ish series so DEMO_MODE is
+  // always restored, even if the build fails partway through.
+  var seq = gulp.series(
+    "set-demo-mode-on",
+    "build",
+    "copy-dist-assets"
+  );
+  seq(function (err) {
+    setDemoMode(false);
+    done(err);
+  });
+});
+
+
 gulp.task("watch", gulp.parallel("watch-terriajs-assets", "watch-app"));
 // Simple task that waits for index.html then starts server
 gulp.task(
