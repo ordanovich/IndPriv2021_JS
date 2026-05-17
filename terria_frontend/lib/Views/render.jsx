@@ -7,6 +7,13 @@ import "./global.scss";
 import { Loader } from "./Loader";
 import { terriaStore } from "./terriaStore";
 import { readPersistedLang } from "./AppContext";
+import { parseHash } from "./urlState";
+
+// Captured once at mount so the initial fly-to / lang / quintile / year
+// don't shift as TerriaJS or our own writers update the hash later.
+const INITIAL_HASH_STATE = typeof window !== "undefined"
+  ? parseHash(window.location.hash)
+  : {};
 
 // Lazy load the entire TerriaUserInterface component
 const LazyTerriaUserInterface = React.lazy(() =>
@@ -17,7 +24,7 @@ const LazyTerriaUserInterface = React.lazy(() =>
 
 const Root = observer(({ themeOverrides }) => {
   const { terria, viewState, status } = terriaStore;
-  const lang = readPersistedLang();
+  const lang = INITIAL_HASH_STATE.lang || readPersistedLang();
 
   if (status === "loading") {
     return <Loader lang={lang} />;
@@ -30,6 +37,7 @@ const Root = observer(({ themeOverrides }) => {
           terria={terria}
           viewState={viewState}
           themeOverrides={themeOverrides}
+          initialHashState={INITIAL_HASH_STATE}
         />
       </Suspense>
       <Loader overlay terria={terria} lang={lang} />

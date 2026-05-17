@@ -13,8 +13,10 @@ export function readPersistedLang() {
   return "es";
 }
 
-export function AppProvider({ children }) {
-  const [lang,      setLang]      = useState(readPersistedLang);
+export function AppProvider({ children, initialLang }) {
+  const [lang,      setLang]      = useState(() =>
+    initialLang === "es" || initialLang === "en" ? initialLang : readPersistedLang()
+  );
   const [colorblind, setColorblind] = useState(false);
 
   useEffect(() => {

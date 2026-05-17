@@ -1,9 +1,10 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import PropTypes from "prop-types";
 import { autorun, runInAction } from "mobx";
 import { MenuLeft } from "terriajs/lib/ReactViews/StandardUserInterface/customizable/Groups";
 import StandardUserInterface from "terriajs/lib/ReactViews/StandardUserInterface/StandardUserInterface";
 import version from "../../version";
+import { getViewRect } from "./viewStats";
 import ExportPanel from "./ExportPanel";
 import ExtentChart from "./ExtentChart";
 import AboutPanel from "./AboutPanel";
@@ -13,6 +14,7 @@ import RankingsPanel from "./RankingsPanel";
 import { AppProvider, useApp } from "./AppContext";
 import { TR } from "./translations";
 import { DEMO_MODE } from "./buildConfig";
+import { buildHash, replaceHash, debounce } from "./urlState";
 
 const SS_KEY_DEMO_BANNER = "atlas.demoBannerDismissed";
 const isDemoMode = () =>
@@ -211,12 +213,18 @@ function ToggleBtn({ active, onClick, title, children }) {
 }
 
 // ── Inner component (has access to context) ────────────────────────────────────
-function TerriaUIInner({ terria, viewState }) {
+function TerriaUIInner({ terria, viewState, initialHashState = {} }) {
   const { lang, toggleLang, colorblind, toggleColorblind } = useApp();
   const [exportOpen,       setExportOpen]       = useState(false);
   const [aboutOpen,        setAboutOpen]         = useState(false);
   const [rankingsOpen,     setRankingsOpen]     = useState(false);
-  const [selectedQuintile, setSelectedQuintile]  = useState(null);
+  const [selectedQuintile, setSelectedQuintile]  = useState(
+    initialHashState.q != null ? initialHashState.q - 1 : null
+  );
+  const [year,             setYear]              = useState(
+    initialHashState.v === "2011" ? "2011" : "2021"
+  );
+  const [bbox,             setBbox]              = useState(null);
   const openExport  = useCallback(() => setExportOpen(true),  []);
   const closeExport = useCallback(() => setExportOpen(false), []);
   const tr = TR[lang];
@@ -237,6 +245,135 @@ function TerriaUIInner({ terria, viewState }) {
     });
     return dispose;
   }, [terria, lang, colorblind, selectedQuintile]);
+
+  // Keep React `year` in sync with whichever layer is currently shown so
+  // toggling the workbench eyes updates the permalink.
+  useEffect(() => {
+    const dispose = autorun(() => {
+      const items = terria.workbench?.items ?? [];
+      const on21 = items.find(i => i.uniqueId === "atlas-2021")?.show !== false;
+      const on11 = items.find(i => i.uniqueId === "atlas-2011")?.show === true;
+      if (on21 && !on11) setYear("2021");
+      else if (on11 && !on21) setYear("2011");
+    });
+    return dispose;
+  }, [terria]);
+
+  // Apply hash.v on startup: if it asks for 2011, toggle the workbench
+  // visibility on the existing items. Retry until both items exist.
+  useEffect(() => {
+    const target = initialHashState.v;
+    if (target !== "2011") return undefined;
+    let cancelled = false;
+    const apply = () => {
+      const items = terria.workbench?.items ?? [];
+      const i21 = items.find(i => i.uniqueId === "atlas-2021");
+      const i11 = items.find(i => i.uniqueId === "atlas-2011");
+      if (!i21 || !i11) return false;
+      runInAction(() => {
+        i21.setTrait("user", "show", false);
+        i11.setTrait("user", "show", true);
+      });
+      return true;
+    };
+    if (apply()) return undefined;
+    const timer = setInterval(() => {
+      if (cancelled) return;
+      if (apply()) clearInterval(timer);
+    }, 400);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, [terria]);
+
+  // Track the current viewport bbox in state so we can push it into the hash.
+  useEffect(() => {
+    const refresh = () => {
+      const rect = getViewRect(terria);
+      if (!rect) return;
+      const r = 180 / Math.PI;
+      setBbox({
+        west:  rect.west  * r, south: rect.south * r,
+        east:  rect.east  * r, north: rect.north * r,
+      });
+    };
+    let detach = null;
+    const attach = () => {
+      if (terria.cesium) {
+        terria.cesium.scene.camera.moveEnd.addEventListener(refresh);
+        detach = () => terria.cesium?.scene.camera.moveEnd.removeEventListener(refresh);
+        refresh();
+        return true;
+      }
+      if (terria.leaflet) {
+        terria.leaflet.map.on("moveend", refresh);
+        detach = () => terria.leaflet?.map.off("moveend", refresh);
+        refresh();
+        return true;
+      }
+      return false;
+    };
+    if (attach()) return () => detach?.();
+    const timer = setInterval(() => { if (attach()) { clearInterval(timer); } }, 400);
+    return () => { clearInterval(timer); detach?.(); };
+  }, [terria]);
+
+  // Fly to the encoded bbox once the camera is available. Cesium and
+  // Leaflet are loaded asynchronously, so retry every 400 ms.
+  const initialBboxAppliedRef = useRef(false);
+  useEffect(() => {
+    const bb = initialHashState.bbox;
+    if (!bb || initialBboxAppliedRef.current) return undefined;
+    let cancelled = false;
+    const fly = () => {
+      if (terria.cesium?.scene?.camera) {
+        import("terriajs-cesium/Source/Core/Rectangle")
+          .then((mod) => {
+            if (cancelled) return;
+            const Rectangle = mod.default ?? mod;
+            terria.cesium.scene.camera.flyTo({
+              destination: Rectangle.fromDegrees(bb.west, bb.south, bb.east, bb.north),
+              duration: 1.5,
+            });
+          })
+          .catch(() => {});
+        return true;
+      }
+      if (terria.leaflet?.map) {
+        terria.leaflet.map.fitBounds(
+          [[bb.south, bb.west], [bb.north, bb.east]],
+          { animate: true, duration: 1.5 }
+        );
+        return true;
+      }
+      return false;
+    };
+    let elapsed = 0;
+    const timer = setInterval(() => {
+      elapsed += 400;
+      if (elapsed > 30000 || cancelled) { clearInterval(timer); return; }
+      if (fly()) {
+        initialBboxAppliedRef.current = true;
+        clearInterval(timer);
+      }
+    }, 400);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, [terria]);
+
+  // Debounced hash writer — keyed by all four state slots.
+  const writeHash = useMemo(
+    () => debounce((state) => replaceHash(buildHash(state)), 300),
+    []
+  );
+  useEffect(() => {
+    writeHash({
+      v:    year,
+      q:    selectedQuintile != null ? selectedQuintile + 1 : null,
+      lang,
+      // Preserve the initial bbox until the map produces its own; that
+      // way reloading a permalink before the first moveEnd doesn't clear
+      // the bbox component.
+      bbox: bbox || initialHashState.bbox,
+    });
+  }, [year, selectedQuintile, lang, bbox, writeHash]);
 
   return (
     <>
@@ -412,13 +549,15 @@ function TerriaUIInner({ terria, viewState }) {
 }
 
 // ── Public export ──────────────────────────────────────────────────────────────
-export const TerriaUserInterface = ({ terria, viewState }) => (
-  <AppProvider>
-    <TerriaUIInner terria={terria} viewState={viewState} />
+export const TerriaUserInterface = ({ terria, viewState, initialHashState }) => (
+  <AppProvider initialLang={initialHashState?.lang}>
+    <TerriaUIInner terria={terria} viewState={viewState}
+                   initialHashState={initialHashState} />
   </AppProvider>
 );
 
 TerriaUserInterface.propTypes = {
-  terria:    PropTypes.object.isRequired,
-  viewState: PropTypes.object.isRequired,
+  terria:           PropTypes.object.isRequired,
+  viewState:        PropTypes.object.isRequired,
+  initialHashState: PropTypes.object,
 };
