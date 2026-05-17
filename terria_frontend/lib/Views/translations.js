@@ -85,6 +85,12 @@ export const TR = {
     aboutValDegurbaInter: "Intermedio",
     aboutValDegurbaRural: "Rural",
     aboutValTerrNote: "La menor correlación intermedia refleja la conocida heterogeneidad de las áreas periurbanas, no una debilidad del índice.",
+    // ── Citation block (Atlas tab) ────────────────────────────────────────────
+    aboutCiteTitle:  "Citar",
+    aboutCiteDesc:   "Por favor, cite el atlas de la siguiente manera:",
+    aboutCiteCopy:   "📋 Copiar BibTeX",
+    aboutCiteCopied: "¡Copiado!",
+    aboutCitePendDoi: "[DOI pendiente]",
     // ── Province atlas panel ──────────────────────────────────────────────────
     provPanelTitle:  "Atlas provincial",
     provContinuo:    "Continuo",
@@ -183,6 +189,12 @@ export const TR = {
     aboutValDegurbaInter: "Intermediate",
     aboutValDegurbaRural: "Rural",
     aboutValTerrNote: "The lower intermediate correlation reflects the known heterogeneity of peri-urban areas, not a weakness of the index.",
+    // ── Citation block (Atlas tab) ────────────────────────────────────────────
+    aboutCiteTitle:  "Cite",
+    aboutCiteDesc:   "Please cite the atlas as follows:",
+    aboutCiteCopy:   "📋 Copy BibTeX",
+    aboutCiteCopied: "Copied!",
+    aboutCitePendDoi: "[DOI pending]",
     // ── Province atlas panel ──────────────────────────────────────────────────
     provPanelTitle:  "Provincial atlas",
     provContinuo:    "Continuous",

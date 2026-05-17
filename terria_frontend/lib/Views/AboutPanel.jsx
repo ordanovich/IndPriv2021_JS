@@ -264,14 +264,71 @@ function Tab({ label, active, onClick }) {
 }
 Tab.propTypes = { label: PropTypes.string, active: PropTypes.bool, onClick: PropTypes.func };
 
+// ── Citation constants ─────────────────────────────────────────────────────────
+// TODO: REPLACE_DOI — once the Zenodo DOI is assigned, replace CITATION_DOI
+// with the real value (e.g. "10.5281/zenodo.0000000") and remove the
+// "[DOI pendiente / DOI pending]" placeholder in the UI.
+const CITATION_DOI = null;
+const CITATION_YEAR = 2026;
+const CITATION_AUTHORS = "Danovich, O. et al.";
+const CITATION_TITLE_ES =
+  "Atlas de Privación de España: Índice de Privación 2021 a nivel de sección censal";
+const CITATION_TITLE_EN =
+  "Atlas of Deprivation of Spain: 2021 Deprivation Index at census section level";
+const CITATION_PUBLISHER = "Zenodo";
+
+function buildApa(lang) {
+  const title = lang === "es" ? CITATION_TITLE_ES : CITATION_TITLE_EN;
+  const doiStr = CITATION_DOI
+    ? `https://doi.org/${CITATION_DOI}`
+    : (lang === "es" ? "[DOI pendiente]" : "[DOI pending]");
+  return `${CITATION_AUTHORS} (${CITATION_YEAR}). ${title}. ${CITATION_PUBLISHER}. ${doiStr}`;
+}
+
+function buildBibtex(lang) {
+  const title = lang === "es" ? CITATION_TITLE_ES : CITATION_TITLE_EN;
+  const doiLine = CITATION_DOI ? `  doi          = {${CITATION_DOI}},\n` : "";
+  return (
+`@misc{atlasPrivacionEspana${CITATION_YEAR},
+  author       = {${CITATION_AUTHORS}},
+  title        = {${title}},
+  year         = {${CITATION_YEAR}},
+  publisher    = {${CITATION_PUBLISHER}},
+${doiLine}  note         = {${CITATION_DOI ? "" : "DOI pending"}}
+}`);
+}
+
 // ── Main component ─────────────────────────────────────────────────────────────
 export default function AboutPanel({ isOpen, onClose }) {
   const { lang } = useApp();
   const tr = TR[lang];
   const [activeTab, setActiveTab] = useState("vars");
+  const [copiedFlash, setCopiedFlash] = useState(false);
 
   if (!isOpen) return null;
   const isEs = lang === "es";
+
+  const copyBibtex = () => {
+    const bibtex = buildBibtex(lang);
+    const fallback = () => {
+      const ta = document.createElement("textarea");
+      ta.value = bibtex;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { document.execCommand("copy"); } catch (_) {}
+      document.body.removeChild(ta);
+    };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(bibtex).catch(fallback);
+    } else {
+      fallback();
+    }
+    setCopiedFlash(true);
+    setTimeout(() => setCopiedFlash(false), 1500);
+  };
 
   return (
     <div style={S.panel}>
@@ -577,6 +634,49 @@ export default function AboutPanel({ isOpen, onClose }) {
                     : "The atlases will be published on Zenodo with a permanent DOI. The link will be available once the publication process is complete."}
                 </p>
               </div>
+            </div>
+
+            {/* ── Citation / BibTeX ────────────────────────────────────── */}
+            <div style={{ ...S.section, ...S.divider }}>
+              <span style={S.sectionLabel}>{tr.aboutCiteTitle}</span>
+              <p style={{ ...S.para, marginBottom: 10 }}>{tr.aboutCiteDesc}</p>
+
+              <div style={{
+                background: "#f9fafb", border: "1px solid #e5e7eb",
+                borderRadius: 7, padding: "10px 12px",
+                fontSize: 11, color: "#374151", lineHeight: 1.55,
+                fontFamily: "'SFMono-Regular', Menlo, Consolas, monospace",
+                marginBottom: 10, whiteSpace: "pre-wrap", wordBreak: "break-word",
+              }}>
+                {buildApa(lang)}
+              </div>
+
+              {!CITATION_DOI && (
+                <p style={{
+                  ...S.caption, marginTop: -2, marginBottom: 12,
+                  fontStyle: "italic",
+                }}>
+                  {tr.aboutCitePendDoi}
+                </p>
+              )}
+
+              <button
+                onClick={copyBibtex}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  padding: "7px 12px",
+                  borderRadius: 6,
+                  border: copiedFlash
+                    ? "1px solid #16a34a"
+                    : "1px solid #d1d5db",
+                  background: copiedFlash ? "#dcfce7" : "#ffffff",
+                  color:      copiedFlash ? "#15803d" : "#374151",
+                  fontSize:   12, fontWeight: 600, cursor: "pointer",
+                  transition: "background 0.2s, color 0.2s, border-color 0.2s",
+                }}
+              >
+                {copiedFlash ? `✓ ${tr.aboutCiteCopied}` : tr.aboutCiteCopy}
+              </button>
             </div>
           </>
         )}
