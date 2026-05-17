@@ -8,6 +8,7 @@ import {
 } from "./geoDataStore";
 import { useApp } from "./AppContext";
 import { TR } from "./translations";
+import { computeViewSnapshot } from "./viewStats";
 
 function downloadBlob(blob, name) {
   const url = URL.createObjectURL(blob);
@@ -198,6 +199,42 @@ export default function ExportPanel({ terria, isOpen, onClose, onReopen }) {
     XLSX.writeFile(wb, "privacion_secciones.xlsx");
   };
 
+  const exportCSV = () => {
+    const features = filtered();
+    const includeDelta = features.some(f => f.properties.deltaQ != null);
+    const headers = ["CUSEC", "NMUN", "NPRO", "IP2011", "IP2021", "Q11_Label", "Q21_Label"];
+    if (includeDelta) headers.push("DeltaQ");
+
+    const escape = v => {
+      if (v == null) return "";
+      const s = String(v);
+      if (/[",\r\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+      return s;
+    };
+
+    const lines = [headers.join(",")];
+    for (const f of features) {
+      const p = f.properties;
+      const row = [p.CUSEC, p.NMUN, p.NPRO, p.IP2011, p.IP2021, p.Q11_Label, p.Q21_Label];
+      if (includeDelta) row.push(p.deltaQ);
+      lines.push(row.map(escape).join(","));
+    }
+    const csv = "﻿" + lines.join("\r\n");
+    downloadBlob(
+      new Blob([csv], { type: "text/csv;charset=utf-8" }),
+      "privacion_secciones.csv"
+    );
+  };
+
+  const exportStatsSnapshot = () => {
+    const snap = computeViewSnapshot(terria);
+    if (!snap) return;
+    downloadBlob(
+      new Blob([JSON.stringify(snap, null, 2)], { type: "application/json" }),
+      `privacion_estadisticas_${snap.year}.json`
+    );
+  };
+
   if (!isOpen) return null;
 
   const feats    = filtered();
@@ -294,10 +331,29 @@ export default function ExportPanel({ terria, isOpen, onClose, onReopen }) {
                   disabled={!data || feats.length === 0}>
             {tr.exportXlsx}
           </button>
+          <button style={S.btnSecondary} onClick={exportCSV}
+                  disabled={!data || feats.length === 0}>
+            {tr.exportCsv}
+          </button>
           <button style={S.btnSecondary} onClick={exportGeoJSON}
                   disabled={!data || feats.length === 0}>
             {tr.exportGeoJSON}
           </button>
+        </div>
+
+        {/* Stats snapshot */}
+        <div style={{ ...S.section, ...S.divider }}>
+          <span style={S.sectionLabel}>{tr.exportStatsTitle}</span>
+          <button style={S.btnSecondary} onClick={exportStatsSnapshot}
+                  disabled={!data}>
+            {tr.exportStatsSnapshot}
+          </button>
+          {!data && (
+            <p style={{ fontSize: 10, color: "#9ca3af", margin: "2px 0 0",
+                        lineHeight: 1.45 }}>
+              {tr.exportStatsNoView}
+            </p>
+          )}
         </div>
 
         {/* Full download */}
