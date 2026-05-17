@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { autorun } from "mobx";
 import { useApp } from "./AppContext";
 import { TR } from "./translations";
+import { getCachedData, onDataReady } from "./geoDataStore";
+import { STD_COLORS, CB_COLORS } from "./UserInterface";
 
 // CPRO (zero-padded 2-digit code) → { continuo, discreto } PNG filenames
 const PROVINCE_IMAGES = {
@@ -71,13 +73,41 @@ function getProps(properties) {
   return properties;
 }
 
+// CPRO codes sorted alphabetically by display name — used for prev/next nav.
+const SORTED_CPROS = Object.entries(PROVINCE_IMAGES)
+  .sort((a, b) => a[1].name.localeCompare(b[1].name, "es"))
+  .map(([code]) => code);
+
+function computeProvinceStats(geo, cpro) {
+  if (!geo?.features) return null;
+  const counts = [0, 0, 0, 0, 0];
+  let total = 0;
+  let sum = 0;
+  let n = 0;
+  for (const f of geo.features) {
+    const cusec = f.properties?.CUSEC;
+    if (!cusec || String(cusec).slice(0, 2) !== cpro) continue;
+    total++;
+    const q = f.properties.Q21_num;
+    if (q >= 1 && q <= 5) counts[q - 1]++;
+    const ip = f.properties.IP2021;
+    if (ip != null && isFinite(ip)) { sum += ip; n++; }
+  }
+  if (total === 0) return null;
+  return { total, mean: n > 0 ? sum / n : null, counts };
+}
+
 export default function ProvinceAtlasPanel({ terria }) {
-  const { lang } = useApp();
+  const { lang, colorblind } = useApp();
   const tr = TR[lang];
+  const COLORS = colorblind ? CB_COLORS : STD_COLORS;
 
   const [cpro,   setCpro]   = useState(null);
   const [mode,   setMode]   = useState("continuo"); // "continuo" | "discreto"
   const [closed, setClosed] = useState(false);
+  const [stats,  setStats]  = useState(null);
+
+  const statsCacheRef = useRef(new Map());
 
   // Watch terria.selectedFeature — reset close state and derive CPRO
   useEffect(() => {
@@ -96,10 +126,41 @@ export default function ProvinceAtlasPanel({ terria }) {
     return dispose;
   }, [terria]);
 
+  // Compute (or look up cached) per-province aggregate stats whenever the
+  // active CPRO changes. Also recompute once on first data-ready event in
+  // case the panel is open before the GeoJSON finishes loading.
+  useEffect(() => {
+    if (!cpro) { setStats(null); return; }
+    const compute = (geo) => {
+      if (!geo) { setStats(null); return; }
+      const cache = statsCacheRef.current;
+      if (!cache.has(cpro)) cache.set(cpro, computeProvinceStats(geo, cpro));
+      setStats(cache.get(cpro));
+    };
+    const cached = getCachedData();
+    if (cached) compute(cached);
+    return onDataReady(compute);
+  }, [cpro]);
+
   const entry = cpro ? PROVINCE_IMAGES[cpro] : null;
   if (!entry || closed) return null;
 
   const imgSrc = `atlas/provinces/${entry[mode]}`;
+
+  const goPrev = () => {
+    const idx = SORTED_CPROS.indexOf(cpro);
+    if (idx < 0) return;
+    setCpro(SORTED_CPROS[(idx - 1 + SORTED_CPROS.length) % SORTED_CPROS.length]);
+  };
+  const goNext = () => {
+    const idx = SORTED_CPROS.indexOf(cpro);
+    if (idx < 0) return;
+    setCpro(SORTED_CPROS[(idx + 1) % SORTED_CPROS.length]);
+  };
+
+  const localeFmt = lang === "es" ? "es-ES" : "en-GB";
+  const fmtInt = v => v.toLocaleString(localeFmt);
+  const fmt2 = v => v.toFixed(2);
 
   return (
     <div style={{
@@ -123,18 +184,47 @@ export default function ProvinceAtlasPanel({ terria }) {
         padding:        "9px 12px",
         background:     "#f3f4f6",
         borderBottom:   "1px solid #e5e7eb",
+        gap:            6,
       }}>
-        <div>
+        <button
+          onClick={goPrev}
+          title={tr.provPrev}
+          style={{
+            background: "none", border: "1px solid #d1d5db",
+            borderRadius: 4, color: "#374151",
+            fontSize: 14, lineHeight: 1, cursor: "pointer",
+            padding: "4px 8px", flexShrink: 0,
+          }}
+        >
+          ←
+        </button>
+        <div style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
           <span style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.7px", color: "#6b7280", display: "block" }}>
             {tr.provPanelTitle}
           </span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>
+          <span style={{
+            fontSize: 13, fontWeight: 700, color: "#111827",
+            display: "block",
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
             {entry.name}
           </span>
         </div>
         <button
+          onClick={goNext}
+          title={tr.provNext}
+          style={{
+            background: "none", border: "1px solid #d1d5db",
+            borderRadius: 4, color: "#374151",
+            fontSize: 14, lineHeight: 1, cursor: "pointer",
+            padding: "4px 8px", flexShrink: 0,
+          }}
+        >
+          →
+        </button>
+        <button
           onClick={() => setClosed(true)}
-          style={{ background: "none", border: "none", color: "#9ca3af", fontSize: 20, cursor: "pointer", lineHeight: 1, padding: 0 }}
+          style={{ background: "none", border: "none", color: "#9ca3af", fontSize: 20, cursor: "pointer", lineHeight: 1, padding: "0 4px", flexShrink: 0 }}
         >
           {tr.provClose}
         </button>
@@ -173,6 +263,97 @@ export default function ProvinceAtlasPanel({ terria }) {
           onError={e => { e.target.style.display = "none"; }}
         />
       </div>
+
+      {/* Download button */}
+      <div style={{ padding: "8px 12px 4px", borderTop: "1px solid #f3f4f6" }}>
+        <a
+          href={imgSrc}
+          download={entry[mode]}
+          style={{
+            display:        "block",
+            textAlign:      "center",
+            padding:        "6px 10px",
+            borderRadius:   6,
+            border:         "1px solid #d1d5db",
+            background:     "#ffffff",
+            color:          "#374151",
+            fontSize:       11, fontWeight: 600,
+            textDecoration: "none",
+            transition:     "background 0.15s, border-color 0.15s",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = "#f3f4f6"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "#ffffff"; }}
+        >
+          {tr.provDownload}
+        </a>
+      </div>
+
+      {/* Aggregate stats */}
+      {stats && (
+        <div style={{ padding: "6px 12px 12px" }}>
+          <div style={{
+            display: "flex", gap: 8, marginBottom: 8,
+          }}>
+            <div style={{
+              flex: 1,
+              background: "#f9fafb", border: "1px solid #e5e7eb",
+              borderRadius: 6, padding: "6px 8px",
+              textAlign: "center",
+            }}>
+              <div style={{
+                fontSize: 9, color: "#6b7280",
+                textTransform: "uppercase", letterSpacing: "0.5px",
+                marginBottom: 2,
+              }}>
+                {tr.provStatsSections}
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#111827", lineHeight: 1.1 }}>
+                {fmtInt(stats.total)}
+              </div>
+            </div>
+            <div style={{
+              flex: 1,
+              background: "#f9fafb", border: "1px solid #e5e7eb",
+              borderRadius: 6, padding: "6px 8px",
+              textAlign: "center",
+            }}>
+              <div style={{
+                fontSize: 9, color: "#6b7280",
+                textTransform: "uppercase", letterSpacing: "0.5px",
+                marginBottom: 2,
+              }}>
+                {tr.provStatsMean}
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#111827", lineHeight: 1.1 }}>
+                {stats.mean != null ? fmt2(stats.mean) : "—"}
+              </div>
+            </div>
+          </div>
+
+          <div style={{
+            fontSize: 9, color: "#6b7280",
+            textTransform: "uppercase", letterSpacing: "0.5px",
+            marginBottom: 4,
+          }}>
+            {tr.provStatsQuintileBar}
+          </div>
+          <div style={{
+            display: "flex", height: 8, borderRadius: 4,
+            overflow: "hidden", gap: 1,
+          }}>
+            {stats.counts.map((c, i) => (
+              <div key={i}
+                title={`${tr.legendItems[i]} · ${fmtInt(c)}`}
+                style={{
+                  flex: Math.max(c, 0.001),
+                  background: COLORS[i],
+                  minWidth: c > 0 ? 2 : 0,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
