@@ -291,6 +291,7 @@ export default function AboutPanel({ isOpen, onClose }) {
       <div style={S.tabBar}>
         <Tab label={isEs ? "Variables" : "Variables"} active={activeTab === "vars"} onClick={() => setActiveTab("vars")} />
         <Tab label={isEs ? "ACP" : "PCA"}             active={activeTab === "pca"}  onClick={() => setActiveTab("pca")}  />
+        <Tab label={tr.aboutValTab}                   active={activeTab === "val"}  onClick={() => setActiveTab("val")}  />
         <Tab label={isEs ? "Atlas" : "Atlas"}         active={activeTab === "atlas"} onClick={() => setActiveTab("atlas")} />
       </div>
 
@@ -301,6 +302,7 @@ export default function AboutPanel({ isOpen, onClose }) {
           <p style={S.para}>
             {activeTab === "vars"  && tr.aboutIntroVars}
             {activeTab === "pca"   && tr.aboutIntroPca}
+            {activeTab === "val"   && tr.aboutValIntro}
             {activeTab === "atlas" && tr.aboutIntroAtlas}
           </p>
         </div>
@@ -404,6 +406,120 @@ export default function AboutPanel({ isOpen, onClose }) {
                 {isEs
                   ? "ρ = correlación de Spearman con CP1; w = peso (coef. del eigenvector). Datos: Tabla 04 del informe final."
                   : "ρ = Spearman correlation with PC1; w = eigenvector weight. Source: Table 04, final report."}
+              </p>
+            </div>
+          </>
+        )}
+
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* VALIDATION TAB                                                  */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {activeTab === "val" && (
+          <>
+            {/* Random Forest reconstruction */}
+            <div style={S.section}>
+              <span style={S.sectionLabel}>{tr.aboutValRfTitle}</span>
+              <p style={{ ...S.para, marginBottom: 14 }}>{tr.aboutValRfDesc}</p>
+
+              <div style={{
+                display: "flex", alignItems: "center", gap: 12,
+                padding: "14px 16px",
+                background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+                border: "1px solid #bfdbfe", borderRadius: 8,
+                marginBottom: 10,
+              }}>
+                <div style={{
+                  fontSize: 28, fontWeight: 800, color: "#1d4ed8",
+                  lineHeight: 1, flexShrink: 0,
+                }}>
+                  0.953
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontSize: 11, color: "#1e40af",
+                    fontWeight: 700, marginBottom: 3,
+                  }}>
+                    {tr.aboutValRfMetric}
+                  </div>
+                  <div style={{ fontSize: 11, color: "#374151", lineHeight: 1.45 }}>
+                    {tr.aboutValRfNote}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Territorial correlations (DEGURBA) */}
+            <div style={{ ...S.section, ...S.divider }}>
+              <span style={S.sectionLabel}>{tr.aboutValTerrTitle}</span>
+              <p style={{ ...S.para, marginBottom: 14 }}>{tr.aboutValTerrDesc}</p>
+
+              <table style={{
+                width: "100%", borderCollapse: "collapse",
+                fontSize: 12, marginBottom: 10,
+              }}>
+                <thead>
+                  <tr style={{ background: "#f9fafb" }}>
+                    <th style={{
+                      textAlign: "left", padding: "8px 10px",
+                      fontSize: 10, fontWeight: 700, color: "#6b7280",
+                      textTransform: "uppercase", letterSpacing: "0.5px",
+                      borderBottom: "1px solid #e5e7eb",
+                    }}>
+                      {tr.aboutValDegurbaCol}
+                    </th>
+                    <th style={{
+                      textAlign: "right", padding: "8px 10px",
+                      fontSize: 10, fontWeight: 700, color: "#6b7280",
+                      textTransform: "uppercase", letterSpacing: "0.5px",
+                      borderBottom: "1px solid #e5e7eb",
+                    }}>
+                      {tr.aboutValRhoCol}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { label: tr.aboutValDegurbaUrban, rho: 0.734 },
+                    { label: tr.aboutValDegurbaInter, rho: 0.341 },
+                    { label: tr.aboutValDegurbaRural, rho: 0.609 },
+                  ].map(({ label, rho }) => {
+                    const pct = Math.min(rho, 1) * 100;
+                    return (
+                      <tr key={label} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                        <td style={{
+                          padding: "10px",
+                          fontSize: 12, color: "#374151",
+                        }}>
+                          <div>{label}</div>
+                          <div style={{
+                            marginTop: 5, height: 5,
+                            background: "#f3f4f6", borderRadius: 3,
+                            overflow: "hidden",
+                          }}>
+                            <div style={{
+                              width: `${pct}%`, height: "100%",
+                              background: "#2563eb", opacity: 0.78,
+                              borderRadius: 3,
+                            }} />
+                          </div>
+                        </td>
+                        <td style={{
+                          padding: "10px",
+                          textAlign: "right",
+                          fontSize: 13, fontWeight: 700,
+                          color: "#111827", verticalAlign: "top",
+                          whiteSpace: "nowrap",
+                        }}>
+                          {rho.toFixed(3)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              <p style={{ ...S.caption, marginTop: 12 }}>
+                {tr.aboutValTerrNote}
               </p>
             </div>
           </>
