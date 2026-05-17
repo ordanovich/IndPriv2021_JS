@@ -9,6 +9,7 @@ import ExtentChart from "./ExtentChart";
 import AboutPanel from "./AboutPanel";
 import ProvinceAtlasPanel from "./ProvinceAtlasPanel";
 import SearchPanel from "./SearchPanel";
+import RankingsPanel from "./RankingsPanel";
 import { AppProvider, useApp } from "./AppContext";
 import { TR } from "./translations";
 import { DEMO_MODE } from "./buildConfig";
@@ -214,6 +215,7 @@ function TerriaUIInner({ terria, viewState }) {
   const { lang, toggleLang, colorblind, toggleColorblind } = useApp();
   const [exportOpen,       setExportOpen]       = useState(false);
   const [aboutOpen,        setAboutOpen]         = useState(false);
+  const [rankingsOpen,     setRankingsOpen]     = useState(false);
   const [selectedQuintile, setSelectedQuintile]  = useState(null);
   const openExport  = useCallback(() => setExportOpen(true),  []);
   const closeExport = useCallback(() => setExportOpen(false), []);
@@ -309,6 +311,10 @@ function TerriaUIInner({ terria, viewState }) {
                      title={tr.aboutTitle}>
             {tr.aboutBtn}
           </ToggleBtn>
+          <ToggleBtn active={rankingsOpen} onClick={() => setRankingsOpen(o => !o)}
+                     title={tr.rankingsTitle}>
+            {tr.rankingsBtn}
+          </ToggleBtn>
           <ToggleBtn onClick={toggleLang} title={tr.langTitle}>
             {tr.langBtn}
           </ToggleBtn>
@@ -391,6 +397,13 @@ function TerriaUIInner({ terria, viewState }) {
 
       {/* ── Search panel (top-right) ─────────────────────────────────────── */}
       <SearchPanel terria={terria} />
+
+      {/* ── Rankings panel (bottom-centre, toggled from toolbar) ─────────── */}
+      <RankingsPanel
+        terria={terria}
+        isOpen={rankingsOpen}
+        onClose={() => setRankingsOpen(false)}
+      />
 
       {/* ── Demo banner (only when DEMO_MODE or ?demo=1) ─────────────────── */}
       <DemoBanner />
