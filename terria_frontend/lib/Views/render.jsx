@@ -6,6 +6,7 @@ import Variables from "../Styles/variables.scss";
 import "./global.scss";
 import { Loader } from "./Loader";
 import { terriaStore } from "./terriaStore";
+import { readPersistedLang } from "./AppContext";
 
 // Lazy load the entire TerriaUserInterface component
 const LazyTerriaUserInterface = React.lazy(() =>
@@ -16,21 +17,22 @@ const LazyTerriaUserInterface = React.lazy(() =>
 
 const Root = observer(({ themeOverrides }) => {
   const { terria, viewState, status } = terriaStore;
+  const lang = readPersistedLang();
 
   if (status === "loading") {
-    return <Loader />;
+    return <Loader lang={lang} />;
   }
 
   return (
     <>
-      <Suspense fallback={<Loader />}>
+      <Suspense fallback={<Loader lang={lang} />}>
         <LazyTerriaUserInterface
           terria={terria}
           viewState={viewState}
           themeOverrides={themeOverrides}
         />
       </Suspense>
-      <Loader overlay terria={terria} />
+      <Loader overlay terria={terria} lang={lang} />
     </>
   );
 });

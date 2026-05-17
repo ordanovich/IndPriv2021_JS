@@ -101,6 +101,18 @@ export const TR = {
     demoBanner:      "Versión de demostración · 5 provincias únicamente · Datos completos disponibles en la publicación",
     demoDismiss:     "×",
     demoDismissTitle: "Cerrar aviso de demo",
+    // ── Loader ────────────────────────────────────────────────────────────────
+    loaderTitle:     "Atlas de Privación de España",
+    loaderLoading:   "Cargando…",
+    loaderStatSections: "secciones censales",
+    loaderStatVars:  "variables del modelo",
+    loaderStatProvinces: "provincias cartografiadas",
+    loaderFacts: [
+      "Explora la distribución del Índice de Privación a lo largo de más de 36.000 secciones censales de toda España.",
+      "Filtra por comunidad autónoma o provincia, dibuja una selección sobre el mapa y exporta los datos a Excel o GeoJSON.",
+      "Haz clic en cualquier sección censal para ver el mapa provincial correspondiente del atlas estático.",
+      "La robustez del índice fue verificada mediante Random Forest (R² = 0,95) y Bootstrap PCA, confirmando su estabilidad estructural.",
+    ],
   },
 
   en: {
@@ -205,6 +217,18 @@ export const TR = {
     demoBanner:      "Demo version · 5 provinces only · Full data available in the publication",
     demoDismiss:     "×",
     demoDismissTitle: "Dismiss demo notice",
+    // ── Loader ────────────────────────────────────────────────────────────────
+    loaderTitle:     "Atlas of Deprivation of Spain",
+    loaderLoading:   "Loading…",
+    loaderStatSections: "census tracts",
+    loaderStatVars:  "model variables",
+    loaderStatProvinces: "provinces mapped",
+    loaderFacts: [
+      "Explore the distribution of the Deprivation Index across more than 36,000 census tracts in Spain.",
+      "Filter by autonomous community or province, draw a selection on the map and export the data to Excel or GeoJSON.",
+      "Click any census tract to view the corresponding provincial map from the static atlas.",
+      "The index was validated with Random Forest (R² = 0.95) and Bootstrap PCA, confirming its structural stability.",
+    ],
   },
 };
 

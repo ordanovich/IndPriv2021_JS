@@ -1,10 +1,25 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 
 const AppContext = createContext(null);
 
+export const LANG_STORAGE_KEY = "atlas.lang";
+
+export function readPersistedLang() {
+  if (typeof window === "undefined") return "es";
+  try {
+    const stored = window.localStorage?.getItem(LANG_STORAGE_KEY);
+    if (stored === "es" || stored === "en") return stored;
+  } catch (_) { /* localStorage may be disabled */ }
+  return "es";
+}
+
 export function AppProvider({ children }) {
-  const [lang,      setLang]      = useState("es"); // "es" | "en"
+  const [lang,      setLang]      = useState(readPersistedLang);
   const [colorblind, setColorblind] = useState(false);
+
+  useEffect(() => {
+    try { window.localStorage?.setItem(LANG_STORAGE_KEY, lang); } catch (_) {}
+  }, [lang]);
 
   const toggleLang      = useCallback(() => setLang(l => l === "es" ? "en" : "es"), []);
   const toggleColorblind = useCallback(() => setColorblind(c => !c), []);

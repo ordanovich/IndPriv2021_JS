@@ -1,22 +1,21 @@
 import { autorun } from "mobx";
 import React, { useState, useEffect } from "react";
 import { onDataReady, ensureDataLoaded } from "./geoDataStore";
+import { TR } from "./translations";
+import { readPersistedLang } from "./AppContext";
 
 const Q_COLORS = ["#1a9850", "#91cf60", "#ffffbf", "#fc8d59", "#d73027"];
-
-const FACTS = [
-  "Explora la distribución del Índice de Privación a lo largo de más de 36.000 secciones censales de toda España.",
-  "Filtra por comunidad autónoma o provincia, dibuja una selección sobre el mapa y exporta los datos a Excel o GeoJSON.",
-  "Haz clic en cualquier sección censal para ver el mapa provincial correspondiente del atlas estático.",
-  "La robustez del índice fue verificada mediante Random Forest (R² = 0,95) y Bootstrap PCA, confirmando su estabilidad estructural.",
-];
 
 interface LoaderProps {
   overlay?: boolean;
   terria?: any;
+  lang?: "es" | "en";
 }
 
-export const Loader: React.FC<LoaderProps> = ({ overlay = false, terria }) => {
+export const Loader: React.FC<LoaderProps> = ({ overlay = false, terria, lang: langProp }) => {
+  const lang = (langProp ?? readPersistedLang()) as "es" | "en";
+  const tr = TR[lang];
+  const FACTS = tr.loaderFacts;
   const [gone,    setGone]    = useState(false);
   const [fading,  setFading]  = useState(false);
   const [factIdx, setFactIdx] = useState(0);
@@ -130,7 +129,7 @@ export const Loader: React.FC<LoaderProps> = ({ overlay = false, terria }) => {
             color:         "#111827",
             letterSpacing: "0.2px",
           }}>
-            Atlas de Privación de España
+            {tr.loaderTitle}
           </span>
         </div>
 
@@ -153,7 +152,7 @@ export const Loader: React.FC<LoaderProps> = ({ overlay = false, terria }) => {
           letterSpacing: "0.8px",
           textTransform: "uppercase",
         }}>
-          Cargando…
+          {tr.loaderLoading}
         </p>
 
         {/* ── Info panel ──────────────────────────────────────────────── */}
@@ -184,9 +183,9 @@ export const Loader: React.FC<LoaderProps> = ({ overlay = false, terria }) => {
           {/* Key numbers */}
           <div style={{ display: "flex", justifyContent: "space-around",
                         width: "100%", marginTop: 26 }}>
-            {([ ["36.333", "secciones censales"],
-                ["9",      "variables del modelo"],
-                ["52",     "provincias cartografiadas"],
+            {([ [lang === "es" ? "36.333" : "36,333", tr.loaderStatSections],
+                ["9",                                  tr.loaderStatVars],
+                ["52",                                 tr.loaderStatProvinces],
             ] as [string, string][]).map(([val, lbl], i) => (
               <div key={i} style={{
                 textAlign: "center",
