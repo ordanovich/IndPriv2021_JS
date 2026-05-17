@@ -301,35 +301,35 @@ gulp.task("set-demo-mode-off", function (done) { setDemoMode(false); done(); });
 
 function copyDistAssets(done) {
   var fse = require("fs-extra");
+  var WWW  = path.join(__dirname, "wwwroot");
   var DIST = path.join(__dirname, "..", "dist");
   fse.emptyDirSync(DIST);
 
-  // The webpack bundle (index.html + JS/CSS). Goes flat at dist/ root.
-  fse.copySync(path.join(__dirname, "wwwroot", "build"), DIST);
-
-  // Static assets referenced from the bundle: province images, logos,
-  // favicons, and the build version stamp.
-  ["atlas", "images", "favicons"].forEach(function (dir) {
-    var src = path.join(__dirname, "wwwroot", dir);
-    if (fs.existsSync(src)) fse.copySync(src, path.join(DIST, dir));
+  // Mirror wwwroot/* into dist/* — TerriaJS expects index.html at the
+  // server root with bundled JS under /build, so the paths must match.
+  // Skip the full 139 MB GeoJSON and the non-demo runtime config; both
+  // are replaced by their demo-flavoured siblings further down.
+  var skip = new Set([
+    "data",                  // copied selectively below (demo geojson only)
+    "init",                  // copied selectively below (demo.json only)
+    "config.json",           // demo build uses config_demo.json
+    "index.ejs",             // template only, already compiled into index.html
+  ]);
+  fs.readdirSync(WWW).forEach(function (name) {
+    if (skip.has(name)) return;
+    fse.copySync(path.join(WWW, name), path.join(DIST, name));
   });
-  var versionFile = path.join(__dirname, "wwwroot", "version.json");
-  if (fs.existsSync(versionFile)) fse.copySync(versionFile, path.join(DIST, "version.json"));
 
-  // Demo-specific runtime files: trimmed GeoJSON, demo init, demo config.
+  // Demo-specific runtime files.
   fse.ensureDirSync(path.join(DIST, "data"));
   fse.copySync(
-    path.join(__dirname, "wwwroot", "data", "secciones_demo.geojson"),
+    path.join(WWW, "data", "secciones_demo.geojson"),
     path.join(DIST, "data", "secciones_demo.geojson")
   );
   fse.ensureDirSync(path.join(DIST, "init"));
   fse.copySync(
-    path.join(__dirname, "wwwroot", "init", "demo.json"),
+    path.join(WWW, "init", "demo.json"),
     path.join(DIST, "init", "demo.json")
-  );
-  fse.copySync(
-    path.join(__dirname, "wwwroot", "config_demo.json"),
-    path.join(DIST, "config_demo.json")
   );
   done();
 }
