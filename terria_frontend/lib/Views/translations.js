@@ -76,6 +76,10 @@ export const TR = {
     provDiscreto:    "Quintiles",
     provClose:       "×",
     provNoImage:     "Sin mapa disponible",
+    // ── Demo banner ───────────────────────────────────────────────────────────
+    demoBanner:      "Versión de demostración · 5 provincias únicamente · Datos completos disponibles en la publicación",
+    demoDismiss:     "×",
+    demoDismissTitle: "Cerrar aviso de demo",
   },
 
   en: {
@@ -155,6 +159,10 @@ export const TR = {
     provDiscreto:    "Quintiles",
     provClose:       "×",
     provNoImage:     "No map available",
+    // ── Demo banner ───────────────────────────────────────────────────────────
+    demoBanner:      "Demo version · 5 provinces only · Full data available in the publication",
+    demoDismiss:     "×",
+    demoDismissTitle: "Dismiss demo notice",
   },
 };
 

@@ -10,7 +10,14 @@ import updateApplicationOnHashChange from "terriajs/lib/ViewModels/updateApplica
 import updateApplicationOnMessageFromParentWindow from "terriajs/lib/ViewModels/updateApplicationOnMessageFromParentWindow";
 import loadPlugins from "./lib/Core/loadPlugins";
 import showGlobalDisclaimer from "./lib/Views/showGlobalDisclaimer";
+import { DEMO_MODE } from "./lib/Views/buildConfig";
 import plugins from "./plugins";
+
+const isDemo =
+  DEMO_MODE ||
+  (typeof window !== "undefined" &&
+    window.location.search.includes("demo=1"));
+const configUrl = isDemo ? "config_demo.json" : "config.json";
 
 const terriaOptions = {
   baseUrl: "build/TerriaJS"
@@ -51,7 +58,7 @@ if (process.env.NODE_ENV === "development") {
 export default terria
   .start({
     applicationUrl: window.location,
-    configUrl: "config.json",
+    configUrl,
     shareDataService: new ShareDataService({
       terria: terria
     }),

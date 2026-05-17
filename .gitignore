@@ -6,7 +6,11 @@ terria_frontend/wwwroot/build/
 
 # ── Large binary / geodata files (too large for GitHub without LFS) ─────────
 terria_frontend/wwwroot/data/*.geojson
+!terria_frontend/wwwroot/data/secciones_demo.geojson
 data_pipeline/data/
+
+# ── Demo gh-pages dist (built locally; not tracked) ─────────────────────────
+dist/
 
 # ── R artifacts ─────────────────────────────────────────────────────────────
 .Rhistory

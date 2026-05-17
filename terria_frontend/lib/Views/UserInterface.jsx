@@ -10,6 +10,73 @@ import AboutPanel from "./AboutPanel";
 import ProvinceAtlasPanel from "./ProvinceAtlasPanel";
 import { AppProvider, useApp } from "./AppContext";
 import { TR } from "./translations";
+import { DEMO_MODE } from "./buildConfig";
+
+const SS_KEY_DEMO_BANNER = "atlas.demoBannerDismissed";
+const isDemoMode = () =>
+  DEMO_MODE ||
+  (typeof window !== "undefined" &&
+    window.location.search.includes("demo=1"));
+
+function DemoBanner() {
+  const { lang } = useApp();
+  const tr = TR[lang];
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.sessionStorage?.getItem(SS_KEY_DEMO_BANNER) === "1";
+  });
+
+  if (!isDemoMode() || dismissed) return null;
+
+  const dismiss = () => {
+    try { window.sessionStorage?.setItem(SS_KEY_DEMO_BANNER, "1"); } catch (_) {}
+    setDismissed(true);
+  };
+
+  return (
+    <div style={{
+      position:   "fixed",
+      top:        0,
+      left:       0,
+      right:      0,
+      zIndex:     100001,
+      background: "#fef3c7",
+      borderBottom: "1px solid #fcd34d",
+      color:      "#78350f",
+      padding:    "5px 38px 5px 16px",
+      fontSize:   12,
+      fontWeight: 500,
+      letterSpacing: "0.2px",
+      textAlign:  "center",
+      lineHeight: 1.4,
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      boxShadow:  "0 1px 2px rgba(0,0,0,0.04)",
+    }}>
+      {tr.demoBanner}
+      <button
+        onClick={dismiss}
+        title={tr.demoDismissTitle}
+        style={{
+          position:   "absolute",
+          top:        "50%",
+          right:      10,
+          transform:  "translateY(-50%)",
+          background: "none",
+          border:     "none",
+          color:      "#78350f",
+          fontSize:   16,
+          fontWeight: 700,
+          cursor:     "pointer",
+          lineHeight: 1,
+          padding:    "2px 6px",
+          opacity:    0.75,
+        }}
+      >
+        {tr.demoDismiss}
+      </button>
+    </div>
+  );
+}
 
 // ── Color palettes ─────────────────────────────────────────────────────────────
 export const STD_COLORS = ["#1a9850", "#91cf60", "#ffffbf", "#fc8d59", "#d73027"];
@@ -320,6 +387,9 @@ function TerriaUIInner({ terria, viewState }) {
 
       {/* ── Province atlas panel (appears on feature click) ──────────────── */}
       <ProvinceAtlasPanel terria={terria} />
+
+      {/* ── Demo banner (only when DEMO_MODE or ?demo=1) ─────────────────── */}
+      <DemoBanner />
     </>
   );
 }
