@@ -153,7 +153,7 @@ export const TR = {
     provStatsMean:   "IP2021 medio",
     provStatsQuintileBar: "Distribución por quintiles (2021)",
     // ── Demo banner ───────────────────────────────────────────────────────────
-    demoBanner:      "Versión de demostración · Madrid únicamente · Datos completos disponibles en la publicación",
+    demoBanner:      "Versión de demostración · muestra territorial — los datos completos abarcan las 52 provincias",
     demoDismiss:     "×",
     demoDismissTitle: "Cerrar aviso de demo",
     // ── Loader ────────────────────────────────────────────────────────────────
@@ -166,7 +166,7 @@ export const TR = {
       "Explora la distribución del Índice de Privación a lo largo de más de 36.000 secciones censales de toda España.",
       "Filtra por comunidad autónoma o provincia, dibuja una selección sobre el mapa y exporta los datos a Excel o GeoJSON.",
       "Haz clic en cualquier sección censal para ver el mapa provincial correspondiente del atlas estático.",
-      "La robustez del índice fue verificada mediante Random Forest (R² = 0,95) y Bootstrap PCA, confirmando su estabilidad estructural.",
+      "La validez del índice fue verificada mediante correlaciones de Spearman con indicadores externos de renta: ρ = −0,926 con el precio de compraventa de vivienda y ρ = −0,914 con la renta bruta per cápita.",
     ],
   },
 
@@ -324,7 +324,7 @@ export const TR = {
     provStatsMean:   "Mean IP2021",
     provStatsQuintileBar: "Quintile breakdown (2021)",
     // ── Demo banner ───────────────────────────────────────────────────────────
-    demoBanner:      "Demo version · Madrid only · Full data available in the publication",
+    demoBanner:      "Demo version · territorial sample — full data covers all 52 provinces",
     demoDismiss:     "×",
     demoDismissTitle: "Dismiss demo notice",
     // ── Loader ────────────────────────────────────────────────────────────────
@@ -337,7 +337,7 @@ export const TR = {
       "Explore the distribution of the Deprivation Index across more than 36,000 census tracts in Spain.",
       "Filter by autonomous community or province, draw a selection on the map and export the data to Excel or GeoJSON.",
       "Click any census tract to view the corresponding provincial map from the static atlas.",
-      "The index was validated with Random Forest (R² = 0.95) and Bootstrap PCA, confirming its structural stability.",
+      "Index validity was confirmed via Spearman correlations with income indicators: ρ = −0.926 with housing sale price and ρ = −0.914 with gross income per capita.",
     ],
   },
 };

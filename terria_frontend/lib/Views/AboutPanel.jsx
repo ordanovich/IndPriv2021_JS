@@ -351,7 +351,6 @@ export default function AboutPanel({ isOpen, onClose }) {
       <div style={S.tabBar}>
         <Tab label={isEs ? "Variables" : "Variables"} active={activeTab === "vars"} onClick={() => setActiveTab("vars")} />
         <Tab label={isEs ? "ACP" : "PCA"}             active={activeTab === "pca"}  onClick={() => setActiveTab("pca")}  />
-        <Tab label={tr.aboutValTab}                   active={activeTab === "val"}  onClick={() => setActiveTab("val")}  />
         <Tab label={isEs ? "Atlas" : "Atlas"}         active={activeTab === "atlas"} onClick={() => setActiveTab("atlas")} />
       </div>
 
@@ -362,7 +361,6 @@ export default function AboutPanel({ isOpen, onClose }) {
           <p style={S.para}>
             {activeTab === "vars"  && tr.aboutIntroVars}
             {activeTab === "pca"   && tr.aboutIntroPca}
-            {activeTab === "val"   && tr.aboutValIntro}
             {activeTab === "atlas" && tr.aboutIntroAtlas}
           </p>
         </div>
@@ -418,7 +416,7 @@ export default function AboutPanel({ isOpen, onClose }) {
                 {[
                   { label: isEs ? "Varianza explicada CP1" : "Variance explained PC1", value: "47.3 %" },
                   { label: "KMO", value: "0.816" },
-                  { label: isEs ? "Variables (modelo final)" : "Variables (final model)", value: "9" },
+                  { label: isEs ? "Validación" : "Validation", value: "Spearman · RF · Bootstrap" },
                   { label: isEs ? "Método" : "Method", value: "ACP / PCA" },
                 ].map(({ label, value }) => (
                   <div key={label} style={{
@@ -467,120 +465,69 @@ export default function AboutPanel({ isOpen, onClose }) {
                   ? "ρ = correlación de Spearman con CP1; w = peso (coef. del eigenvector). Datos: Tabla 04 del informe final."
                   : "ρ = Spearman correlation with PC1; w = eigenvector weight. Source: Table 04, final report."}
               </p>
-            </div>
-          </>
-        )}
 
-        {/* ════════════════════════════════════════════════════════════════ */}
-        {/* VALIDATION TAB                                                  */}
-        {/* ════════════════════════════════════════════════════════════════ */}
-        {activeTab === "val" && (
-          <>
-            {/* Random Forest reconstruction */}
-            <div style={S.section}>
-              <span style={S.sectionLabel}>{tr.aboutValRfTitle}</span>
-              <p style={{ ...S.para, marginBottom: 14 }}>{tr.aboutValRfDesc}</p>
-
+              {/* Validation note */}
               <div style={{
-                display: "flex", alignItems: "center", gap: 12,
-                padding: "14px 16px",
-                background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
-                border: "1px solid #bfdbfe", borderRadius: 8,
-                marginBottom: 10,
+                marginTop: 18, padding: "10px 12px",
+                background: "#f0fdf4", border: "1px solid #bbf7d0",
+                borderRadius: 6,
               }}>
-                <div style={{
-                  fontSize: 28, fontWeight: 800, color: "#1d4ed8",
-                  lineHeight: 1, flexShrink: 0,
-                }}>
-                  0.953
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    fontSize: 11, color: "#1e40af",
-                    fontWeight: 700, marginBottom: 3,
-                  }}>
-                    {tr.aboutValRfMetric}
+                <span style={{ ...S.sectionLabel, color: "#166534", marginBottom: 6 }}>
+                  {isEs ? "Validación del índice (4 pruebas)" : "Index validation (4 tests)"}
+                </span>
+                {(isEs ? [
+                  ["1. Criterio externo — Spearman", "Correlaciones de Spearman entre el IP2021 y variables de renta externas al modelo: ρ = −0,926 con el precio de compraventa de vivienda y ρ = −0,914 con la renta bruta per cápita."],
+                  ["2. Coherencia interna — Random Forest", "El CP1 se reconstruye mediante Random Forest a partir de las 9 variables componentes. Un R² elevado confirma que el índice es una síntesis coherente y determinista de las variables de entrada."],
+                  ["3. Estabilidad estructural — Bootstrap PCA", "Se aplica remuestreo con reemplazo (B = 100 iteraciones) para evaluar la estabilidad de las cargas factoriales. Intervalos de confianza estrechos sin cruce de cero indican robustez muestral."],
+                  ["4. Consistencia territorial — DEGURBA", "Modelos factoriales locales, estimados por estrato de urbanización (zona urbana, intermedia y rural), se correlacionan con el índice nacional para verificar la invarianza del constructo en distintos contextos territoriales."],
+                ] : [
+                  ["1. External criterion — Spearman", "Spearman correlations between IP2021 and income indicators external to the model: ρ = −0.926 with housing sale price and ρ = −0.914 with gross income per capita."],
+                  ["2. Internal coherence — Random Forest", "PC1 is reconstructed via Random Forest from the 9 component variables. A high R² confirms the index is a coherent, deterministic synthesis of the input variables."],
+                  ["3. Structural stability — Bootstrap PCA", "Resampling with replacement (B = 100 iterations) is used to evaluate factorial loading stability. Narrow confidence intervals that do not cross zero indicate sample robustness."],
+                  ["4. Territorial consistency — DEGURBA", "Local factor models, estimated by urbanisation stratum (urban, intermediate, rural), are correlated with the national index to verify construct invariance across different territorial contexts."],
+                ]).map(([title, desc]) => (
+                  <div key={title} style={{ marginBottom: 9 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: "#166534", marginBottom: 2 }}>{title}</div>
+                    <p style={{ fontSize: 11, color: "#374151", lineHeight: 1.5, margin: 0 }}>{desc}</p>
                   </div>
-                  <div style={{ fontSize: 11, color: "#374151", lineHeight: 1.45 }}>
-                    {tr.aboutValRfNote}
-                  </div>
-                </div>
+                ))}
               </div>
-            </div>
 
-            {/* Territorial correlations (DEGURBA) */}
-            <div style={{ ...S.section, ...S.divider }}>
-              <span style={S.sectionLabel}>{tr.aboutValTerrTitle}</span>
-              <p style={{ ...S.para, marginBottom: 14 }}>{tr.aboutValTerrDesc}</p>
-
-              <table style={{
-                width: "100%", borderCollapse: "collapse",
-                fontSize: 12, marginBottom: 10,
+              {/* Abbreviations */}
+              <div style={{
+                marginTop: 12, padding: "10px 12px",
+                background: "#f9fafb", border: "1px solid #e5e7eb",
+                borderRadius: 6,
               }}>
-                <thead>
-                  <tr style={{ background: "#f9fafb" }}>
-                    <th style={{
-                      textAlign: "left", padding: "8px 10px",
-                      fontSize: 10, fontWeight: 700, color: "#6b7280",
-                      textTransform: "uppercase", letterSpacing: "0.5px",
-                      borderBottom: "1px solid #e5e7eb",
-                    }}>
-                      {tr.aboutValDegurbaCol}
-                    </th>
-                    <th style={{
-                      textAlign: "right", padding: "8px 10px",
-                      fontSize: 10, fontWeight: 700, color: "#6b7280",
-                      textTransform: "uppercase", letterSpacing: "0.5px",
-                      borderBottom: "1px solid #e5e7eb",
-                    }}>
-                      {tr.aboutValRhoCol}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { label: tr.aboutValDegurbaUrban, rho: 0.734 },
-                    { label: tr.aboutValDegurbaInter, rho: 0.341 },
-                    { label: tr.aboutValDegurbaRural, rho: 0.609 },
-                  ].map(({ label, rho }) => {
-                    const pct = Math.min(rho, 1) * 100;
-                    return (
-                      <tr key={label} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                <span style={{ ...S.sectionLabel, marginBottom: 6 }}>
+                  {isEs ? "Glosario de siglas" : "Abbreviations"}
+                </span>
+                <table style={{ fontSize: 10, width: "100%", borderCollapse: "collapse" }}>
+                  <tbody>
+                    {(isEs ? [
+                      ["ACP / PCA", "Análisis de Componentes Principales"],
+                      ["CP1",       "Primer Componente Principal (primera dimensión del ACP)"],
+                      ["KMO",       "Índice Kaiser-Meyer-Olkin · adecuación muestral para ACP (> 0,8 = bueno)"],
+                      ["ρ (rho)",   "Coeficiente de correlación de Spearman"],
+                      ["w",         "Peso del eigenvector en CP1 (coeficiente de carga)"],
+                    ] : [
+                      ["PCA",       "Principal Component Analysis"],
+                      ["PC1",       "First Principal Component (first PCA dimension)"],
+                      ["KMO",       "Kaiser-Meyer-Olkin index · sampling adequacy for PCA (> 0.8 = good)"],
+                      ["ρ (rho)",   "Spearman correlation coefficient"],
+                      ["w",         "Eigenvector weight on PC1 (loading coefficient)"],
+                    ]).map(([abbr, def]) => (
+                      <tr key={abbr}>
                         <td style={{
-                          padding: "10px",
-                          fontSize: 12, color: "#374151",
-                        }}>
-                          <div>{label}</div>
-                          <div style={{
-                            marginTop: 5, height: 5,
-                            background: "#f3f4f6", borderRadius: 3,
-                            overflow: "hidden",
-                          }}>
-                            <div style={{
-                              width: `${pct}%`, height: "100%",
-                              background: "#2563eb", opacity: 0.78,
-                              borderRadius: 3,
-                            }} />
-                          </div>
-                        </td>
-                        <td style={{
-                          padding: "10px",
-                          textAlign: "right",
-                          fontSize: 13, fontWeight: 700,
-                          color: "#111827", verticalAlign: "top",
-                          whiteSpace: "nowrap",
-                        }}>
-                          {rho.toFixed(3)}
-                        </td>
+                          padding: "3px 10px 3px 0", fontWeight: 700,
+                          color: "#374151", whiteSpace: "nowrap", verticalAlign: "top",
+                        }}>{abbr}</td>
+                        <td style={{ padding: "3px 0", color: "#6b7280", lineHeight: 1.45 }}>{def}</td>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-
-              <p style={{ ...S.caption, marginTop: 12 }}>
-                {tr.aboutValTerrNote}
-              </p>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </>
         )}
