@@ -270,7 +270,10 @@ Tab.propTypes = { label: PropTypes.string, active: PropTypes.bool, onClick: Prop
 // "[DOI pendiente / DOI pending]" placeholder in the UI.
 const CITATION_DOI = null;
 const CITATION_YEAR = 2026;
-const CITATION_AUTHORS = "Danovich, O. et al.";
+const CITATION_AUTHORS =
+  "Duque, I., Gras-García, E. M., Ordanovich, D., Mari Dell-Olmo, M., " +
+  "Aguilar-Palacio, I., La Parra-Casado, D., Fernández-Villa, T., " +
+  "Martin Roncero, U., & Grupo de Determinantes Sociales de la Salud de la SEE";
 const CITATION_TITLE_ES =
   "Atlas de Privación de España: Índice de Privación 2021 a nivel de sección censal";
 const CITATION_TITLE_EN =

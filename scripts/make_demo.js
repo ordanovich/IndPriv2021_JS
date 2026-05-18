@@ -9,11 +9,7 @@ const fs = require("fs");
 const path = require("path");
 
 const DEMO_PROVINCES = new Set([
-  "08", // Barcelona — large urban
-  "12", // Castellón — Mediterranean mid-size
-  "28", // Madrid — large urban
-  "33", // Asturias — Northern industrial decline
-  "41", // Sevilla — Southern deprivation
+  "28", // Madrid
 ]);
 
 const SRC = path.join("terria_frontend", "wwwroot", "data", "secciones_unified.geojson");

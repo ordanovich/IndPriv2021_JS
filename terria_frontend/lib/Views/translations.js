@@ -136,10 +136,10 @@ export const TR = {
     aboutValTerrNote: "La menor correlación intermedia refleja la conocida heterogeneidad de las áreas periurbanas, no una debilidad del índice.",
     // ── Citation block (Atlas tab) ────────────────────────────────────────────
     aboutCiteTitle:  "Citar",
-    aboutCiteDesc:   "Por favor, cite el atlas de la siguiente manera:",
+    aboutCiteDesc:   "Cita provisional — los detalles definitivos se actualizarán cuando el atlas sea publicado en Zenodo:",
     aboutCiteCopy:   "📋 Copiar BibTeX",
     aboutCiteCopied: "¡Copiado!",
-    aboutCitePendDoi: "[DOI pendiente]",
+    aboutCitePendDoi: "[DOI pendiente · cita provisional]",
     // ── Province atlas panel ──────────────────────────────────────────────────
     provPanelTitle:  "Atlas provincial",
     provContinuo:    "Continuo",
@@ -307,10 +307,10 @@ export const TR = {
     aboutValTerrNote: "The lower intermediate correlation reflects the known heterogeneity of peri-urban areas, not a weakness of the index.",
     // ── Citation block (Atlas tab) ────────────────────────────────────────────
     aboutCiteTitle:  "Cite",
-    aboutCiteDesc:   "Please cite the atlas as follows:",
+    aboutCiteDesc:   "Provisional citation — details will be updated once the atlas is published on Zenodo:",
     aboutCiteCopy:   "📋 Copy BibTeX",
     aboutCiteCopied: "Copied!",
-    aboutCitePendDoi: "[DOI pending]",
+    aboutCitePendDoi: "[DOI pending · provisional citation]",
     // ── Province atlas panel ──────────────────────────────────────────────────
     provPanelTitle:  "Provincial atlas",
     provContinuo:    "Continuous",

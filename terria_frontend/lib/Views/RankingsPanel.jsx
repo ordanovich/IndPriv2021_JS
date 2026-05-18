@@ -31,11 +31,13 @@ export default function RankingsPanel({ terria, isOpen, onClose }) {
   const { lang } = useApp();
   const tr = TR[lang];
 
-  const [rows,   setRows]   = useState([]);
-  const [year,   setYear]   = useState("2021");
-  const [sort,   setSort]   = useState("ip-desc"); // "ip-desc" | "ip-asc" | "prov"
-  const [page,   setPage]   = useState(0);
-  const [hasData, setHasData] = useState(false);
+  const [rows,    setRows]    = useState([]);
+  const [year,    setYear]    = useState("2021");
+  const [sort,    setSort]    = useState("ip-desc"); // "ip-desc" | "ip-asc" | "prov"
+  const [page,    setPage]    = useState(0);
+  // Initialise eagerly so opening the panel never flashes "Cargando datos…"
+  // when the GeoJSON is already in the cache (normal case after Loader dismisses).
+  const [hasData, setHasData] = useState(() => getCachedData() != null);
   const cleanupRef = useRef(null);
 
   const refresh = useCallback(() => {
@@ -66,25 +68,33 @@ export default function RankingsPanel({ terria, isOpen, onClose }) {
     setPage(0);
   }, [terria]);
 
-  // Wire data + map listeners only while the panel is visible.
+  // Effect 1: data subscription — separated from viewer wiring so hasData
+  // updates independently and doesn't force viewer re-attachment.
   useEffect(() => {
     if (!isOpen) return undefined;
     ensureDataLoaded();
-    const unsubData = onDataReady(() => { setHasData(true); refresh(); });
-    setHasData(getCachedData() != null);
+    const unsub = onDataReady(() => setHasData(true));
+    if (getCachedData()) setHasData(true);
+    return unsub;
+  }, [isOpen]);
+
+  // Effect 2: attach map move listener and do initial row population.
+  // Only runs once both the panel is open AND data is in the cache.
+  useEffect(() => {
+    if (!isOpen || !hasData) return undefined;
+
+    refresh();
 
     const attach = () => {
-      if (terria.cesium) {
+      if (terria?.cesium) {
         const { moveEnd } = terria.cesium.scene.camera;
         moveEnd.addEventListener(refresh);
         cleanupRef.current = () => moveEnd.removeEventListener(refresh);
-        refresh();
         return true;
       }
-      if (terria.leaflet) {
+      if (terria?.leaflet) {
         terria.leaflet.map.on("moveend", refresh);
         cleanupRef.current = () => terria.leaflet?.map.off("moveend", refresh);
-        refresh();
         return true;
       }
       return false;
@@ -94,12 +104,11 @@ export default function RankingsPanel({ terria, isOpen, onClose }) {
       timer = setInterval(() => { if (attach()) { clearInterval(timer); timer = null; } }, 400);
     }
     return () => {
-      unsubData();
       if (timer) clearInterval(timer);
       cleanupRef.current?.();
       cleanupRef.current = null;
     };
-  }, [isOpen, terria, refresh]);
+  }, [isOpen, hasData, terria, refresh]);
 
   const sorted = useMemo(() => {
     const arr = rows.slice();
