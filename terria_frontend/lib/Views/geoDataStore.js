@@ -1,4 +1,5 @@
 // Shared GeoJSON cache and helpers used by ExportPanel and ExtentChart
+import { DEMO_MODE } from "./buildConfig";
 
 export const PROV_TO_CCAA = {
   "04": "Andalucía",   "11": "Andalucía",   "14": "Andalucía",
@@ -107,10 +108,9 @@ export function ensureDataLoaded() {
 }
 
 function pickDataUrl() {
-  if (typeof window !== "undefined") {
-    const isDemo = window.location.search.includes("demo=1");
-    if (isDemo) return "data/secciones_demo.geojson";
-  }
+  if (DEMO_MODE) return "data/secciones_demo.geojson";
+  if (typeof window !== "undefined" && window.location.search.includes("demo=1"))
+    return "data/secciones_demo.geojson";
   return "data/secciones_unified.geojson";
 }
 

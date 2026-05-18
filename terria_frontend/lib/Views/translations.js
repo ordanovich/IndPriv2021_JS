@@ -153,7 +153,7 @@ export const TR = {
     provStatsMean:   "IP2021 medio",
     provStatsQuintileBar: "Distribución por quintiles (2021)",
     // ── Demo banner ───────────────────────────────────────────────────────────
-    demoBanner:      "Versión de demostración · 5 provincias únicamente · Datos completos disponibles en la publicación",
+    demoBanner:      "Versión de demostración · Madrid únicamente · Datos completos disponibles en la publicación",
     demoDismiss:     "×",
     demoDismissTitle: "Cerrar aviso de demo",
     // ── Loader ────────────────────────────────────────────────────────────────
@@ -324,7 +324,7 @@ export const TR = {
     provStatsMean:   "Mean IP2021",
     provStatsQuintileBar: "Quintile breakdown (2021)",
     // ── Demo banner ───────────────────────────────────────────────────────────
-    demoBanner:      "Demo version · 5 provinces only · Full data available in the publication",
+    demoBanner:      "Demo version · Madrid only · Full data available in the publication",
     demoDismiss:     "×",
     demoDismissTitle: "Dismiss demo notice",
     // ── Loader ────────────────────────────────────────────────────────────────
