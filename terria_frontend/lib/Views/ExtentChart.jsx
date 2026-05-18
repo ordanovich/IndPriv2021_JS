@@ -241,9 +241,9 @@ export default function ExtentChart({ terria, selectedQuintile = null, onQuintil
             style={{
               display: "block", width: "100%", marginTop: 8,
               padding: "4px 0", borderRadius: 6,
-              border: `1px solid ${COLORS[selectedQuintile]}50`,
-              background: `${COLORS[selectedQuintile]}10`,
-              color: COLORS[selectedQuintile],
+              border: `1px solid ${COLORS[selectedQuintile]}80`,
+              background: `${COLORS[selectedQuintile]}18`,
+              color: "#111827",
               fontSize: 11, fontWeight: 600,
               cursor: "pointer", letterSpacing: "0.2px",
             }}
