@@ -9,12 +9,12 @@
 
     /* Texto informativo en la parte inferior del mapa */
     "disclaimer": {
-      "text": "Versión de demostración · Madrid. Este mapa tiene carácter informativo y no debe utilizarse para análisis espaciales de precisión.",
+      "text": "Versión de demostración · Andalucía. Este mapa tiene carácter informativo y no debe utilizarse para análisis espaciales de precisión.",
       "url": ""
     },
 
     /* Nombre interno de la aplicación (aparece en algunos mensajes de la interfaz) */
-    "appName": "Atlas de Privación · Demo (Madrid)",
+    "appName": "Atlas de Privación · Demo (Andalucía)",
 
     /*
       Barra superior: tres posiciones (izquierda, centro, derecha).
@@ -62,7 +62,7 @@
         "title": "Acerca del mapa (demo)",
         "itemName": "acercadelmapa",
         "icon": "info",
-        "markdownText": "## Atlas de Privación de España · Demo\n\nEsta es una **versión de demostración** con datos de **Madrid** extraídos del conjunto completo (52 provincias). Los datos completos estarán disponibles en la publicación.\n\n---\n\n### Cómo usar el mapa\n\n- **Activar la capa 2011** usando el icono del ojo en el panel izquierdo\n- **Clic en cualquier sección** para ver ambos índices y quintiles simultáneamente"
+        "markdownText": "## Atlas de Privación de España · Demo\n\nEsta es una **versión de demostración** con datos de **Andalucía** (8 provincias) extraídos del conjunto completo (52 provincias). Los datos completos estarán disponibles en la publicación.\n\n---\n\n### Cómo usar el mapa\n\n- **Activar la capa 2011** usando el icono del ojo en el panel izquierdo\n- **Clic en cualquier sección** para ver ambos índices y quintiles simultáneamente"
       }
     ],
 
