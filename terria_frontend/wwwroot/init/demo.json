@@ -70,7 +70,7 @@
         "outline": { "null": { "color": "rgba(0,0,0,0)", "width": 0 } },
         "color": {
           "colorColumn": "DeltaLabel",
-          "nullColor": "#d3d3d3",
+          "nullColor": "rgba(0,0,0,0)",
           "enumColors": [
             { "value": "1. Mejora notable",         "color": "#1a9850" },
             { "value": "2. Mejora leve",            "color": "#91cf60" },
