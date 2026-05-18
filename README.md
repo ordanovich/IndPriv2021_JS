@@ -4,6 +4,14 @@ Visor web interactivo para la consulta y descarga del **Índice de Privación (I
 
 ---
 
+## Demo en línea
+
+**URL:** https://ordanovich.github.io/IndPriv2021_JS/
+
+Versión de demostración pública desplegada en GitHub Pages. Incluye datos de **Andalucía** (8 provincias, 5 995 secciones censales, ~19 MB) como muestra territorial del conjunto completo.
+
+---
+
 ## Tabla de contenidos
 
 1. [Descripción general](#descripción-general)
@@ -12,8 +20,9 @@ Visor web interactivo para la consulta y descarga del **Índice de Privación (I
 4. [Arquitectura del proyecto](#arquitectura-del-proyecto)
 5. [Funcionalidades principales](#funcionalidades-principales)
 6. [Ejecución local](#ejecución-local)
-7. [Personalización institucional](#personalización-institucional)
-8. [Despliegue en servidor institucional](#despliegue-en-servidor-institucional)
+7. [Versión demo y GitHub Pages](#versión-demo-y-github-pages)
+8. [Personalización institucional](#personalización-institucional)
+9. [Despliegue en servidor institucional](#despliegue-en-servidor-institucional)
 
 ---
 
@@ -160,7 +169,7 @@ Al hacer clic en cualquier sección censal, aparece un popup con:
 ### Panel de metodología (`AboutPanel`)
 Accesible mediante el botón **ℹ Índice** en la barra superior. Contiene tres pestañas:
 - **Variables** — lista de las 9 variables del modelo final con sus correlaciones de Spearman (ρ) con el CP1, representadas como barras de color (azul = factor de riesgo, ámbar = factor protector); imagen del diccionario de variables y panel de mapas nacionales (puntuaciones Z)
-- **ACP** — estructura factorial del modelo: gráfico de loadings, estadísticos (varianza explicada, KMO, contraste de Bartlett) e imagen del proceso de selección de variables
+- **ACP/PCA** — estructura factorial del modelo: gráfico de loadings, estadísticos (47,2 % varianza explicada, KMO = 0,816, 9 variables); bloque de validación del índice (4 pruebas: correlaciones de Spearman con indicadores externos de renta, reconstrucción con Random Forest, Bootstrap PCA con B = 100 iteraciones, consistencia territorial por DEGURBA); glosario de siglas (ACP/PCA, CP1/PC1, KMO, ρ, w)
 - **Atlas** — acceso a los 5 volúmenes del atlas cartográfico estático (nacional, provincias, ciudades, conurbaciones, AUF) con enlace a DOI en Zenodo (pendiente de publicación)
 
 Las imágenes del panel son ampliables (clic → lightbox) y enlazables en nueva pestaña.
@@ -217,6 +226,45 @@ El servidor sirve los archivos de `wwwroot/` en el puerto **3001** y reconstruye
 source("data_pipeline/01_process_and_export.R")
 # Salida: terria_frontend/wwwroot/data/secciones_unified.geojson
 ```
+
+---
+
+## Versión demo y GitHub Pages
+
+La versión demo se publica en la rama `gh-pages` del repositorio y es accesible en https://ordanovich.github.io/IndPriv2021_JS/.
+
+### Diferencias respecto a la versión completa
+
+| | Versión completa | Versión demo |
+|---|---|---|
+| **Datos** | `secciones_unified.geojson` (139 MB, 52 provincias) | `secciones_demo.geojson` (19 MB, Andalucía) |
+| **Config** | `wwwroot/config.json` + `init/simple.json` | `wwwroot/config_demo.json` + `init/demo.json` |
+| **DEMO_MODE** | `false` | `true` (banner de aviso activo) |
+
+### Compilar y publicar la demo
+
+```bash
+# 1. Generar el build de demo (desde terria_frontend/)
+cd terria_frontend
+npx gulp build-demo-dist
+# Resultado: dist/ en la raíz del repo (~90 MB, incluye GeoJSON de demo)
+
+# 2. Corregir la ruta base (obligatorio para GitHub Pages)
+# En dist/index.html, línea 4, cambiar:
+#   <base href="/" />
+# por:
+#   <base href="/IndPriv2021_JS/" />
+
+# 3. Publicar (desde la raíz del repo)
+cd ..
+node_modules\.bin\gh-pages -d dist --dotfiles --add
+```
+
+> **Nota:** Usar siempre `--add` para evitar errores de nombres de archivo demasiado largos en Windows. El flag `git config --global core.longpaths true` debe estar activado (ya configurado).
+
+### Cambiar la cobertura territorial de la demo
+
+Para usar provincias distintas de Andalucía, filtra `secciones_unified.geojson` por los dos primeros dígitos del código `CUSEC` (código de provincia INE) y guarda el resultado como `terria_frontend/wwwroot/data/secciones_demo.geojson`. Actualiza también las referencias textuales en `config_demo.json` y `init/demo.json`.
 
 ---
 
