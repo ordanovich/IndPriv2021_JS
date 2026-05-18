@@ -1,0 +1,71 @@
+{
+  /* Archivo de inicialización del catálogo de capas — versión demo */
+  "initializationUrls": ["demo"],
+
+  "parameters": {
+    "googleUrlShortenerKey": null,
+    "googleAnalyticsKey": null,
+    "googleAnalyticsOptions": null,
+
+    /* Texto informativo en la parte inferior del mapa */
+    "disclaimer": {
+      "text": "Versión de demostración · Madrid. Este mapa tiene carácter informativo y no debe utilizarse para análisis espaciales de precisión.",
+      "url": ""
+    },
+
+    /* Nombre interno de la aplicación (aparece en algunos mensajes de la interfaz) */
+    "appName": "Atlas de Privación · Demo (Madrid)",
+
+    /*
+      Barra superior: tres posiciones (izquierda, centro, derecha).
+    */
+    "brandBarElements": [
+      "<div style='display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px 16px;gap:3px;background:#ffffff'><span style='color:#111827;font-size:12px;font-weight:700;letter-spacing:0.3px;white-space:nowrap;line-height:1.2'>Atlas de Privación · Demo</span><img src='images/logo.jpg' style='height:28px;width:auto;object-fit:contain;display:block;max-width:180px' alt='Logo institucional' onerror=\"this.style.display='none'\"/></div>",
+      "",
+      ""
+    ],
+
+    /* Desactiva el botón de feedback (no hay endpoint de servidor) */
+    "feedbackUrl": null,
+
+    "proj4ServiceBaseUrl": "proj4def/",
+
+    /* Vista por defecto en dispositivos móviles */
+    "mobileDefaultViewerMode": "2d",
+
+    "experimentalFeatures": true,
+
+    /* Internacionalización — desactivada, la interfaz está en español */
+    "languageConfiguration": {
+      "enabled": false,
+      "debug": false,
+      "languages": { "en": "English" },
+      "fallbackLanguage": "en"
+    },
+
+    "searchBarConfig": {},
+
+    /* Buscador de localidades (servicio público de Cesium Ion, sin clave) */
+    "searchProviders": [
+      {
+        "id": "search-provider/cesium-ion",
+        "type": "cesium-ion-search-provider",
+        "name": "Buscar localidad…",
+        "flightDurationSeconds": 1.5,
+        "minCharacters": 3
+      }
+    ],
+
+    /* Contenido del panel de ayuda — solo información del proyecto */
+    "helpContent": [
+      {
+        "title": "Acerca del mapa (demo)",
+        "itemName": "acercadelmapa",
+        "icon": "info",
+        "markdownText": "## Atlas de Privación de España · Demo\n\nEsta es una **versión de demostración** con datos de **Madrid** extraídos del conjunto completo (52 provincias). Los datos completos estarán disponibles en la publicación.\n\n---\n\n### Cómo usar el mapa\n\n- **Activar la capa 2011** usando el icono del ojo en el panel izquierdo\n- **Clic en cualquier sección** para ver ambos índices y quintiles simultáneamente"
+      }
+    ],
+
+    "helpContentTerms": []
+  }
+}
