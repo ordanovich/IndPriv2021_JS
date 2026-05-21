@@ -11,7 +11,7 @@
       "name": "Provincias",
       "type": "geojson",
       "url": "data/provincias.geojson",
-      "show": false,
+      "show": true,
       "columns": [
         { "name": "NPRO", "title": "Provincia" },
         { "name": "CPRO", "type": "hidden" }
@@ -38,7 +38,7 @@
       "name": "Municipios",
       "type": "geojson",
       "url": "data/municipios.geojson",
-      "show": false,
+      "show": true,
       "columns": [
         { "name": "NMUN", "title": "Municipio" },
         { "name": "NPRO", "title": "Provincia" },
@@ -170,6 +170,8 @@
     }
   ],
   "workbench": [
+    "overlay-provincias",
+    "overlay-municipios",
     "atlas-2021",
     "atlas-2011",
     "atlas-delta"

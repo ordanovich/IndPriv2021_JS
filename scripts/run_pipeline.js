@@ -43,22 +43,38 @@ if (!anyOutputMissing && out2021 && inputMtime <= out2021) {
 
 console.log("Source data changed — running R pipeline...");
 
-try {
-  execSync("Rscript 01_process_and_export.R", {
-    cwd: "data_pipeline",
-    stdio: "inherit",
-  });
-} catch (_) {
-  if (!fs.existsSync(OUT_2021)) {
-    console.error(
-      "\nERROR: R pipeline failed and no existing GeoJSON found.\n" +
-      "Make sure R is installed and the following packages are available:\n" +
-      "  sf, data.table, rmapshaper, dplyr, readxl\n" +
-      "Install missing packages in R with: install.packages(c('sf','data.table','rmapshaper','dplyr','readxl'))"
-    );
-    process.exit(1);
+function findRscript() {
+  // Try PATH first
+  try { execSync("Rscript --version", { stdio: "ignore" }); return "Rscript"; } catch {}
+  // Fall back to common Windows install locations
+  const winPaths = fs.existsSync("C:\\Program Files\\R")
+    ? fs.readdirSync("C:\\Program Files\\R")
+        .sort().reverse()
+        .map(v => `C:\\Program Files\\R\\${v}\\bin\\Rscript.exe`)
+    : [];
+  for (const p of winPaths) if (fs.existsSync(p)) return `"${p}"`;
+  return null;
+}
+
+const rscript = findRscript();
+if (!rscript) {
+  console.error("ERROR: Rscript not found. Install R from https://cran.r-project.org/");
+  if (!fs.existsSync(OUT_2021)) process.exit(1);
+  console.warn("Continuing with existing GeoJSON files.");
+} else {
+  try {
+    execSync(`${rscript} 01_process_and_export.R`, { cwd: "data_pipeline", stdio: "inherit" });
+  } catch (_) {
+    if (!fs.existsSync(OUT_2021)) {
+      console.error(
+        "\nERROR: R pipeline failed and no existing GeoJSON found.\n" +
+        "Required R packages: sf, data.table, rmapshaper, dplyr, readxl\n" +
+        "Install with: install.packages(c('sf','data.table','rmapshaper','dplyr','readxl'))"
+      );
+      process.exit(1);
+    }
+    console.warn("\nWARNING: R pipeline failed — continuing with existing GeoJSON files.");
   }
-  console.warn("\nWARNING: R pipeline failed — continuing with existing GeoJSON files.");
 }
 
 // Regenerate Andalucía demo subsets from the freshly produced GeoJSONs
