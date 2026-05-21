@@ -322,10 +322,9 @@ function copyDistAssets(done) {
 
   // Demo-specific runtime files.
   fse.ensureDirSync(path.join(DIST, "data"));
-  fse.copySync(
-    path.join(WWW, "data", "secciones_demo.geojson"),
-    path.join(DIST, "data", "secciones_demo.geojson")
-  );
+  ["secciones_demo.geojson", "provincias_demo.geojson", "municipios_demo.geojson"].forEach(function (f) {
+    fse.copySync(path.join(WWW, "data", f), path.join(DIST, "data", f));
+  });
   fse.ensureDirSync(path.join(DIST, "init"));
   fse.copySync(
     path.join(WWW, "init", "demo.json"),
