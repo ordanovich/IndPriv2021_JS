@@ -409,8 +409,9 @@ function TerriaUIInner({ terria, viewState, initialHashState = {} }) {
           fill: #374151 !important;
         }
 
-        /* ── Hide ⋮ "Show more actions" button from workbench items ── */
-        [title="Show more actions"] {
+        /* ── Hide ⋮ "Show more actions" and "Custom" legend button ── */
+        [title="Show more actions"],
+        [class*="legend__inner"] > button {
           display: none !important;
         }
 
