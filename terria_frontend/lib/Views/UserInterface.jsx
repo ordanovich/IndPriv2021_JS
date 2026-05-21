@@ -11,7 +11,6 @@ import AboutPanel from "./AboutPanel";
 import ProvinceAtlasPanel from "./ProvinceAtlasPanel";
 import SearchPanel from "./SearchPanel";
 import RankingsPanel from "./RankingsPanel";
-import { DELTA_ENUMS } from "./geoDataStore";
 import { AppProvider, useApp } from "./AppContext";
 import { TR } from "./translations";
 import { DEMO_MODE } from "./buildConfig";
@@ -86,10 +85,6 @@ function DemoBanner() {
 // ── Color palettes ─────────────────────────────────────────────────────────────
 export const STD_COLORS = ["#1a9850", "#91cf60", "#ffffbf", "#fc8d59", "#d73027"];
 export const CB_COLORS  = ["#4575b4", "#91bfdb", "#ffffbf", "#fc8d59", "#d73027"];
-// Delta layer palette: the standard one matches the IP scale; the
-// colorblind variant uses ColorBrewer RdBu-5 (cb-safe diverging).
-export const DELTA_COLORS    = ["#1a9850", "#91cf60", "#ffffbf", "#fc8d59", "#d73027"];
-export const CB_DELTA_COLORS = ["#2166ac", "#92c5de", "#f7f7f7", "#f4a582", "#d6604d"];
 
 // Exact data values in the GeoJSON (must match precisely)
 const ENUM_2021 = [
@@ -127,19 +122,6 @@ const COLS_2011 = title => [
   { name: "NMUN",      type: "hidden" },
   { name: "NPRO",      type: "hidden" },
 ];
-const COLS_DELTA = title => [
-  { name: "DeltaLabel", title },
-  { name: "deltaQ",     type: "hidden" },
-  { name: "IP2011",     type: "hidden" },
-  { name: "IP2021",     type: "hidden" },
-  { name: "Q11_Label",  type: "hidden" },
-  { name: "Q21_Label",  type: "hidden" },
-  { name: "Q21_num",    type: "hidden" },
-  { name: "CUSEC",      type: "hidden" },
-  { name: "NMUN",       type: "hidden" },
-  { name: "NPRO",       type: "hidden" },
-];
-
 // ── Light theme overrides ──────────────────────────────────────────────────────
 const LIGHT_THEME = {
   dark:                   "#ffffff",
@@ -167,12 +149,9 @@ const LIGHT_THEME = {
 
 // ── Sync TerriaJS catalog items with current lang + colorblind state ──────────
 function updateCatalogItems(terria, lang, colorblind, selectedQ = null) {
-  const ipColors    = colorblind ? CB_COLORS       : STD_COLORS;
-  const deltaColors = colorblind ? CB_DELTA_COLORS : DELTA_COLORS;
+  const ipColors = colorblind ? CB_COLORS : STD_COLORS;
   const tr = TR[lang];
 
-  // When a quintile is selected, grey out all others on the map (IP layers
-  // only — the delta layer's categories are an independent dimension).
   const dimColor = "#d0d0d0";
   const ipMapColors = selectedQ === null
     ? ipColors
@@ -188,11 +167,6 @@ function updateCatalogItems(terria, lang, colorblind, selectedQ = null) {
       name: tr.layer2011, cols: COLS_2011(tr.column2011),
       col:  "Q11_Label",  enums: ENUM_2011,
       palette: ipMapColors, legend: tr.legendItems,
-    },
-    "atlas-delta": {
-      name: tr.layerDelta, cols: COLS_DELTA(tr.columnDelta),
-      col:  "DeltaLabel",  enums: DELTA_ENUMS,
-      palette: deltaColors, legend: tr.deltaLegendItems,
     },
   };
 
@@ -224,8 +198,8 @@ function ToggleBtn({ active, onClick, title, children }) {
       onClick={onClick}
       title={title}
       style={{
-        background:    active ? "#eff6ff" : "transparent",
-        border:        active ? "1px solid #93c5fd" : "1px solid #d1d5db",
+        background:    active ? "#eff6ff" : "#ffffff",
+        border:        active ? "1px solid #93c5fd" : "1px solid #e5e7eb",
         borderRadius:  6,
         color:         active ? "#2563eb" : "#374151",
         cursor:        "pointer",
@@ -236,6 +210,7 @@ function ToggleBtn({ active, onClick, title, children }) {
         letterSpacing: "0.3px",
         marginLeft:    4,
         whiteSpace:    "nowrap",
+        boxShadow:     "0 1px 3px rgba(0,0,0,0.08)",
         transition:    "background 0.15s, border-color 0.15s, color 0.15s",
       }}
     >
@@ -418,6 +393,21 @@ function TerriaUIInner({ terria, viewState, initialHashState = {} }) {
         [class*="-singleValue"] { color: #111827 !important; }
         [class*="-placeholder"] { color: #6b7280 !important; }
         [class*="-Input"] input { color: #111827 !important; }
+
+        /* ── TerriaJS toolbar buttons — white background ────────── */
+        .tjs-_buttons__btn--map {
+          background: #ffffff !important;
+          color: #374151 !important;
+          border: 1px solid #e5e7eb !important;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+        }
+        .tjs-_buttons__btn--map:hover {
+          background: #f3f4f6 !important;
+          border-color: #d1d5db !important;
+        }
+        .tjs-_buttons__btn--map svg {
+          fill: #374151 !important;
+        }
 
         /* ── Feature Information Panel ──────────────────────── */
         .tjs-feature-info-panel__panel {

@@ -36,7 +36,7 @@ if (USE_REAL_DATA) {
   
   geo$IP2021 <- round(as.numeric(geo$IP2021), 3)
   geo$IP2011 <- round(as.numeric(geo$IP2011), 3)
-  
+
 } else {
   message("Loading FAKE data...")
   set.seed(2026) 
@@ -114,7 +114,10 @@ geo_final <- geo[, intersect(cols, names(geo))]
 
 # 4. Simplify & Export
 message("Applying gentle geometry simplification...")
-geo_simplified <- ms_simplify(geo_final, keep = 0.8, keep_shapes = TRUE)
+geo_final <- geo_final %>% st_collection_extract("POLYGON") %>% st_make_valid()
+geo_simplified <- ms_simplify(geo_final, keep = 0.8, keep_shapes = TRUE) %>%
+  st_collection_extract("POLYGON") %>%
+  st_make_valid()
 
 out_dir <- "../terria_frontend/wwwroot/data"
 if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
@@ -195,9 +198,13 @@ message("  Dissolving to municipalities...")
 municipios_poly <- geo_s %>%
   group_by(CMUN) %>%
   summarise(NMUN = first(NMUN), NPRO = first(NPRO), CPRO = first(CPRO)) %>%
+  st_make_valid() %>%
+  st_collection_extract("POLYGON") %>%
   st_make_valid()
 
-municipios_lines <- st_cast(municipios_poly, "MULTILINESTRING") %>% st_make_valid()
+municipios_simp  <- ms_simplify(municipios_poly, keep = 0.03,
+                                keep_shapes = TRUE)
+municipios_lines <- st_cast(municipios_simp, "MULTILINESTRING") %>% st_make_valid()
 municipios_lines$stroke           <- "#aaaaaa"
 municipios_lines[["stroke-width"]]   <- 0.7
 municipios_lines[["stroke-opacity"]] <- 0.45
@@ -209,13 +216,15 @@ message(sprintf("  Exported municipios.geojson (%d boundaries)", nrow(municipios
 # -- Provinces: dissolve to polygons (kept as polygons to support text labels).
 #    Transparent fill; outline and label configured in the catalog.
 message("  Dissolving to provinces...")
-provincias <- municipios_poly %>%
+provincias_poly <- municipios_poly %>%
   group_by(CPRO) %>%
   summarise(NPRO = first(NPRO)) %>%
+  st_make_valid() %>%
+  st_collection_extract("POLYGON") %>%
   st_make_valid()
 
-provincias[["fill"]]             <- "#ffffff"
-provincias[["fill-opacity"]]     <- 0
+provincias_simp <- ms_simplify(provincias_poly, keep = 0.03, keep_shapes = TRUE)
+provincias <- st_cast(provincias_simp, "MULTILINESTRING") %>% st_make_valid()
 provincias$stroke                <- "#787878"
 provincias[["stroke-width"]]     <- 1.5
 provincias[["stroke-opacity"]]   <- 0.65

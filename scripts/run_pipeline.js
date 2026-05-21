@@ -87,4 +87,8 @@ if (fs.existsSync(OUT_2011)) {
   execSync("node scripts/make_demo_2011.js", { stdio: "inherit" });
 }
 
+// Fix GeometryCollection features left by ms_simplify (Cesium cannot render them)
+console.log("Fixing GeometryCollection features...");
+execSync("node scripts/fix_geometries.js", { stdio: "inherit" });
+
 console.log("Pipeline complete.");

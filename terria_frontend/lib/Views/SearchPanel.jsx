@@ -176,66 +176,106 @@ export default function SearchPanel({ terria }) {
   const hasResults = flat.length > 0;
   const showDropdown = open && query.trim().length >= 3;
 
+  const inputRef = useRef(null);
+
+  const handleToggle = () => {
+    if (open) {
+      setOpen(false);
+      setQuery("");
+      setFocused(-1);
+    } else {
+      setOpen(true);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  };
+
   return (
     <div
       ref={containerRef}
       style={{
         position: "fixed",
-        top: 12, right: 12,
-        zIndex: 950,
-        width: 280,
+        top: 21,
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 1100,
         fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
     >
-      <div style={{
-        display: "flex", alignItems: "center",
-        background: "rgba(255,255,255,0.97)",
-        border: "1px solid rgba(0,0,0,0.10)",
-        borderRadius: 10,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-        padding: "6px 10px",
-      }}>
-        <span aria-hidden="true" style={{ fontSize: 13, color: "#6b7280", marginRight: 8, lineHeight: 1 }}>🔎</span>
-        <input
-          value={query}
-          onChange={(e) => { setQuery(e.target.value); setFocused(-1); setOpen(true); }}
-          onFocus={() => setOpen(true)}
-          onKeyDown={onKeyDown}
-          placeholder={tr.searchPlaceholder}
+      {/* Collapsed: icon button */}
+      {!open && (
+        <button
+          onClick={handleToggle}
+          title={tr.searchPlaceholder}
           style={{
-            flex: 1, minWidth: 0,
-            border: "none", outline: "none",
-            background: "transparent",
-            fontSize: 12.5, color: "#111827",
-            padding: 0,
+            display: "flex", alignItems: "center", gap: 6,
+            background: "#ffffff",
+            border: "1px solid #e5e7eb",
+            borderRadius: 6,
+            color: "#374151",
+            cursor: "pointer",
+            fontSize: 12,
+            fontWeight: 600,
+            padding: "5px 10px",
+            lineHeight: 1.5,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+            whiteSpace: "nowrap",
           }}
-        />
-        {query && (
-          <button
-            type="button"
-            onClick={() => { setQuery(""); setFocused(-1); setOpen(false); }}
-            title={tr.searchClearTitle}
-            style={{
-              background: "none", border: "none", color: "#9ca3af",
-              fontSize: 13, cursor: "pointer", padding: "0 4px", lineHeight: 1,
-              marginLeft: 4, flexShrink: 0,
-            }}
-          >
-            {tr.searchClear}
-          </button>
-        )}
-      </div>
+        >
+          <span style={{ fontSize: 13, lineHeight: 1 }}>🔎</span>
+          {tr.searchPlaceholder}
+        </button>
+      )}
 
-      {showDropdown && (
-        <div style={{
-          marginTop: 4,
-          background: "rgba(255,255,255,0.98)",
-          border: "1px solid rgba(0,0,0,0.10)",
-          borderRadius: 10,
-          boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
-          overflow: "hidden",
-          maxHeight: 360, overflowY: "auto",
-        }}>
+      {/* Expanded: input + dropdown */}
+      {open && (
+        <div style={{ width: 280 }}>
+          <div style={{
+            display: "flex", alignItems: "center",
+            background: "#ffffff",
+            border: "1px solid #2563eb",
+            borderRadius: 6,
+            boxShadow: "0 2px 8px rgba(37,99,235,0.15)",
+            padding: "5px 10px",
+          }}>
+            <span aria-hidden="true" style={{ fontSize: 13, color: "#6b7280", marginRight: 8, lineHeight: 1 }}>🔎</span>
+            <input
+              ref={inputRef}
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); setFocused(-1); }}
+              onKeyDown={onKeyDown}
+              placeholder={tr.searchPlaceholder}
+              style={{
+                flex: 1, minWidth: 0,
+                border: "none", outline: "none",
+                background: "transparent",
+                fontSize: 12.5, color: "#111827",
+                padding: 0,
+              }}
+            />
+            <button
+              type="button"
+              onClick={handleToggle}
+              title={tr.searchClearTitle}
+              style={{
+                background: "none", border: "none", color: "#9ca3af",
+                fontSize: 14, cursor: "pointer", padding: "0 2px", lineHeight: 1,
+                marginLeft: 4, flexShrink: 0,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          {showDropdown && (
+          <div style={{
+            marginTop: 4,
+            background: "rgba(255,255,255,0.98)",
+            border: "1px solid rgba(0,0,0,0.10)",
+            borderRadius: 10,
+            boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
+            overflow: "hidden",
+            maxHeight: 360, overflowY: "auto",
+          }}>
           {!hasResults && (
             <div style={{
               padding: "10px 12px",
@@ -268,6 +308,8 @@ export default function SearchPanel({ terria }) {
                 );
               })}
             </>
+          )}
+        </div>
           )}
         </div>
       )}
