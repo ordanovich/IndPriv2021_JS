@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "gh-pages": "^6.3.0",
+    "shapefile": "^0.6.6",
+    "proj4": "^2.12.1"
+  }
+}
