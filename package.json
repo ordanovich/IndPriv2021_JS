@@ -3,7 +3,7 @@
     "prepare-data": "node scripts/run_pipeline.js",
     "dev":          "npm run prepare-data && cd terria_frontend && npx gulp dev",
     "build":        "npm run prepare-data && cd terria_frontend && npx gulp build-app",
-    "build-demo":   "npm run prepare-data && cd terria_frontend && npx gulp build-demo-dist"
+    "build-demo":   "npm run prepare-data && cd terria_frontend && npx gulp build-demo-dist --baseHref /IndPriv2021_JS/"
   },
   "devDependencies": {
     "gh-pages": "^6.3.0"
