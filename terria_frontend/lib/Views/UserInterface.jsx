@@ -323,6 +323,46 @@ function TerriaUIInner({ terria, viewState, initialHashState = {} }) {
     return () => { clearInterval(timer); detach?.(); };
   }, [terria]);
 
+  // Show municipios overlay only when zoomed in (Cesium: < 400 km altitude; Leaflet: zoom >= 10).
+  useEffect(() => {
+    const CESIUM_HEIGHT_THRESHOLD = 400000; // metres ≈ zoom 10
+    const LEAFLET_ZOOM_THRESHOLD  = 10;
+
+    const update = () => {
+      const item = (terria.workbench?.items ?? [])
+        .find(i => i.uniqueId === "overlay-municipios");
+      if (!item) return;
+      let show = false;
+      if (terria.cesium?.scene?.camera) {
+        const h = terria.cesium.scene.camera.positionCartographic?.height;
+        show = h != null && h < CESIUM_HEIGHT_THRESHOLD;
+      } else if (terria.leaflet?.map) {
+        show = terria.leaflet.map.getZoom() >= LEAFLET_ZOOM_THRESHOLD;
+      }
+      runInAction(() => item.setTrait("user", "show", show));
+    };
+
+    let detach = null;
+    const attach = () => {
+      if (terria.cesium) {
+        terria.cesium.scene.camera.moveEnd.addEventListener(update);
+        detach = () => terria.cesium?.scene.camera.moveEnd.removeEventListener(update);
+        update();
+        return true;
+      }
+      if (terria.leaflet) {
+        terria.leaflet.map.on("zoomend", update);
+        detach = () => terria.leaflet?.map.off("zoomend", update);
+        update();
+        return true;
+      }
+      return false;
+    };
+    if (attach()) return () => detach?.();
+    const timer = setInterval(() => { if (attach()) clearInterval(timer); }, 400);
+    return () => { clearInterval(timer); detach?.(); };
+  }, [terria]);
+
   // Fly to the encoded bbox once the camera is available. Cesium and
   // Leaflet are loaded asynchronously, so retry every 400 ms.
   const initialBboxAppliedRef = useRef(false);
