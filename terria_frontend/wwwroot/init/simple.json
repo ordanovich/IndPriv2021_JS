@@ -170,8 +170,6 @@
     }
   ],
   "workbench": [
-    "overlay-provincias",
-    "overlay-municipios",
     "atlas-2021",
     "atlas-2011",
     "atlas-delta"
