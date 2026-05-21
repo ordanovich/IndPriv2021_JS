@@ -23,10 +23,20 @@ function latestInputMtime() {
     .reduce((max, f) => Math.max(max, mtime(path.join(DATA_DIR, f))), 0);
 }
 
-const inputMtime = latestInputMtime();
-const out2021    = mtime(OUT_2021);
+// All files the pipeline is expected to produce. If any are missing, re-run.
+const EXPECTED_OUTPUTS = [
+  OUT_2021,
+  path.join(OUT_DIR, "municipios.geojson"),
+  path.join(OUT_DIR, "provincias.geojson"),
+  path.join(OUT_DIR, "municipios_demo.geojson"),
+  path.join(OUT_DIR, "provincias_demo.geojson"),
+];
 
-if (out2021 && inputMtime <= out2021) {
+const inputMtime      = latestInputMtime();
+const out2021         = mtime(OUT_2021);
+const anyOutputMissing = EXPECTED_OUTPUTS.some(f => !fs.existsSync(f));
+
+if (!anyOutputMissing && out2021 && inputMtime <= out2021) {
   console.log("Data is up to date — skipping pipeline.");
   process.exit(0);
 }
