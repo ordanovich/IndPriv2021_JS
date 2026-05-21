@@ -179,3 +179,58 @@ if (length(shp_2011_candidates) == 0) {
            layer_options = "COORDINATE_PRECISION=5", delete_dsn = TRUE)
   message("Exported: ", out_file_11)
 }
+
+# 6. Administrative boundary overlays (municipalities and provinces)
+# Dissolved from the already-simplified 2021 sections so boundaries are
+# geometrically consistent with the section data.
+message("Dissolving administrative boundaries for navigation overlays...")
+
+geo_s <- geo_simplified
+geo_s$CPRO <- substr(formatC(as.character(geo_s$CUSEC), width = 9, flag = "0"), 1, 2)
+geo_s$CMUN <- substr(formatC(as.character(geo_s$CUSEC), width = 9, flag = "0"), 1, 5)
+
+# -- Municipalities: dissolve then convert to boundary lines.
+#    Lines avoid polygon click-interception on the section data layer.
+message("  Dissolving to municipalities...")
+municipios_poly <- geo_s %>%
+  group_by(CMUN) %>%
+  summarise(NMUN = first(NMUN), NPRO = first(NPRO), CPRO = first(CPRO)) %>%
+  st_make_valid()
+
+municipios_lines <- st_cast(municipios_poly, "MULTILINESTRING") %>% st_make_valid()
+municipios_lines$stroke           <- "#aaaaaa"
+municipios_lines[["stroke-width"]]   <- 0.7
+municipios_lines[["stroke-opacity"]] <- 0.45
+
+st_write(municipios_lines, file.path(out_dir, "municipios.geojson"),
+         driver = "GeoJSON", layer_options = "COORDINATE_PRECISION=5", delete_dsn = TRUE)
+message(sprintf("  Exported municipios.geojson (%d boundaries)", nrow(municipios_lines)))
+
+# -- Provinces: dissolve to polygons (kept as polygons to support text labels).
+#    Transparent fill; outline and label configured in the catalog.
+message("  Dissolving to provinces...")
+provincias <- municipios_poly %>%
+  group_by(CPRO) %>%
+  summarise(NPRO = first(NPRO)) %>%
+  st_make_valid()
+
+provincias[["fill"]]             <- "#ffffff"
+provincias[["fill-opacity"]]     <- 0
+provincias$stroke                <- "#787878"
+provincias[["stroke-width"]]     <- 1.5
+provincias[["stroke-opacity"]]   <- 0.65
+
+st_write(provincias, file.path(out_dir, "provincias.geojson"),
+         driver = "GeoJSON", layer_options = "COORDINATE_PRECISION=5", delete_dsn = TRUE)
+message(sprintf("  Exported provincias.geojson (%d provinces)", nrow(provincias)))
+
+# -- Demo subsets (Andalucía)
+demo_provs <- c("04", "11", "14", "18", "21", "23", "29", "41")
+
+st_write(municipios_lines %>% filter(CPRO %in% demo_provs),
+         file.path(out_dir, "municipios_demo.geojson"),
+         driver = "GeoJSON", layer_options = "COORDINATE_PRECISION=5", delete_dsn = TRUE)
+st_write(provincias %>% filter(CPRO %in% demo_provs),
+         file.path(out_dir, "provincias_demo.geojson"),
+         driver = "GeoJSON", layer_options = "COORDINATE_PRECISION=5", delete_dsn = TRUE)
+message("  Exported demo boundary files (Andalucía)")
