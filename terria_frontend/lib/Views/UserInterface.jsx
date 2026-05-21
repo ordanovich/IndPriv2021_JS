@@ -409,6 +409,17 @@ function TerriaUIInner({ terria, viewState, initialHashState = {} }) {
           fill: #374151 !important;
         }
 
+        /* ── Hide ⋮ "Show more actions" button from workbench items ── */
+        [title="Show more actions"] {
+          display: none !important;
+        }
+
+        /* ── Hide overlay layers from workbench list ──────── */
+        li:has([title="Provincias"]),
+        li:has([title="Municipios"]) {
+          display: none !important;
+        }
+
         /* ── Feature Information Panel ──────────────────────── */
         .tjs-feature-info-panel__panel {
           background: #ffffff !important;
