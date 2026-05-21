@@ -161,6 +161,20 @@ gulp.task("copy-terriajs-assets", function () {
     .pipe(gulp.dest(destPath));
 });
 
+// Patch TerriaJS translation to remove un-interpolated {{email}} literal.
+gulp.task("patch-translations", function (done) {
+  var translationPath = path.join(
+    __dirname, "wwwroot", "build", "TerriaJS", "languages", "en", "translation.json"
+  );
+  var content = fs.readFileSync(translationPath, "utf8");
+  var patched = content.replace(
+    "email-message='If the problem persists, please report to {{email}}'",
+    "email-message='If the problem persists, please report to'"
+  );
+  fs.writeFileSync(translationPath, patched, "utf8");
+  done();
+});
+
 gulp.task(
   "watch-terriajs-assets",
   gulp.series("copy-terriajs-assets", function waitForTerriaJsAssetChanges() {
@@ -278,8 +292,8 @@ function checkForDuplicateCesium() {
 
 gulp.task("terriajs-server", terriajsServerGulpTask(3001));
 
-gulp.task("build", gulp.series("copy-terriajs-assets", "build-app"));
-gulp.task("release", gulp.series("copy-terriajs-assets", "release-app"));
+gulp.task("build", gulp.series("copy-terriajs-assets", "patch-translations", "build-app"));
+gulp.task("release", gulp.series("copy-terriajs-assets", "patch-translations", "release-app"));
 
 // ── Demo / GitHub Pages bundle ────────────────────────────────────────────────
 // Sets DEMO_MODE=true in buildConfig.js, runs a production build, and
