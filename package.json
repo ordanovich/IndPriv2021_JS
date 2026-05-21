@@ -1,7 +1,11 @@
 {
+  "scripts": {
+    "prepare-data": "node scripts/run_pipeline.js",
+    "dev":          "npm run prepare-data && cd terria_frontend && npx gulp dev",
+    "build":        "npm run prepare-data && cd terria_frontend && npx gulp build-app",
+    "build-demo":   "npm run prepare-data && cd terria_frontend && npx gulp build-demo-dist"
+  },
   "devDependencies": {
-    "gh-pages": "^6.3.0",
-    "shapefile": "^0.6.6",
-    "proj4": "^2.12.1"
+    "gh-pages": "^6.3.0"
   }
 }

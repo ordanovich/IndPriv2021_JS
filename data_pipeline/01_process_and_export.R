@@ -121,3 +121,61 @@ if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
 out_file <- file.path(out_dir, "secciones_unified.geojson")
 
 st_write(geo_simplified, out_file, driver = "GeoJSON", layer_options = "COORDINATE_PRECISION=5", delete_dsn = TRUE)
+message("Exported: ", out_file)
+
+# 5. 2011 Shapefile — process if present in data/
+# The colleague's 2011 shapefile can have any filename; place it in data_pipeline/data/.
+# It must contain CUSEC (9-digit section code), NMUN (municipality name), NPRO (province name).
+# IP2011 values come from IP2011_RE.xlsx (column "IP2011", sheet 1).
+shp_all <- list.files("data", pattern = "\\.shp$", full.names = TRUE)
+shp_2011_candidates <- shp_all[!grepl("SECC_CE_20210101", shp_all, fixed = TRUE)]
+
+if (length(shp_2011_candidates) == 0) {
+  message("No 2011 shapefile found in data_pipeline/data/ — skipping secciones_2011.geojson")
+  message("Place the 2011 shapefile (any name except SECC_CE_20210101.shp) in data_pipeline/data/")
+} else {
+  shp_2011_path <- shp_2011_candidates[1]
+  if (length(shp_2011_candidates) > 1)
+    message("Multiple 2011 candidates found — using: ", shp_2011_path)
+  message("Processing 2011 shapefile: ", shp_2011_path)
+
+  geo_11 <- st_read(shp_2011_path, quiet = TRUE) %>%
+    st_transform(4326) %>%
+    st_make_valid()
+  geo_11$CUSEC <- trimws(as.character(geo_11$CUSEC))
+
+  # Join IP2011 from IP2011_RE.xlsx (already loaded above as dt_11)
+  dt_geo_11 <- as.data.table(st_drop_geometry(geo_11))
+  dt_m11 <- merge(dt_geo_11, dt_11[, .(CUSEC, IP2011)], by = "CUSEC", all.x = TRUE)
+  geo_11$IP2011 <- dt_m11[match(geo_11$CUSEC, dt_m11$CUSEC), IP2011]
+  geo_11$IP2011 <- round(as.numeric(geo_11$IP2011), 3)
+
+  joined_n <- sum(!is.na(geo_11$IP2011))
+  message(sprintf("  Joined IP2011 for %d / %d sections", joined_n, nrow(geo_11)))
+  if (joined_n == 0)
+    stop("No CUSEC matches between 2011 shapefile and IP2011_RE.xlsx — check that both use the same CUSEC format")
+
+  # Q11_Label — same national quintile labels as in the unified file
+  geo_11$Q11_Label <- as.character(factor(ntile(geo_11$IP2011, 5), levels = 1:5, labels = etiquetas_11))
+  geo_11[["stroke-width"]]   <- 0
+  geo_11[["stroke-opacity"]] <- 0
+
+  # If NMUN or NPRO are absent (some older INE shapefiles use different names),
+  # rename the relevant column here before proceeding, e.g.:
+  #   names(geo_11)[names(geo_11) == "NMU"] <- "NMUN"
+  missing_cols <- setdiff(c("NMUN", "NPRO"), names(geo_11))
+  if (length(missing_cols) > 0)
+    message("  WARNING: expected columns missing from 2011 shapefile: ", paste(missing_cols, collapse = ", "),
+            " — those fields will be absent from the output")
+
+  cols_11 <- c("CUSEC", "NMUN", "NPRO", "IP2011", "Q11_Label", "stroke-width", "stroke-opacity")
+  geo_11_final <- geo_11[, intersect(cols_11, names(geo_11))]
+
+  message("  Simplifying geometry...")
+  geo_11_simplified <- ms_simplify(geo_11_final, keep = 0.8, keep_shapes = TRUE)
+
+  out_file_11 <- file.path(out_dir, "secciones_2011.geojson")
+  st_write(geo_11_simplified, out_file_11, driver = "GeoJSON",
+           layer_options = "COORDINATE_PRECISION=5", delete_dsn = TRUE)
+  message("Exported: ", out_file_11)
+}

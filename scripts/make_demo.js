@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 
 const DEMO_PROVINCES = new Set([
-  "28", // Madrid
+  "04","11","14","18","21","23","29","41", // Andalucía (8 provinces)
 ]);
 
 const SRC = path.join("terria_frontend", "wwwroot", "data", "secciones_unified.geojson");
