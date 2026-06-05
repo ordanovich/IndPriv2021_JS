@@ -1,9 +1,9 @@
 {
   "homeCamera": {
-    "north": 44.5,
-    "east": 5,
-    "south": 35,
-    "west": -10
+    "north": 38.8,
+    "east": -1.6,
+    "south": 35.8,
+    "west": -7.6
   },
   "catalog": [
     {
@@ -135,12 +135,53 @@
     "previewBaseMapId": "basemap-positron",
     "items": [
       {
+        "image": "https://basemaps.cartocdn.com/light_all/5/15/12.png",
         "item": {
           "id": "basemap-positron",
           "name": "Carto Positron (Light)",
           "type": "url-template-imagery",
           "url": "https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
           "attribution": "© OpenStreetMap contributors © CARTO"
+        }
+      },
+      {
+        "image": "https://basemaps.cartocdn.com/rastertiles/voyager/5/15/12.png",
+        "item": {
+          "id": "basemap-voyager",
+          "name": "Carto Voyager",
+          "type": "url-template-imagery",
+          "url": "https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+          "attribution": "© OpenStreetMap contributors © CARTO"
+        }
+      },
+      {
+        "image": "https://tile.openstreetmap.org/5/15/12.png",
+        "item": {
+          "id": "basemap-osm",
+          "name": "OpenStreetMap",
+          "type": "url-template-imagery",
+          "url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          "attribution": "© OpenStreetMap contributors"
+        }
+      },
+      {
+        "image": "https://basemaps.cartocdn.com/dark_all/5/15/12.png",
+        "item": {
+          "id": "basemap-dark",
+          "name": "Carto Dark",
+          "type": "url-template-imagery",
+          "url": "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+          "attribution": "© OpenStreetMap contributors © CARTO"
+        }
+      },
+      {
+        "image": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/12/15",
+        "item": {
+          "id": "basemap-satellite",
+          "name": "Esri Satellite",
+          "type": "url-template-imagery",
+          "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+          "attribution": "© Esri, Maxar, GeoEye, Earthstar Geographics"
         }
       }
     ]
