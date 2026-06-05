@@ -18,17 +18,6 @@
       }
     },
     {
-      "id": "overlay-municipios",
-      "name": "Municipios",
-      "type": "geojson",
-      "url": "data/municipios_demo.geojson",
-      "show": false,
-      "featureInfoTemplate": {
-        "name": "{{NMUN}}",
-        "template": "<div style='font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:8px 12px;font-size:13px;color:#374151'><strong>{{NMUN}}</strong><br/><span style='color:#6b7280;font-size:11px'>{{NPRO}}</span></div>"
-      }
-    },
-        {
       "id": "atlas-2021",
       "name": "Índice de Privación 2021 (demo)",
       "description": "<p>Esta capa muestra el <strong>Índice de Privación 2021</strong> para las secciones censales de Andalucía (demo), clasificado en cinco quintiles nacionales. Valores más altos indican mayor privación.</p><p><strong>Construcción del índice:</strong> el índice es el primer componente principal (CP1) de un ACP aplicado a 9 variables socioeconómicas de fuentes censales y administrativas (desempleo, baja cualificación, trabajo eventual, hacinamiento, vivienda en alquiler, monoparentalidad, inmigración reciente, mortalidad prematura y discapacidad). El primer componente principal explica el 47,2% de la varianza conjunta. La robustez del índice fue evaluada mediante cuatro pruebas: correlaciones de Spearman con indicadores externos de renta (ρ = −0,926 con el precio de compraventa de vivienda), reconstrucción con Random Forest, Bootstrap PCA (B = 100 iteraciones) y análisis de consistencia territorial por grado de urbanización (DEGURBA).</p><table style='border-collapse:collapse;width:100%;font-size:13px;margin-top:8px'><tr style='background:#f3f4f6'><th style='padding:5px 8px;text-align:left'>Quintil</th><th style='padding:5px 8px;text-align:center'>Rango IP</th><th style='padding:5px 8px;text-align:left'>Interpretación</th></tr><tr><td style='padding:5px 8px'>🟩 Q1 · Inferior</td><td style='padding:5px 8px;text-align:center;font-family:monospace'>−2,82 / −0,82</td><td style='padding:5px 8px'>Menor privación relativa</td></tr><tr style='background:#f9fafb'><td style='padding:5px 8px'>🟨 Q2 · Intermedio bajo</td><td style='padding:5px 8px;text-align:center;font-family:monospace'>−0,82 / −0,26</td><td style='padding:5px 8px'>Privación por debajo de la media</td></tr><tr><td style='padding:5px 8px'>⬜ Q3 · Intermedio</td><td style='padding:5px 8px;text-align:center;font-family:monospace'>−0,26 / 0,20</td><td style='padding:5px 8px'>Privación media nacional</td></tr><tr style='background:#f9fafb'><td style='padding:5px 8px'>🟧 Q4 · Intermedio alto</td><td style='padding:5px 8px;text-align:center;font-family:monospace'>0,20 / 0,76</td><td style='padding:5px 8px'>Privación por encima de la media</td></tr><tr><td style='padding:5px 8px'>🟥 Q5 · Superior</td><td style='padding:5px 8px;text-align:center;font-family:monospace'>0,76 / 7,29</td><td style='padding:5px 8px'>Mayor privación relativa</td></tr></table><p style='margin-top:10px;font-style:italic;font-size:12px'>Los quintiles dividen las 5.XXX secciones en cinco grupos de igual tamaño según la distribución nacional. Los rangos corresponden a valores del índice bruto (CP1 estandarizado).</p>",
@@ -136,7 +125,6 @@
   ],
   "workbench": [
     "overlay-provincias",
-    "overlay-municipios",
     "atlas-2021",
     "atlas-2011"
   ],
