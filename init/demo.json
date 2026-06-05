@@ -129,7 +129,7 @@
     "atlas-2011"
   ],
   "showSplitter": false,
-  "viewerMode": "3dSmooth",
+  "viewerMode": "2d",
   "baseMaps": {
     "defaultBaseMapId": "basemap-positron",
     "previewBaseMapId": "basemap-positron",
