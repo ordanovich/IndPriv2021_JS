@@ -102,7 +102,7 @@ eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpa
   \********************/
 (module) {
 
-eval("{module.exports = '2026-6-5-0.4.5-8.11.3-8219db2 (plus local modifications)';//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiLi92ZXJzaW9uLmpzIiwibWFwcGluZ3MiOiJBQUFBIiwic291cmNlcyI6WyJ3ZWJwYWNrOi8vdGVycmlhanMtbWFwLy4vdmVyc2lvbi5qcz83MTNjIl0sInNvdXJjZXNDb250ZW50IjpbIm1vZHVsZS5leHBvcnRzID0gJzIwMjYtNi01LTAuNC41LTguMTEuMy04MjE5ZGIyIChwbHVzIGxvY2FsIG1vZGlmaWNhdGlvbnMpJzsiXSwibmFtZXMiOltdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlUm9vdCI6IiJ9\n//# sourceURL=webpack-internal:///./version.js\n\n}");
+eval("{module.exports = '2026-6-8-0.4.5-8.11.3-8219db2 (plus local modifications)';//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiLi92ZXJzaW9uLmpzIiwibWFwcGluZ3MiOiJBQUFBIiwic291cmNlcyI6WyJ3ZWJwYWNrOi8vdGVycmlhanMtbWFwLy4vdmVyc2lvbi5qcz83MTNjIl0sInNvdXJjZXNDb250ZW50IjpbIm1vZHVsZS5leHBvcnRzID0gJzIwMjYtNi04LTAuNC41LTguMTEuMy04MjE5ZGIyIChwbHVzIGxvY2FsIG1vZGlmaWNhdGlvbnMpJzsiXSwibmFtZXMiOltdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlUm9vdCI6IiJ9\n//# sourceURL=webpack-internal:///./version.js\n\n}");
 
 /***/ },
 
