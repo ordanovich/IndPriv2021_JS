@@ -83,8 +83,8 @@ function DemoBanner() {
 }
 
 // ── Color palettes ─────────────────────────────────────────────────────────────
-export const STD_COLORS = ["#1a9850", "#91cf60", "#ffffbf", "#fc8d59", "#d73027"];
-export const CB_COLORS  = ["#4575b4", "#91bfdb", "#ffffbf", "#fc8d59", "#d73027"];
+export const STD_COLORS = ["#1a9850", "#91cf60", "#fee08b", "#fc8d59", "#d73027"];
+export const CB_COLORS  = ["#4575b4", "#91bfdb", "#fee08b", "#fc8d59", "#d73027"];
 
 // Exact data values in the GeoJSON (must match precisely)
 const ENUM_2021 = [
@@ -96,10 +96,10 @@ const ENUM_2021 = [
 ];
 const ENUM_2011 = [
   "1. Inferior [-2,58/-0,86]",
-  "2. Intermedio bajo [-0,87/-0,27]",
-  "3. Intermedio [-0,28/-0,21]",
+  "2. Intermedio bajo [-0,86/-0,28]",
+  "3. Intermedio [-0,28/0,22]",
   "4. Intermedio alto [0,22/0,82]",
-  "5. Superior [0,83/4,88]",
+  "5. Superior [0,82/4,88]",
 ];
 
 const COLS_2021 = title => [
@@ -363,6 +363,39 @@ function TerriaUIInner({ terria, viewState, initialHashState = {} }) {
     return () => { clearInterval(timer); detach?.(); };
   }, [terria]);
 
+  // Remove compass and pedestrian-mode from the map navigation model.
+  useEffect(() => {
+    const REMOVE_IDS = new Set(["compass", "pedestrian-mode"]);
+    const remove = () => {
+      const model = terria.mapNavigationModel;
+      if (!model?.items?.length) return false;
+      runInAction(() => {
+        for (let i = model.items.length - 1; i >= 0; i--) {
+          if (REMOVE_IDS.has(model.items[i].id)) model.items.splice(i, 1);
+        }
+      });
+      return true;
+    };
+    if (!remove()) {
+      const t = setInterval(() => { if (remove()) clearInterval(t); }, 300);
+      return () => clearInterval(t);
+    }
+  }, [terria]);
+
+  // Patch the TerriaJS "Search for locations" placeholder to be less ambiguous.
+  useEffect(() => {
+    const label = lang === "es" ? "Buscar dirección / lugar" : "Search address / place";
+    const patch = () => {
+      document.querySelectorAll('input[placeholder="Search for locations"]').forEach(el => {
+        el.placeholder = label;
+      });
+    };
+    patch();
+    const obs = new MutationObserver(patch);
+    obs.observe(document.body, { childList: true, subtree: true });
+    return () => obs.disconnect();
+  }, [lang]);
+
   // Fly to the encoded bbox once the camera is available. Cesium and
   // Leaflet are loaded asynchronously, so retry every 400 ms.
   const initialBboxAppliedRef = useRef(false);
@@ -458,6 +491,17 @@ function TerriaUIInner({ terria, viewState, initialHashState = {} }) {
         /* ── Hide overlay layers from workbench list ──────── */
         li:has([title="Provincias"]),
         li:has([title="Municipios"]) {
+          display: none !important;
+        }
+
+        /* ── Hide Story button from menu bar ─────────────── */
+        [class*="story-button__storyBtn"],
+        .tjs-story-button__storyBtn {
+          display: none !important;
+        }
+
+        /* ── Hide pedestrian mode button ─────────────────── */
+        [title="Pedestrian Mode"] {
           display: none !important;
         }
 
