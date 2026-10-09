@@ -6,22 +6,28 @@ For each spatial mode (today only census tracts, "ct") and each year, writes:
   webapp/public/data/<mode>/<year>_bounds.pmtiles CCAA / province / municipality
                                                   lines dissolved from the SAME
                                                   units, so they coincide exactly
+  webapp/public/data/<mode>/<year>_gaps.pmtiles   areas no unit covers
+                                                  (territorios comunes)
   webapp/public/data/<mode>/<year>.json           compact attribute table
   webapp/public/data/<mode>/link_2021_2011.json   overlap between the two years'
                                                   geometries (cross-year panels)
   webapp/public/data/<mode>/geo/<year>_<cpro>.json  exact GeoJSON per province,
                                                   fetched only by the GeoJSON export
 
-Geometry is the original INE geometry. The only loss is the vector-tile grid:
-at the maximum tile zoom (14) a coordinate is snapped to ~0.5 m; at lower
-zooms polygons are simplified by at most a quarter of a screen pixel.
+Geometry is the original INE geometry. Tiles are built in two parts:
+  zoom 4-8   finer grid (16384 units/tile), simplified by at most 1/8 of a
+             screen pixel: every section that covers a pixel is drawn
+  zoom 9-14  no simplification at zoom 14 (grid ~0.5 m), at most 1/4 pixel
+             below it; every section is present
+and merged into one PMTiles file. Check the output with 03_validate_web_data.py.
 
 Run from data_pipeline/:  python 02_build_web_data.py
 """
 
 import json
-import os
 import shutil
+import tempfile
+import os
 import sys
 import time
 from pathlib import Path
@@ -31,6 +37,9 @@ import numpy as np
 import pandas as pd
 import pyogrio
 import shapely
+from pmtiles.reader import Reader, all_tiles
+from pmtiles.tile import zxy_to_tileid
+from pmtiles.writer import write as pmtiles_write
 
 # Publish the index's input variables (imputed, standardised) alongside the
 # index? Pending the INE's permission. When True, <year>_vars.json is written
@@ -42,14 +51,17 @@ HERE = Path(__file__).resolve().parent
 DATA = HERE / "data"
 OUT = HERE.parent / "webapp" / "public" / "data" / "ct"
 
-TILE_OPTIONS = dict(
-    MINZOOM=4,
-    MAXZOOM=14,
-    SIMPLIFICATION=2,           # tile units; 8 units = 1 screen pixel
-    SIMPLIFICATION_MAX_ZOOM=0,  # no simplification at the deepest zoom
-    MAX_SIZE=8_000_000,         # never drop features to fit a tile budget
-    MAX_FEATURES=2_000_000,
-)
+# Tile units: with 512 px tiles, 1 screen pixel = EXTENT / 512 units.
+NO_DROP = dict(MAX_SIZE=50_000_000, MAX_FEATURES=5_000_000)  # never drop features to fit a budget
+TILES_LOW = dict(MINZOOM=4, MAXZOOM=8, EXTENT=16384,          # national / regional views
+                 SIMPLIFICATION=4, SIMPLIFICATION_MAX_ZOOM=4, **NO_DROP)
+TILES_HIGH = dict(MINZOOM=9, MAXZOOM=14, EXTENT=4096,         # local views
+                  SIMPLIFICATION=2, SIMPLIFICATION_MAX_ZOOM=0, **NO_DROP)
+
+# Holes in the national coverage larger than this are real areas with no
+# census section (territorios comunes such as the Bardenas Reales or
+# Aldovera); smaller ones are digitising gaps between neighbouring sections.
+MIN_GAP_AREA = 10_000   # m²
 
 YEARS = {
     "2021": dict(
@@ -113,11 +125,52 @@ def assign_quintile(values, breaks):
     return q.astype(int)
 
 
+def exterior_lines(geoms):
+    """Outer rings of each (multi)polygon, as one MultiLineString per unit."""
+    out = []
+    for geom in geoms:
+        rings = [p.exterior for p in shapely.get_parts(geom) if p.geom_type == "Polygon"]
+        out.append(shapely.MultiLineString(rings))
+    return out
+
+
+def coverage_gaps(geoms):
+    """Areas inside the national outline that no unit covers."""
+    union = shapely.union_all(geoms)
+    holes = [shapely.Polygon(r) for p in shapely.get_parts(union) if p.geom_type == "Polygon"
+             for r in p.interiors]
+    return np.array([h for h in holes if h.area > MIN_GAP_AREA], dtype=object)
+
+
 def write_pmtiles(gdf, path, layer):
-    if path.exists():
-        path.unlink()
-    pyogrio.write_dataframe(gdf, path, driver="PMTiles", layer=layer,
-                            dataset_options=TILE_OPTIONS)
+    """Write the low- and high-zoom parts with GDAL, then merge them."""
+    # Temporary parts live outside Dropbox, which locks files it is syncing.
+    tmpdir = Path(tempfile.mkdtemp(prefix="pmtiles_"))
+    parts = []
+    for tag, opts in (("low", TILES_LOW), ("high", TILES_HIGH)):
+        tmp = tmpdir / f"{path.stem}.{tag}.pmtiles"
+        pyogrio.write_dataframe(gdf, tmp, driver="PMTiles", layer=layer, dataset_options=opts)
+        parts.append(tmp)
+    tiles, header, metadata = [], None, None
+    for tmp in parts:
+        with open(tmp, "rb") as fh:
+            def get_bytes(offset, length):
+                fh.seek(offset)
+                return fh.read(length)
+            r = Reader(get_bytes)
+            if header is None:
+                header, metadata = r.header(), r.metadata()
+            tiles += [(zxy_to_tileid(z, x, y), data) for (z, x, y), data in all_tiles(get_bytes)]
+    tiles.sort(key=lambda t: t[0])
+    zmin, zmax = TILES_LOW["MINZOOM"], TILES_HIGH["MAXZOOM"]
+    metadata.update(name=path.stem, minzoom=str(zmin), maxzoom=str(zmax))
+    for vl in metadata.get("vector_layers", []):
+        vl.update(minzoom=zmin, maxzoom=zmax)
+    with pmtiles_write(str(path)) as w:
+        for tid, data in tiles:
+            w.write_tile(tid, data)
+        w.finalize(header, metadata)
+    shutil.rmtree(tmpdir, ignore_errors=True)
 
 
 def load_year(year, cfg):
@@ -183,12 +236,23 @@ def build_year(year, cfg, g, breaks):
     mun = g.dissolve(by="CUMUN")[["geometry"]]
     prov = g.dissolve(by="CPRO")[["geometry"]]
     cca = g.dissolve(by="CCA")[["geometry"]]
+    # Only outer edges: the INE sections leave hairline gaps between
+    # neighbours, which become interior rings when dissolved and would be
+    # drawn as broken boundary lines. Real enclaves are still drawn, by the
+    # outer edge of the unit they belong to.
     lines = pd.concat([
-        gpd.GeoDataFrame({"l": [level] * len(d)}, geometry=d.boundary.values, crs=g.crs)
+        gpd.GeoDataFrame({"l": [level] * len(d)}, geometry=exterior_lines(d.geometry.values), crs=g.crs)
         for level, d in ((0, cca), (1, prov), (2, mun))
     ], ignore_index=True)
     lines["l"] = lines["l"].astype(np.int16)
     write_pmtiles(lines.to_crs(4326), OUT / f"{year}_bounds.pmtiles", "bounds")
+
+    # A tile layer holds one geometry type, so the gaps get their own file.
+    gaps = coverage_gaps(g.geometry.values)
+    log(f"[{year}] {len(gaps)} areas without census sections (> {MIN_GAP_AREA / 1e4:.0f} ha), "
+        f"{sum(shapely.area(gaps)) / 1e6:.0f} km²")
+    gaps_gdf = gpd.GeoDataFrame({"g": np.ones(len(gaps), dtype=np.int16)}, geometry=gaps, crs=g.crs)
+    write_pmtiles(gaps_gdf.to_crs(4326), OUT / f"{year}_gaps.pmtiles", "gaps")
 
     names = {
         "ccaa": dict(sorted(zip(g["CCA"], g["NCA"]))),
@@ -282,10 +346,11 @@ def build_link(g21, g11):
 
 
 def main():
-    # Empty the folder rather than delete it: Dropbox keeps a handle on it.
+    # Delete old files but keep the folders: Dropbox keeps handles on them.
     OUT.mkdir(parents=True, exist_ok=True)
-    for p in OUT.iterdir():
-        shutil.rmtree(p) if p.is_dir() else p.unlink()
+    for p in OUT.rglob("*"):
+        if p.is_file():
+            p.unlink()
 
     gdfs = {year: load_year(year, cfg) for year, cfg in YEARS.items()}
     breaks = {year: add_quintiles(year, g) for year, g in gdfs.items()}
