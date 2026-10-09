@@ -265,6 +265,12 @@ export default function MapView() {
         <button onClick={() => mapRef.current?.fitBounds(VIEWS.canarias, { duration: 800 })}>{t.canarias}</button>
       </div>
       {state.drawing && <div className="map-hint">{t.drawing} · Esc</div>}
+      {app.selectedIndex != null && (
+        <button className="map-clear" title={t.clearSelection + " (Esc)"} aria-label={t.clearSelection}
+                onClick={() => set({ selected: null })}>
+          <span aria-hidden="true">✕</span>
+        </button>
+      )}
       {ready && state.compare && <CompareOverlay mainMap={mapRef.current} />}
     </div>
   );
