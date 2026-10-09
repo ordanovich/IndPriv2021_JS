@@ -34,8 +34,25 @@ Excel del índice). Desde la raíz del repositorio:
 python data_pipeline/02_build_web_data.py
 ```
 
-Escribe en `webapp/public/data/ct/` (≈ 10 min). Para inspeccionar el tamaño de
-las teselas: `python data_pipeline/tile_stats.py webapp/public/data/ct/2021.pmtiles`.
+Escribe en `webapp/public/data/ct/` (≈ 40 min). Después, **validar siempre**:
+
+```
+python data_pipeline/03_validate_web_data.py
+```
+
+Relee los shapefiles del INE y los Excel y comprueba, de forma independiente
+al pipeline, que cada código, valor del índice y quintil es correcto, que cada
+tesela lleva los valores de su sección y que a partir del zoom 5 no falta
+ninguna sección. Termina con `RESULT: OK` o con la lista de problemas.
+
+Para inspeccionar el tamaño de las teselas:
+`python data_pipeline/tile_stats.py webapp/public/data/ct/2021.pmtiles`.
+
+**Zonas sin secciones.** El INE no asigna sección censal a los territorios
+comunes que no pertenecen a ningún municipio (Bardenas Reales, Aldovera,
+facerías…): 95 zonas, ~1.500 km². El pipeline las extrae a
+`<año>_gaps.pmtiles` y el visor las dibuja rayadas, con su explicación en la
+leyenda, para que no se confundan con datos que faltan.
 
 **Variables del índice (imputadas).** No se publican mientras el INE no lo
 autorice. Para publicarlas basta con poner `EXPORT_VARIABLES = True` al
@@ -69,11 +86,12 @@ Todo en `src/config.js`:
 | Qué | Dónde |
 |---|---|
 | Unidades espaciales (secciones, malla…) y sus años | `MODES` |
-| Mapas base y su respaldo automático | `BASEMAPS` |
-| Capas WMS ofrecidas por defecto | `WMS_CATALOG` |
+| Mapas base y su respaldo automático (menú «Mapa base» de la barra superior) | `BASEMAPS` |
+| Capas WMS ofrecidas por defecto (menú «+ Capas WMS») | `WMS_CATALOG` |
 | Paletas de color | `PALETTES` |
 | Cita y DOI | `CITATION` |
 
 **Añadir la malla (grid):** generar sus datos con la misma estructura
-(teselas con las propiedades `i, q, ip, p, m, s` y una tabla JSON por año),
+(teselas con las propiedades `i, q, ip, p, m, s`, teselas de límites y de
+zonas sin unidades, y una tabla JSON por año),
 rellenar `years` en la entrada `grid` de `MODES` y poner `available: true`.
