@@ -1,0 +1,16 @@
+library(sf)
+sf_use_s2(FALSE)
+geo <- st_read("data/SECC_CE_20210101.shp", quiet=TRUE) %>%
+  st_transform(4326) %>%
+  st_make_valid()
+cat("After ingestion st_make_valid:\n")
+print(table(as.character(st_geometry_type(geo))))
+step1 <- st_collection_extract(geo, "POLYGON")
+cat("\nAfter st_collection_extract:\n")
+print(table(as.character(st_geometry_type(step1))))
+step2 <- st_make_valid(step1)
+cat("\nAfter 2nd st_make_valid:\n")
+print(table(as.character(st_geometry_type(step2))))
+step3 <- st_collection_extract(step2, "POLYGON")
+cat("\nAfter final st_collection_extract:\n")
+print(table(as.character(st_geometry_type(step3))))
