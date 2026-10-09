@@ -1,0 +1,19 @@
+{
+  "built": "2026-10-09",
+  "years": [
+    "2021",
+    "2011"
+  ],
+  "link": {
+    "sections_2021": 36333,
+    "sections_2011": 35960,
+    "common_codes": 35188,
+    "stable": 29204,
+    "same_code_redrawn": 5984,
+    "only_2021": 1145,
+    "only_2011": 772,
+    "stable_share": 0.95
+  },
+  "variables": false,
+  "geojson_export": false
+}
