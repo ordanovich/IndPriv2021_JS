@@ -11,6 +11,7 @@ const DEFAULTS = {
   mode: "ct",
   year: "2021",
   classes: "q",            // "q" quintiles | "c" continuous
+  compare: false,          // swipe comparison between the two years
   opacity: 0.8,
   filters: EMPTY_FILTERS,
   boundaries: { ccaa: true, prov: true, mun: true, units: true },
@@ -59,6 +60,7 @@ function parseHash() {
   if (kv.get("lang") === "en" || kv.get("lang") === "es") out.lang = kv.get("lang");
   if (kv.get("cb") === "1") out.colorblind = true;
   if (kv.get("cls") === "c") out.classes = "c";
+  if (kv.get("cmp") === "1") out.compare = true;
   const base = kv.get("base");
   if (base && BASEMAPS.some(b => b.id === base)) out.basemap = base;
   const filters = { ...EMPTY_FILTERS };
@@ -95,6 +97,7 @@ function buildHash(s) {
   if (f.stable) kv.set("st", "1");
   if (s.selected) kv.set("sel", s.selected.id);
   if (s.classes === "c") kv.set("cls", "c");
+  if (s.compare) kv.set("cmp", "1");
   if (s.colorblind) kv.set("cb", "1");
   if (s.basemap !== DEFAULTS.basemap) kv.set("base", s.basemap);
   const b = s.view ?? s.initialBbox;
@@ -132,7 +135,7 @@ export function AppProvider({ children }) {
       const h = buildHash(state);
       if (h !== window.location.hash) history.replaceState(null, "", h);
     }, 300);
-  }, [state.mode, state.year, state.lang, state.filters, state.selected, state.classes,
+  }, [state.mode, state.year, state.lang, state.filters, state.selected, state.classes, state.compare,
       state.colorblind, state.basemap, state.view]);
 
   useEffect(() => { document.documentElement.lang = state.lang; }, [state.lang]);

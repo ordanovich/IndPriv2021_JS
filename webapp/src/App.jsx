@@ -33,8 +33,19 @@ function SelectionCarrier() {
 }
 
 function Shell() {
-  const { mode, loadError, t } = useApp();
+  const { state, set, mode, loadError, t } = useApp();
   const [about, setAbout] = useState(false);
+
+  // Esc clears the selected unit, unless something else is open to close.
+  useEffect(() => {
+    const key = e => {
+      if (e.key !== "Escape" || state.drawing || !state.selected) return;
+      if (document.querySelector(".modal-backdrop, .menu-panel, .search-results")) return;
+      set({ selected: null });
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [state.drawing, state.selected]);
   return (
     <div className="app">
       <Header onAbout={() => setAbout(true)} />

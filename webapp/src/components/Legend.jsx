@@ -72,7 +72,7 @@ export default function Legend() {
           <span className="pct" />
         </div>
         {counts[0] > 0 && (
-          <div className="legend-row static">
+          <div className="legend-row static" title={t.noDataHelp}>
             <i className="sw" style={{ background: NO_DATA_COLOR }} />
             <span className="lbl">{t.noData}</span>
             <span className="bar" />
@@ -81,6 +81,10 @@ export default function Legend() {
         )}
       </div>
       <p className="legend-note">{t.legendNote}</p>
+      <dl className="legend-defs">
+        <dt><i className="sw hatch" />{t.gap}</dt><dd>{t.gapHelp}</dd>
+        {counts[0] > 0 && <><dt><i className="sw" style={{ background: NO_DATA_COLOR }} />{t.noData}</dt><dd>{t.noDataHelp}</dd></>}
+      </dl>
     </div>
   );
 }
