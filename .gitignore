@@ -33,3 +33,11 @@ desktop.ini
 IndPriv2021_JS.zip
 *.mp4
 ..gh-pages-deploy/
+
+# ── v2 web app: generated data, copied assets, build output ────────────────
+# Regenerate with: python data_pipeline/02_build_web_data.py && npm run assets (in webapp/)
+webapp/public/data/
+webapp/public/atlas/
+webapp/public/images/
+webapp/public/favicon.ico
+webapp/dist/
