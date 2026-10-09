@@ -26,3 +26,10 @@ desktop.ini
 .idea/
 
 # Local tool settings are in .git/info/exclude (never committed)
+
+# ── Local-only artefacts ─────────────────────────────────────────────────────
+# v1 delivery zip (archived as GitHub Release v1.0.0), screen recordings,
+# and the gh-pages worktree used by the demo deploy.
+IndPriv2021_JS.zip
+*.mp4
+..gh-pages-deploy/
