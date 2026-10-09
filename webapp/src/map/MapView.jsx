@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useApp } from "../state";
+import { EMPTY_FILTERS, useApp } from "../state";
+import { activeFilterCount } from "../data";
 import { BASEMAPS, PALETTES, VIEWS, WMS_CATALOG, wmsTileUrl } from "../config";
 import { mapBus } from "./mapBus";
 import { hoverStore } from "./hoverStore";
@@ -265,12 +266,24 @@ export default function MapView() {
         <button onClick={() => mapRef.current?.fitBounds(VIEWS.canarias, { duration: 800 })}>{t.canarias}</button>
       </div>
       {state.drawing && <div className="map-hint">{t.drawing} · Esc</div>}
-      {app.selectedIndex != null && (
-        <button className="map-clear" title={t.clearSelection + " (Esc)"} aria-label={t.clearSelection}
-                onClick={() => set({ selected: null })}>
-          <span aria-hidden="true">✕</span>
-        </button>
-      )}
+      <div className="map-actions">
+        {activeFilterCount(state.filters) > 0 && (
+          <button title={t.clearFilters} aria-label={t.clearFilters}
+                  onClick={() => app.setFilters(EMPTY_FILTERS)}>
+            {/* funnel with a cross: "remove filters" */}
+            <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true">
+              <path d="M2 3h14l-5.5 6.5V15l-3 1.8V9.5z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+              <path d="M13 12.5l5 5M18 12.5l-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+          </button>
+        )}
+        {app.selectedIndex != null && (
+          <button title={t.clearSelection + " (Esc)"} aria-label={t.clearSelection}
+                  onClick={() => set({ selected: null })}>
+            <span aria-hidden="true">✕</span>
+          </button>
+        )}
+      </div>
       {ready && state.compare && <CompareOverlay mainMap={mapRef.current} />}
     </div>
   );
