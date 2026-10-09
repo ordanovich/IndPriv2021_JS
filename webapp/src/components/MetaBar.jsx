@@ -4,11 +4,13 @@ import { useHovered } from "../map/hoverStore";
 import { fmtInt, fmtNum } from "../i18n";
 import { useColors } from "../hooks";
 import Search from "./Search";
+import { BasemapMenu, LayersMenu } from "./MapMenus";
 
 function HoverReadout() {
   const { table, state, t } = useApp();
   const i = useHovered();
   const colors = useColors();
+  if (i === "gap") return <span className="hover" title={t.gapHelp}>{t.gap}</span>;
   if (i == null || !table || i >= table.n) return null;
   const q = table.q[i];
   return (
@@ -31,10 +33,12 @@ export default function MetaBar() {
       <div className="meta" title={src}>
         <strong>{t.index} {state.year}</strong>
         {table && <span>{t.unitsCount(fmtInt(lang, table.n), mode.units[lang])}</span>}
-        <span>{state.classes === "q" ? t.nationalQuintiles : t.continuousScale}</span>
-        {src && <span className="src">{src}</span>}
       </div>
       <HoverReadout />
+      <div className="menus">
+        <BasemapMenu />
+        <LayersMenu />
+      </div>
       {state.notice && (
         <div className="notice">
           {state.notice}

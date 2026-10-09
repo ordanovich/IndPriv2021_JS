@@ -65,6 +65,12 @@ export default function Legend() {
             </button>
           );
         })}
+        <div className="legend-row static" title={t.gapHelp}>
+          <i className="sw hatch" />
+          <span className="lbl">{t.gap}</span>
+          <span className="bar" />
+          <span className="pct" />
+        </div>
         {counts[0] > 0 && (
           <div className="legend-row static">
             <i className="sw" style={{ background: NO_DATA_COLOR }} />

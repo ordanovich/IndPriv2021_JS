@@ -16,7 +16,8 @@ export const DIM_COLOR = "#e6e6e6";
 // file, built by data_pipeline/02_build_web_data.py).
 //
 // To add a mode: build its data with the same layout (tiles with the
-// properties i, q, ip, p, m, s; a table JSON) and add an entry here.
+// properties i, q, ip, p, m, s; boundary and gap tiles; a table JSON) and add
+// an entry here.
 // `filters` lists which filter groups apply (see components/Filters.jsx).
 export const MODES = [
   {
@@ -32,6 +33,7 @@ export const MODES = [
       "2021": {
         tiles: "data/ct/2021.pmtiles",
         bounds: "data/ct/2021_bounds.pmtiles",
+        gaps: "data/ct/2021_gaps.pmtiles",
         table: "data/ct/2021.json",
         vars: "data/ct/2021_vars.json",
         geo: "data/ct/geo/2021_{cpro}.json",
@@ -40,6 +42,7 @@ export const MODES = [
       "2011": {
         tiles: "data/ct/2011.pmtiles",
         bounds: "data/ct/2011_bounds.pmtiles",
+        gaps: "data/ct/2011_gaps.pmtiles",
         table: "data/ct/2011.json",
         vars: "data/ct/2011_vars.json",
         geo: "data/ct/geo/2011_{cpro}.json",

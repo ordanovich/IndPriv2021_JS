@@ -57,6 +57,24 @@ function rectGeoJSON(r) {
   return { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ring] } }] };
 }
 
+// Diagonal hatch for the coverage gaps (drawn at 2x for sharp screens).
+function hatchImage() {
+  const s = 16;
+  const c = document.createElement("canvas");
+  c.width = c.height = s;
+  const g = c.getContext("2d");
+  g.fillStyle = "#f3f4f6";
+  g.fillRect(0, 0, s, s);
+  g.strokeStyle = "#9ca3af";
+  g.lineWidth = 2;
+  g.beginPath();
+  g.moveTo(-2, s + 2); g.lineTo(s + 2, -2);
+  g.moveTo(-2, 2); g.lineTo(2, -2);
+  g.moveTo(s - 2, s + 2); g.lineTo(s + 2, s - 2);
+  g.stroke();
+  return g.getImageData(0, 0, s, s);
+}
+
 function addBasemap(map, id, beforeId) {
   if (map.getLayer("basemap")) map.removeLayer("basemap");
   if (map.getSource("basemap")) map.removeSource("basemap");
@@ -110,6 +128,8 @@ export default function MapView() {
         attribution: DATA_ATTRIBUTION[live.current.state.lang],
       });
       map.addSource("bounds", { type: "vector", url: pmtiles(yearCfg.bounds) });
+      map.addSource("gaps", { type: "vector", url: pmtiles(yearCfg.gaps) });
+      map.addImage("hatch", hatchImage(), { pixelRatio: 2 });
       map.addLayer({
         id: "units-fill", type: "fill", source: "units", "source-layer": "units",
         paint: { "fill-color": NO_DATA_COLOR, "fill-opacity": 0.8 },
@@ -121,6 +141,12 @@ export default function MapView() {
           "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.15, 13, 0.6, 16, 1.2],
           "line-opacity": 0.85,
         },
+      });
+      // Areas no census section covers (territorios comunes): hatched, so
+      // they read as "no unit here" rather than as missing data.
+      map.addLayer({
+        id: "gaps-fill", type: "fill", source: "gaps", "source-layer": "gaps",
+        paint: { "fill-pattern": "hatch", "fill-opacity": 0.9 },
       });
       anchor("anchor-above");
       map.addSource("upload", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
@@ -190,6 +216,8 @@ export default function MapView() {
       setHover(null);
       if (!live.current.state.drawing) map.getCanvas().style.cursor = "";
     });
+    map.on("mousemove", "gaps-fill", () => hoverStore.set("gap"));
+    map.on("mouseleave", "gaps-fill", () => hoverStore.set(null));
     map.on("click", "units-fill", e => {
       const { table: tb, state: st, set: s } = live.current;
       if (st.drawing || !tb) return;
@@ -227,6 +255,7 @@ export default function MapView() {
     if (hoverId.current != null) { hoverId.current = null; hoverStore.set(null); }
     map.getSource("units").setUrl(pmtiles(yearCfg.tiles));
     map.getSource("bounds").setUrl(pmtiles(yearCfg.bounds));
+    map.getSource("gaps").setUrl(pmtiles(yearCfg.gaps));
   }, [ready, state.mode, state.year]);
 
   // Colours, classes, filters, opacity.

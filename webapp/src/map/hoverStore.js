@@ -2,7 +2,7 @@
 // every panel — only the components that subscribe.
 import { useSyncExternalStore } from "react";
 
-let hovered = null;   // row index in the current table, or null
+let hovered = null;   // row index in the current table, "gap", or null
 const subs = new Set();
 
 export const hoverStore = {
