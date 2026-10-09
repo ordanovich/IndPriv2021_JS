@@ -372,6 +372,9 @@ def main():
         "years": list(YEARS),
         "link": stats,
         "variables": EXPORT_VARIABLES,
+        # Per-province exact GeoJSON (geo/) present? A lighter deploy can omit
+        # the folder and set this to false: the viewer then hides that export.
+        "geojson_export": True,
     }
     (OUT / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
 

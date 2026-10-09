@@ -62,6 +62,11 @@ function buildTable(raw, modeId) {
   };
 }
 
+// Build information for a mode (counts, which optional files are deployed).
+export function loadMeta(modeId) {
+  return once(`meta:${modeId}`, () => getJson(`data/${modeId}/meta.json`));
+}
+
 export function loadVariables(modeId, year) {
   const cfg = modeById(modeId).years[year];
   return once(`vars:${modeId}:${year}`, () => getJson(cfg.vars));
