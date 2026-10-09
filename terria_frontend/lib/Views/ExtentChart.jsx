@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { ensureDataLoaded, onDataReady } from "./geoDataStore";
+import { ensureDataLoaded, onDataReady, getCachedData, centroid } from "./geoDataStore";
 import { useApp } from "./AppContext";
 import { TR } from "./translations";
 import { STD_COLORS, CB_COLORS } from "./UserInterface";
@@ -389,6 +389,7 @@ export default function ExtentChart({ terria, selectedQuintile = null, onQuintil
           colors={COLORS}
           lang={lang}
           tr={tr}
+          terria={terria}
         />
       )}
     </div>
@@ -396,8 +397,31 @@ export default function ExtentChart({ terria, selectedQuintile = null, onQuintil
 }
 
 // ── ScatterView ──────────────────────────────────────────────────────────────
-function ScatterView({ data, colors, lang, tr }) {
+function flyToSection(terria, cusec) {
+  const gj = getCachedData();
+  if (!gj) return;
+  const feature = gj.features.find(f => String(f.properties?.CUSEC) === String(cusec));
+  if (!feature) return;
+  const c = centroid(feature.geometry);
+  if (!c) return;
+  const [lon, lat] = c;
+  const pad = 0.025;
+  if (terria.cesium?.scene?.camera) {
+    import("terriajs-cesium/Source/Core/Rectangle").then(mod => {
+      const Rectangle = mod.default ?? mod;
+      terria.cesium.scene.camera.flyTo({
+        destination: Rectangle.fromDegrees(lon - pad, lat - pad, lon + pad, lat + pad),
+        duration: 1.2,
+      });
+    }).catch(() => {});
+  } else if (terria.leaflet?.map) {
+    terria.leaflet.map.fitBounds([[lat - pad, lon - pad], [lat + pad, lon + pad]], { animate: true, duration: 0.8 });
+  }
+}
+
+function ScatterView({ data, colors, lang, tr, terria }) {
   const [hover, setHover] = useState(null);
+  const [selected, setSelected] = useState(null);
   if (!data || data.points.length === 0) {
     return (
       <div style={{
@@ -426,8 +450,8 @@ function ScatterView({ data, colors, lang, tr }) {
   const loc = lang === "es" ? "es-ES" : "en-GB";
   const fmt2 = v => v.toLocaleString(loc, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  // Render: optionally one large circle for hovered point on top.
-  const hoverPoint = hover != null ? points[hover] : null;
+  // Render: show hovered point info; if a point is selected, keep it visible.
+  const hoverPoint = hover != null ? points[hover] : (selected != null ? points[selected] : null);
 
   return (
     <div style={{ marginTop: 4 }}>
@@ -436,7 +460,6 @@ function ScatterView({ data, colors, lang, tr }) {
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
           style={{ display: "block", width: "100%", height: 210 }}
-          onMouseLeave={() => setHover(null)}
         >
           {/* Plot frame */}
           <rect
@@ -453,17 +476,25 @@ function ScatterView({ data, colors, lang, tr }) {
             const cx = xToSvg(p.x);
             const cy = yToSvg(p.y);
             const c  = p.q != null ? colors[p.q - 1] : "#9ca3af";
+            const isSel = selected === idx;
             return (
               <circle
                 key={idx}
-                cx={cx} cy={cy} r={0.7}
-                fill={c} fillOpacity={0.65}
+                cx={cx} cy={cy} r={isSel ? 1.2 : 0.7}
+                fill={c} fillOpacity={isSel ? 1 : 0.65}
+                stroke={isSel ? "#111827" : "none"} strokeWidth={isSel ? 0.4 : 0}
+                style={{ cursor: "pointer" }}
                 onMouseEnter={() => setHover(idx)}
+                onMouseLeave={() => setHover(null)}
+                onClick={() => {
+                  setSelected(idx);
+                  if (terria) flyToSection(terria, p.cusec);
+                }}
               />
             );
           })}
-          {/* Hovered marker */}
-          {hoverPoint && (
+          {/* Hover ring (only when not already selected) */}
+          {hoverPoint && hover !== selected && (
             <circle
               cx={xToSvg(hoverPoint.x)} cy={yToSvg(hoverPoint.y)}
               r={1.4} fill="none"
