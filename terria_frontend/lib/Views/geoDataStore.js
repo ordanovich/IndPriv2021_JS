@@ -108,9 +108,9 @@ export function ensureDataLoaded() {
 }
 
 function pickDataUrl() {
-  if (DEMO_MODE) return "data/secciones_demo.geojson";
+  if (DEMO_MODE) return "data/secciones_unified_demo.geojson";
   if (typeof window !== "undefined" && window.location.search.includes("demo=1"))
-    return "data/secciones_demo.geojson";
+    return "data/secciones_unified_demo.geojson";
   return "data/secciones_unified.geojson";
 }
 
