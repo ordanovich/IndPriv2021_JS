@@ -23,17 +23,25 @@ export default function Distribution() {
     const lo = table.breaks[0], hi = table.breaks[5];
     const w = (hi - lo) / BINS;
     const bins = new Array(BINS).fill(0);
-    for (const v of vals) bins[Math.min(BINS - 1, Math.max(0, Math.floor((v - lo) / w)))]++;
+    const binQ = Array.from({ length: BINS }, () => [0, 0, 0, 0, 0, 0]);
+    for (const i of rows) {
+      const v = table.ip[i];
+      if (!Number.isFinite(v)) continue;
+      const k = Math.min(BINS - 1, Math.max(0, Math.floor((v - lo) / w)));
+      bins[k]++;
+      binQ[k][table.q[i]]++;
+    }
+    // A bar straddling a cut-off takes the quintile most of its sections have.
+    const binColorQ = binQ.map(c => c.indexOf(Math.max(...c.slice(1)), 1));
     const qCounts = [0, 0, 0, 0, 0];
     for (const i of rows) if (table.q[i] > 0) qCounts[table.q[i] - 1]++;
-    return { d, bins, lo, hi, w, max: Math.max(...bins), qCounts };
+    return { d, bins, binColorQ, lo, hi, w, max: Math.max(...bins), qCounts };
   }, [rows, table]);
 
   if (!table) return null;
   if (!data) return <p className="muted pad">{t.rankEmpty}</p>;
 
-  const { d, bins, lo, w, max, qCounts } = data;
-  const quintileOf = v => { let q = 1; while (q < 5 && v > table.breaks[q]) q++; return q; };
+  const { d, bins, binColorQ, lo, w, max, qCounts } = data;
   const H = 100, W = 400;
   const meanX = ((d.mean - lo) / (w * BINS)) * W;
 
@@ -59,9 +67,8 @@ export default function Distribution() {
       <svg className="hist" viewBox={`0 0 ${W} ${H + 6}`} preserveAspectRatio="none">
         {bins.map((c, k) => {
           const h = max ? (c / max) * H : 0;
-          const mid = lo + (k + 0.5) * w;
           return <rect key={k} x={(k * W) / BINS + 0.5} y={H - h} width={W / BINS - 1} height={h}
-                       fill={colors[quintileOf(mid) - 1]} />;
+                       fill={colors[Math.max(binColorQ[k], 1) - 1]} />;
         })}
         <line x1={meanX} x2={meanX} y1={0} y2={H} stroke="#111827" strokeDasharray="3 2" strokeWidth="1" />
         {table.breaks.slice(1, 5).map((b, k) => {

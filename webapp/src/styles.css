@@ -220,13 +220,14 @@ button:disabled { cursor: default; opacity: 0.45; }
 }
 .swipe-label.left { right: 10px; }
 .swipe-label.right { left: 10px; }
-/* Clear-selection button, in line under the zoom (+/−) control. */
-.map-clear {
-  position: absolute; top: 80px; right: 10px; z-index: 2; width: 29px; height: 29px;
-  border: none; border-radius: 4px; background: #fff; color: #b91c1c; font-size: 15px; font-weight: 700;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center;
+/* Clear-filters / clear-selection buttons, in line under the zoom (+/−) control. */
+.map-actions { position: absolute; top: 80px; right: 10px; z-index: 2; display: flex; flex-direction: column; gap: 8px; }
+.map-actions button {
+  width: 29px; height: 29px; border: none; border-radius: 4px; background: #fff; color: #b91c1c;
+  font-size: 15px; font-weight: 700; box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+  display: flex; align-items: center; justify-content: center; padding: 0;
 }
-.map-clear:hover { background: #fef2f2; }
+.map-actions button:hover { background: #fef2f2; }
 .map-hint {
   position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff;
   padding: 5px 12px; border-radius: 14px; font-size: 12px; z-index: 2;

@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
-import { EMPTY_FILTERS, useApp } from "../state";
-import { activeFilterCount } from "../data";
+import { useApp } from "../state";
 import { useColors } from "../hooks";
 import { mapBus } from "../map/mapBus";
 import { Check, Field, Segmented } from "./ui";
@@ -104,9 +103,6 @@ export default function Filters() {
         </Field>
       )}
 
-      {activeFilterCount(filters) > 0 && (
-        <button className="btn ghost small" onClick={() => setFilters(EMPTY_FILTERS)}>✕ {t.clearFilters}</button>
-      )}
     </div>
   );
 }
