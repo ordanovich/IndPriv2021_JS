@@ -31,7 +31,6 @@ export default function Layers() {
         <Check checked={state.boundaries.ccaa} onChange={v => setBoundaries({ ccaa: v })}>{t.bCcaa}</Check>
         <Check checked={state.boundaries.prov} onChange={v => setBoundaries({ prov: v })}>{t.bProv}</Check>
         <Check checked={state.boundaries.mun} onChange={v => setBoundaries({ mun: v })}>{t.bMun}</Check>
-        <Check checked={state.boundaries.units} onChange={v => setBoundaries({ units: v })}>{t.bUnits}</Check>
       </Field>
     </div>
   );

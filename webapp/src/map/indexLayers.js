@@ -103,7 +103,7 @@ export function addUnitLayers(map) {
     id: "units-line", type: "line", source: "units", "source-layer": "units", minzoom: 10,
     paint: {
       "line-color": "#ffffff",
-      "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.15, 13, 0.6, 16, 1.2],
+      "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.2, 12, 0.5, 14, 1, 16, 1.5],
       "line-opacity": 0.85,
     },
   });
@@ -146,5 +146,4 @@ export function showBoundaries(map, b) {
   map.setLayoutProperty("bounds-ccaa", "visibility", vis(b.ccaa));
   map.setLayoutProperty("bounds-prov", "visibility", vis(b.prov));
   map.setLayoutProperty("bounds-mun", "visibility", vis(b.mun));
-  map.setLayoutProperty("units-line", "visibility", vis(b.units));
 }

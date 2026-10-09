@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useApp } from "../state";
-import { describe, loadProvinceGeometry, loadVariables, selectRows } from "../data";
+import { describe, loadMeta, loadProvinceGeometry, loadVariables, selectRows } from "../data";
 import { fmtInt } from "../i18n";
 import { Check, download } from "./ui";
 
@@ -39,6 +39,10 @@ export default function ExportPanel() {
   const lang = state.lang;
   const [busy, setBusy] = useState(null);
   const [withVars, setWithVars] = useState(false);
+  const [geoExport, setGeoExport] = useState(false);
+  useEffect(() => {
+    loadMeta(mode.id).then(m => setGeoExport(m.geojson_export === true)).catch(() => setGeoExport(false));
+  }, [mode.id]);
 
   const box = state.scope === "view" ? state.view : state.scope === "rect" ? state.rect : null;
   const rows = useMemo(() => {
@@ -130,7 +134,9 @@ export default function ExportPanel() {
       <div className="export-buttons">
         <button className="btn" disabled={!rows.length || busy} onClick={csv}>{busy === "csv" ? t.exportBusy : "⬇ " + t.exportCsv}</button>
         <button className="btn" disabled={!rows.length || busy} onClick={xlsx}>{busy === "xlsx" ? t.exportBusy : "⬇ " + t.exportXlsx}</button>
-        <button className="btn wide" disabled={!rows.length || busy} onClick={geojson}>{busy === "geojson" ? t.exportBusy : "⬇ " + t.exportGeojson}</button>
+        {geoExport && (
+          <button className="btn wide" disabled={!rows.length || busy} onClick={geojson}>{busy === "geojson" ? t.exportBusy : "⬇ " + t.exportGeojson}</button>
+        )}
         <button className="btn wide ghost" disabled={!rows.length || busy} onClick={stats}>{busy === "stats" ? t.exportBusy : "⬇ " + t.exportStats}</button>
       </div>
       <p className="muted small">{t.exportNote}</p>

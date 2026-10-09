@@ -14,7 +14,7 @@ const DEFAULTS = {
   compare: false,          // swipe comparison between the two years
   opacity: 0.8,
   filters: EMPTY_FILTERS,
-  boundaries: { ccaa: true, prov: true, mun: true, units: true },
+  boundaries: { ccaa: true, prov: true, mun: true },
   basemap: BASEMAPS[0].id,
   wms: [],                 // ids from WMS_CATALOG or customWms
   customWms: [],
