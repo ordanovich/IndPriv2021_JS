@@ -3,7 +3,6 @@ import { useApp } from "../state";
 import { percentile } from "../data";
 import { fmtNum } from "../i18n";
 import { useColors, useLink, useTable } from "../hooks";
-import { mapBus } from "../map/mapBus";
 import { QuintileChip } from "./ui";
 
 // The unit's counterpart(s) in the other census year, by real overlap.
@@ -43,7 +42,7 @@ function OtherYear({ i }) {
 }
 
 export default function Details() {
-  const { state, set, table, mode, t, selectedIndex: i } = useApp();
+  const { state, table, mode, t, selectedIndex: i } = useApp();
   const colors = useColors();
   const lang = state.lang;
 
@@ -58,10 +57,6 @@ export default function Details() {
           <div className="details-id">{mode.idLabel} {table.id[i]}</div>
           <div className="details-name">{table.names.mun[table.mun[i]]}</div>
           <div className="muted small">{table.names.prov[table.prov[i]]} · {table.names.ccaa[table.ccaa[i]]}</div>
-        </div>
-        <div className="details-actions">
-          <button className="btn small" onClick={() => mapBus.fitUnit(table, i)}>⌖ {t.flyTo}</button>
-          <button className="btn small" title={t.clearSelection + " (Esc)"} onClick={() => set({ selected: null })}>✕ {t.clearSelection}</button>
         </div>
       </div>
       <div className="details-ip">

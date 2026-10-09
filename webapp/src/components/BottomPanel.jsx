@@ -1,5 +1,6 @@
 import React from "react";
 import { useApp } from "../state";
+import { mapBus } from "../map/mapBus";
 import Details from "./Details";
 import Distribution from "./Distribution";
 import Scatter from "./Scatter";
@@ -14,7 +15,7 @@ const TABS = [
 ];
 
 export default function BottomPanel() {
-  const { state, set, setPanels, mode, t } = useApp();
+  const { state, set, setPanels, mode, table, selectedIndex, t } = useApp();
   const open = state.panels.bottom;
   const tabs = TABS.filter(x => !x.needs || x.needs(mode));
   const active = tabs.find(x => x.id === state.bottomTab) ?? tabs[0];
@@ -22,7 +23,15 @@ export default function BottomPanel() {
   return (
     <div className={"bottom" + (open ? " open" : "")}>
       <div className="bottom-bar">
-        <div className="bottom-title">{t.details}</div>
+        <div className="bottom-title">
+          <span>{t.details}</span>
+          {table && selectedIndex != null && (
+            <span className="title-actions">
+              <button className="btn small" onClick={() => mapBus.fitUnit(table, selectedIndex)}>⌖ {t.flyTo}</button>
+              <button className="btn small" title={t.clearSelection + " (Esc)"} onClick={() => set({ selected: null })}>✕ {t.clearSelection}</button>
+            </span>
+          )}
+        </div>
         <div className="tabs" role="tablist">
           {tabs.map(x => (
             <button key={x.id} role="tab" aria-selected={x === active} className={x === active ? "on" : ""}

@@ -89,7 +89,7 @@ export const BASEMAPS = [
     tiles: [IGN_WMTS("IGNBase-gris")],
     attribution: '© <a href="https://www.ign.es" target="_blank" rel="noopener">IGN</a> (CC BY 4.0)',
     maxzoom: 19,
-    fallback: "carto-light",
+    fallback: "osm",
   },
   {
     id: "ign-base",
@@ -107,14 +107,6 @@ export const BASEMAPS = [
             "&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/jpeg"],
     attribution: '© <a href="https://www.ign.es" target="_blank" rel="noopener">PNOA · IGN</a> (CC BY 4.0)',
     maxzoom: 20,
-    fallback: "carto-light",
-  },
-  {
-    id: "carto-light",
-    name: { es: "CARTO · claro", en: "CARTO · light" },
-    tiles: ["a", "b", "c"].map(s => `https://${s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png`),
-    attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> · © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
-    maxzoom: 20,
     fallback: "osm",
   },
   {
@@ -123,7 +115,7 @@ export const BASEMAPS = [
     tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
     attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
     maxzoom: 19,
-    fallback: "carto-light",
+    fallback: "ign-gris",
   },
   {
     id: "none",
