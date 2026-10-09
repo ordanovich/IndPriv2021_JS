@@ -130,12 +130,20 @@ export function filterPredicate(t, filters) {
 
 export const inBounds = (b, x, y) => x >= b.west && x <= b.east && y >= b.south && y <= b.north;
 
-// Rows matching the filters (and, optionally, inside a lon/lat box).
-export function selectRows(t, filters, box = null) {
+// Does the unit's extent (centre ± half-size) overlap the box?
+const overlaps = (b, t, i) =>
+  t.x[i] - t.r[i] <= b.east && t.x[i] + t.r[i] >= b.west &&
+  t.y[i] - t.r[i] <= b.north && t.y[i] + t.r[i] >= b.south;
+
+// Rows matching the filters and, optionally, a lon/lat box. how = "overlaps"
+// (anything visible counts: the map view) or "centre" (the unit's
+// representative point must be inside: a drawn selection rectangle).
+export function selectRows(t, filters, box = null, how = "overlaps") {
   const ok = filterPredicate(t, filters);
+  const inBox = how === "centre" ? i => inBounds(box, t.x[i], t.y[i]) : i => overlaps(box, t, i);
   const out = [];
   for (let i = 0; i < t.n; i++) {
-    if (box && !inBounds(box, t.x[i], t.y[i])) continue;
+    if (box && !inBox(i)) continue;
     if (ok(i)) out.push(i);
   }
   return out;

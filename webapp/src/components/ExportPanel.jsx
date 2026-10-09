@@ -48,7 +48,7 @@ export default function ExportPanel() {
   const rows = useMemo(() => {
     if (!table) return [];
     if (state.scope === "rect" && !state.rect) return [];
-    return selectRows(table, state.filters, box);
+    return selectRows(table, state.filters, box, state.scope === "rect" ? "centre" : "overlaps");
   }, [table, state.filters, state.scope, box]);
 
   if (!table) return null;
