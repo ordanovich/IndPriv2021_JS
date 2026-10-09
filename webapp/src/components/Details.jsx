@@ -43,7 +43,7 @@ function OtherYear({ i }) {
 }
 
 export default function Details() {
-  const { state, table, mode, t, selectedIndex: i } = useApp();
+  const { state, set, table, mode, t, selectedIndex: i } = useApp();
   const colors = useColors();
   const lang = state.lang;
 
@@ -59,7 +59,10 @@ export default function Details() {
           <div className="details-name">{table.names.mun[table.mun[i]]}</div>
           <div className="muted small">{table.names.prov[table.prov[i]]} · {table.names.ccaa[table.ccaa[i]]}</div>
         </div>
-        <button className="btn small" onClick={() => mapBus.fitUnit(table, i)}>⌖ {t.flyTo}</button>
+        <div className="details-actions">
+          <button className="btn small" onClick={() => mapBus.fitUnit(table, i)}>⌖ {t.flyTo}</button>
+          <button className="btn small" title={t.clearSelection + " (Esc)"} onClick={() => set({ selected: null })}>✕ {t.clearSelection}</button>
+        </div>
       </div>
       <div className="details-ip">
         <div>

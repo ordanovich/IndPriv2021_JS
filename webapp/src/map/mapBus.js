@@ -3,6 +3,14 @@
 let map = null;
 
 export const mapBus = {
+  // Set while the swipe comparison is on: { ratio, otherOnLeft }.
+  compare: null,
+  // True if a screen point of the main map is hidden under the other year.
+  coveredByCompare(point) {
+    if (!this.compare || !map) return false;
+    const x = point.x / map.getContainer().clientWidth;
+    return this.compare.otherOnLeft ? x < this.compare.ratio : x > this.compare.ratio;
+  },
   attach(m) { map = m; },
   detach() { map = null; },
   get() { return map; },

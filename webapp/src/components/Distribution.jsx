@@ -56,7 +56,7 @@ export default function Distribution() {
         <span>{t.sd} <b>{fmtNum(lang, d.sd)}</b></span>
         <button className="link" onClick={copy}>{copied ? "✓ " + t.copied : "⧉ " + t.copySummary}</button>
       </div>
-      <svg className="hist" viewBox={`0 0 ${W} ${H + 14}`} preserveAspectRatio="none">
+      <svg className="hist" viewBox={`0 0 ${W} ${H + 6}`} preserveAspectRatio="none">
         {bins.map((c, k) => {
           const h = max ? (c / max) * H : 0;
           const mid = lo + (k + 0.5) * w;
@@ -68,9 +68,12 @@ export default function Distribution() {
           const x = ((b - lo) / (w * BINS)) * W;
           return <line key={k} x1={x} x2={x} y1={H} y2={H + 5} stroke="#6b7280" />;
         })}
-        <text x={2} y={H + 13} className="axis">{fmtNum(lang, lo, 1)}</text>
-        <text x={W - 2} y={H + 13} className="axis" textAnchor="end">{fmtNum(lang, table.breaks[5], 1)}</text>
       </svg>
+      <div className="hist-axis">
+        <span>{fmtNum(lang, lo, 1)}</span>
+        <span>IP {state.year}</span>
+        <span>{fmtNum(lang, table.breaks[5], 1)}</span>
+      </div>
       <div className="qbar">
         {qCounts.map((c, k) => (
           <span key={k} style={{ flex: Math.max(c, 0.0001), background: colors[k] }}

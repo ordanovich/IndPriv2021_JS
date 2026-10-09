@@ -18,6 +18,7 @@ export default function Layers() {
         <Field label={t.year}>
           <Segmented value={state.year} onChange={setYear}
                      options={years.map(y => ({ value: y, label: y }))} />
+          <Check checked={state.compare} onChange={v => set({ compare: v })}>⇔ {t.compare(years)}</Check>
         </Field>
       )}
 
