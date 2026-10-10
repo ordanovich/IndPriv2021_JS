@@ -79,6 +79,22 @@ subir tal cual a cualquier carpeta del servidor (p. ej. `/inJS/`). El servidor
 solo necesita servir ficheros estáticos y admitir peticiones por rangos
 (`Accept-Ranges: bytes`), que el de la SEE ya admite.
 
+### Versión de prueba en GitHub Pages
+
+```
+bash webapp/scripts/publish-preview.sh          # solo código
+bash webapp/scripts/publish-preview.sh --data   # también datos (tras regenerarlos)
+```
+
+Publica en https://ordanovich.github.io/IndPriv2021_JS/v2/ (rama `gh-pages`,
+carpeta `v2/`; la demo v1 sigue en la raíz). Sin la exportación GeoJSON exacta
+(límite de 1 GB de Pages). Compila fuera de Dropbox porque Dropbox bloquea
+`dist/` mientras sincroniza.
+
+### Comprobar la interfaz sin abrir el navegador
+
+`scripts/ui-check/` (capturas, emulación de iPhone, varias resoluciones): ver su README.
+
 ## Dónde se configura cada cosa
 
 Todo en `src/config.js`:

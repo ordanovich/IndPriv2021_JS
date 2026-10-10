@@ -41,3 +41,6 @@ webapp/public/atlas/
 webapp/public/images/
 webapp/public/favicon.ico
 webapp/dist/
+
+# Generated reports (e.g. cambios_geometria_2011_2021.pdf)
+data_pipeline/output/
