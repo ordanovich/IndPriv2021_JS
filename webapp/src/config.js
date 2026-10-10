@@ -73,6 +73,9 @@ export const VIEWS = {
   peninsula: [[-9.8, 35.7], [4.6, 44.0]],
   canarias: [[-18.3, 27.5], [-13.2, 29.5]],
 };
+// The map can't be panned or zoomed out beyond Spain (with some margin),
+// so it never shows an empty world.
+export const MAX_BOUNDS = [[-27, 20], [13, 50]];
 export const TILE_MAX_ZOOM = 14;   // must match MAXZOOM in the pipeline
 
 const IGN_WMTS = layer =>

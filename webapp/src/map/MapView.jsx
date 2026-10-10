@@ -3,7 +3,7 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { EMPTY_FILTERS, useApp } from "../state";
 import { activeFilterCount } from "../data";
-import { BASEMAPS, PALETTES, VIEWS, WMS_CATALOG, wmsTileUrl } from "../config";
+import { BASEMAPS, MAX_BOUNDS, PALETTES, VIEWS, WMS_CATALOG, wmsTileUrl } from "../config";
 import { mapBus } from "./mapBus";
 import { hoverStore } from "./hoverStore";
 import {
@@ -41,7 +41,7 @@ export default function MapView() {
       bounds: b ? [[b.west, b.south], [b.east, b.north]] : VIEWS.peninsula,
       // Tiles start at zoom 4 (TILES_LOW in the pipeline): never go below it,
       // or a narrow phone fitting the whole country would show a blank map.
-      minZoom: 4, maxZoom: 19,
+      minZoom: 4, maxZoom: 19, maxBounds: MAX_BOUNDS,
       dragRotate: false, pitchWithRotate: false, touchPitch: false,
       attributionControl: false,
     });
