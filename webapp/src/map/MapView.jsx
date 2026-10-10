@@ -39,7 +39,9 @@ export default function MapView() {
       container: container.current,
       style: { version: 8, sources: {}, layers: [] },
       bounds: b ? [[b.west, b.south], [b.east, b.north]] : VIEWS.peninsula,
-      minZoom: 3, maxZoom: 19,
+      // Tiles start at zoom 4 (TILES_LOW in the pipeline): never go below it,
+      // or a narrow phone fitting the whole country would show a blank map.
+      minZoom: 4, maxZoom: 19,
       dragRotate: false, pitchWithRotate: false, touchPitch: false,
       attributionControl: false,
     });
