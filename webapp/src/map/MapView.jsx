@@ -82,6 +82,12 @@ export default function MapView() {
       map.addLayer({ id: "rect-fill", type: "fill", source: "rect", paint: { "fill-color": "#2563eb", "fill-opacity": 0.08 } });
       map.addLayer({ id: "rect-line", type: "line", source: "rect", paint: { "line-color": "#2563eb", "line-width": 2, "line-dasharray": [2, 1] } });
       addBasemap(map, live.current.state.basemap, "anchor-base");
+      // On phones keep the credits folded behind the (i) button. MapLibre
+      // unfolds them once they have content, so fold them when it settles.
+      if (window.matchMedia("(max-width: 800px)").matches) {
+        map.once("idle", () => map.getContainer().querySelector(".maplibregl-ctrl-attrib")
+          ?.classList.remove("maplibregl-compact-show"));
+      }
       setReady(true);
     });
 
@@ -266,6 +272,10 @@ export default function MapView() {
         <button onClick={() => mapRef.current?.fitBounds(VIEWS.canarias, { duration: 800 })}>{t.canarias}</button>
       </div>
       {state.drawing && <div className="map-hint">{t.drawing} · Esc</div>}
+      <button className="mini-legend" onClick={() => app.setPanels({ right: true, left: false })} aria-label={t.legend}>
+        {PALETTES[state.colorblind ? "cb" : "std"].map((c, k) => <i key={k} style={{ background: c }}>Q{k + 1}</i>)}
+        <span>{t.legend} ›</span>
+      </button>
       <div className="map-actions">
         {activeFilterCount(state.filters) > 0 && (
           <button title={t.clearFilters} aria-label={t.clearFilters}

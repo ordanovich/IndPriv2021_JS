@@ -159,7 +159,7 @@ export function wmsTileUrl({ url, layers, version = "1.3.0" }) {
 // ── Geocoding (address search) ───────────────────────────────────────────────
 export const GEOCODER = {
   cartociudad: q => `https://www.cartociudad.es/geocoder/api/geocoder/candidates?limit=6&q=${encodeURIComponent(q)}`,
-  photon: q => `https://photon.komoot.io/api/?limit=6&bbox=-18.5,27.4,4.6,44.0&q=${encodeURIComponent(q)}`,
+  photon: q => `https://photon.komoot.io/api/?limit=6&lang=default&bbox=-18.5,27.4,4.6,44.0&q=${encodeURIComponent(q)}`,
 };
 
 // ── Static atlas (province images) ───────────────────────────────────────────

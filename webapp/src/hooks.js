@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useApp } from "./state";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { MOBILE_QUERY, useApp } from "./state";
 import { loadLink, loadTable, selectRows } from "./data";
 import { PALETTES } from "./config";
 
@@ -14,6 +14,13 @@ export function useViewRows({ ignoreQuintiles = false } = {}) {
     const f = ignoreQuintiles ? { ...filters, quintiles: [] } : filters;
     return selectRows(table, f, view);
   }, [table, filters, view, ignoreQuintiles]);
+}
+
+export function useIsMobile() {
+  return useSyncExternalStore(
+    fn => { const m = window.matchMedia(MOBILE_QUERY); m.addEventListener("change", fn); return () => m.removeEventListener("change", fn); },
+    () => window.matchMedia(MOBILE_QUERY).matches,
+  );
 }
 
 export function useColors() {

@@ -2,12 +2,14 @@ import React from "react";
 import { useApp } from "../state";
 import { MODES } from "../config";
 import { activeFilterCount } from "../data";
+import { useIsMobile } from "../hooks";
 import { Section } from "./ui";
 import Filters from "./Filters";
 import Layers from "./Layers";
 
 export default function LeftPanel() {
   const { state, set, setPanels, t } = useApp();
+  const mobile = useIsMobile();
   const lang = state.lang;
 
   if (!state.panels.left) {
@@ -31,7 +33,7 @@ export default function LeftPanel() {
             {!m.available && <small>{t.modeSoon}</small>}
           </button>
         ))}
-        <button className="collapse" title={t.panelCollapse} onClick={() => setPanels({ left: false })}>«</button>
+        <button className="collapse" title={t.panelCollapse} onClick={() => setPanels({ left: false })}>{mobile ? "✕" : "«"}</button>
       </div>
       <div className="side-scroll">
         <Section title={t.filters} right={nFilters ? <span className="badge">{nFilters}</span> : null}>

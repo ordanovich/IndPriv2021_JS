@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AppProvider, useApp } from "./state";
 import { loadLink, loadTable } from "./data";
+import { useIsMobile } from "./hooks";
 import Header from "./components/Header";
 import LeftPanel from "./components/LeftPanel";
 import RightPanel from "./components/RightPanel";
@@ -35,6 +36,11 @@ function SelectionCarrier() {
 function Shell() {
   const { state, set, mode, loadError, t } = useApp();
   const [about, setAbout] = useState(false);
+
+  const mobile = useIsMobile();
+  useEffect(() => {
+    if (mobile && state.selected) set({ panels: { ...state.panels, bottom: true, left: false, right: false } });
+  }, [mobile, state.selected?.id]);
 
   // Esc clears the selected unit, unless something else is open to close.
   useEffect(() => {
