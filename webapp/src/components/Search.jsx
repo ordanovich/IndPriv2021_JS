@@ -17,25 +17,46 @@ function boxOf(table, test) {
   return w < e ? { west: w, south: s, east: e, north: n } : null;
 }
 
-async function geocode(q, signal) {
-  try {
-    const res = await fetch(GEOCODER.cartociudad(q), { signal });
-    const arr = await res.json();
-    return arr.filter(a => Number.isFinite(a.lat) && Number.isFinite(a.lng))
-      .map(a => ({ label: a.address, sub: [a.muni, a.province].filter(Boolean).join(", "), lon: a.lng, lat: a.lat }));
-  } catch (err) {
-    if (err.name === "AbortError") throw err;
-    const res = await fetch(GEOCODER.photon(q), { signal });
-    const js = await res.json();
-    return (js.features || []).map(f => {
+const inSpain = (lon, lat) => lon > -18.5 && lon < 4.6 && lat > 27.4 && lat < 44.0;
+const within = (p, ms) => Promise.race([p, new Promise(r => setTimeout(() => r(null), ms))]);
+
+// Addresses and postal codes. CartoCiudad (official, IGN) and Photon
+// (OpenStreetMap) are asked at once; CartoCiudad's answers go first when it
+// responds in time, Photon covers the times it does not.
+async function geocode(q, signal, onPartial) {
+  const cc = fetch(GEOCODER.cartociudad(q), { signal }).then(r => r.json()).then(arr =>
+    arr.filter(a => Number.isFinite(a.lat) && Number.isFinite(a.lng)).map(a => ({
+      kind: "addr", label: a.address, lon: a.lng, lat: a.lat,
+      sub: [a.postalCode, a.muni, a.province].filter(Boolean).join(" · "),
+    }))).catch(() => null);
+  const ph = fetch(GEOCODER.photon(q), { signal }).then(r => r.json()).then(js =>
+    (js.features || []).filter(f => inSpain(...f.geometry.coordinates)).map(f => {
       const p = f.properties;
+      const [lon, lat] = f.geometry.coordinates;
+      if (p.type === "other" && /^\d{5}$/.test(p.name || "")) {
+        return { kind: "postcode", label: `CP ${p.name}`, sub: [p.city, p.state].filter(Boolean).join(", "), lon, lat };
+      }
+      const street = p.street ? [p.street, p.housenumber].filter(Boolean).join(" ") : null;
       return {
-        label: [p.name, p.street && p.housenumber ? `${p.street} ${p.housenumber}` : p.street].filter(Boolean).join(", "),
-        sub: [p.city, p.state].filter(Boolean).join(", "),
-        lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1],
+        kind: "addr", lon, lat,
+        label: [street, p.name && p.name !== p.street ? p.name : null].filter(Boolean).join(" · ") || p.name,
+        sub: [p.postcode, p.city, p.state].filter(Boolean).join(" · "),
       };
+    })).catch(() => null);
+  let a = null, b = null;
+  const merged = () => {
+    const seen = new Set();
+    return [...(a || []), ...(b || [])].filter(r => {
+      const k = `${r.label}|${r.lon.toFixed(4)}|${r.lat.toFixed(4)}`;
+      return !seen.has(k) && seen.add(k);
     });
-  }
+  };
+  // Whichever answers first is shown at once; the other is merged in later.
+  await Promise.all([
+    within(cc, 8000).then(r => { a = r; onPartial(merged()); }),
+    within(ph, 8000).then(r => { b = r; onPartial(merged()); }),
+  ]);
+  return merged();
 }
 
 let marker = null;
@@ -45,6 +66,7 @@ export default function Search() {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [addresses, setAddresses] = useState([]);
+  const [searching, setSearching] = useState(false);
   const [active, setActive] = useState(0);
   const boxRef = useRef(null);
   const lang = state.lang;
@@ -85,10 +107,13 @@ export default function Search() {
   useEffect(() => {
     const s = q.trim();
     setAddresses([]);
-    if (s.length < 4 || /^\d+$/.test(s)) return;
+    setSearching(false);
+    if (s.length < 4 || (/^\d+$/.test(s) && !/^\d{5}$/.test(s))) return;
+    setSearching(true);
     const ctl = new AbortController();
     const id = setTimeout(() => {
-      geocode(s, ctl.signal).then(r => setAddresses(r.slice(0, 5))).catch(() => {});
+      geocode(s, ctl.signal, r => { if (!ctl.signal.aborted) setAddresses(r.slice(0, 7)); })
+        .catch(() => {}).finally(() => { if (!ctl.signal.aborted) setSearching(false); });
     }, 400);
     return () => { clearTimeout(id); ctl.abort(); };
   }, [q]);
@@ -99,7 +124,7 @@ export default function Search() {
     return () => document.removeEventListener("mousedown", close);
   }, []);
 
-  const results = [...local, ...addresses.map(a => ({ kind: "addr", ...a }))];
+  const results = [...local, ...addresses.filter(a => a.kind === "postcode"), ...addresses.filter(a => a.kind === "addr")];
 
   const choose = r => {
     setOpen(false);
@@ -109,6 +134,9 @@ export default function Search() {
     if (r.kind === "unit") {
       set({ selected: { year: state.year, id: table.id[r.i] } });
       mapBus.fitUnit(table, r.i);
+    } else if (r.kind === "postcode") {
+      map?.flyTo({ center: [r.lon, r.lat], zoom: 14, duration: 900 });
+      if (map) marker = new maplibregl.Marker({ color: "#111827" }).setLngLat([r.lon, r.lat]).addTo(map);
     } else if (r.kind === "addr") {
       if (!map) return;
       marker = new maplibregl.Marker({ color: "#111827" }).setLngLat([r.lon, r.lat]).addTo(map);
@@ -134,7 +162,7 @@ export default function Search() {
     if (e.key === "Escape") setOpen(false);
   };
 
-  const group = { ccaa: t.searchCcaa, prov: t.searchProv, mun: t.searchMun, unit: t.searchUnits, addr: t.searchAddress };
+  const group = { ccaa: t.searchCcaa, prov: t.searchProv, mun: t.searchMun, unit: t.searchUnits, postcode: t.searchPostcode, addr: t.searchAddress };
   let lastKind = null;
 
   return (
@@ -146,7 +174,7 @@ export default function Search() {
       {q && <button className="search-clear" onClick={() => { setQ(""); setAddresses([]); marker?.remove(); marker = null; }}>✕</button>}
       {open && q.trim().length >= 2 && (
         <ul className="search-results" role="listbox">
-          {results.length === 0 && <li className="none">{t.searchNone}</li>}
+          {results.length === 0 && <li className="none">{searching ? t.searching : t.searchNone}</li>}
           {results.map((r, k) => {
             const head = r.kind !== lastKind ? <li className="group" key={"g" + k}>{group[r.kind]}</li> : null;
             lastKind = r.kind;

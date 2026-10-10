@@ -110,7 +110,7 @@ export function BasemapMenu() {
   const lang = state.lang;
   const current = BASEMAPS.find(b => b.id === state.basemap);
   return (
-    <Menu label={<>{t.basemap}: <b>{current?.name[lang]}</b></>}>
+    <Menu label={<><span className="ico">🗺</span><span className="lbl">{t.basemap}: <b>{current?.name[lang]}</b></span></>}>
       <div className="radio-list">
         {BASEMAPS.map(b => (
           <label key={b.id} className="radio">
@@ -160,7 +160,7 @@ export function LayersMenu() {
   };
 
   return (
-    <Menu active={count > 0} label={<><span className="plus">+</span> {t.wms}{count ? <span className="badge">{count}</span> : null}</>}>
+    <Menu active={count > 0} label={<><span className="plus">+</span> <span className="lbl">{t.wms}</span>{count ? <span className="badge">{count}</span> : null}</>}>
       <div className="wms-list">
         {WMS_CATALOG.map(w => (
           <Check key={w.id} checked={state.wms.includes(w.id)} onChange={v => toggle(w.id, v)}>

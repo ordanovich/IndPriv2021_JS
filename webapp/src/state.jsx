@@ -5,6 +5,9 @@ import { loadTable } from "./data";
 
 export const EMPTY_FILTERS = { ccaa: "", prov: "", mun: "", quintiles: [], degurba: 0, stable: false };
 
+export const MOBILE_QUERY = "(max-width: 800px)";
+const isMobile = () => typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches;
+
 const DEFAULTS = {
   lang: "es",
   colorblind: false,
@@ -25,7 +28,9 @@ const DEFAULTS = {
   rect: null,              // { west, south, east, north }
   drawing: false,
   scope: "filters",        // "filters" | "view" | "rect"
-  panels: { left: true, right: true, bottom: true, legend: true },
+  panels: isMobile()
+    ? { left: false, right: false, bottom: false, legend: true }
+    : { left: true, right: true, bottom: true, legend: true },
   bottomTab: "dist",
   notice: null,
 };

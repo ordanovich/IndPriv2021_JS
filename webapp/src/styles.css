@@ -321,6 +321,7 @@ button:disabled { cursor: default; opacity: 0.45; }
 .scatter-plot { flex: 1; min-width: 0; position: relative; padding: 6px; }
 .scatter-plot canvas { position: absolute; inset: 6px; cursor: crosshair; }
 .scatter-side { width: 230px; flex: none; padding: 10px 12px; border-left: 1px solid var(--line); overflow-y: auto; }
+.scatter-sel { font-size: 12px; line-height: 1.5; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--line); }
 .scatter-hover { font-size: 12px; line-height: 1.5; min-height: 70px; }
 .note { font-size: 11px; color: #9a3412; background: #fff7ed; border: 1px solid #fed7aa; border-radius: var(--radius); padding: 6px 8px; line-height: 1.4; }
 
@@ -384,22 +385,83 @@ button:disabled { cursor: default; opacity: 0.45; }
   .hist { height: 110px; }
 }
 
-/* ── Narrow screens: side panels become drawers over the map ─────────────── */
-@media (max-width: 1100px) {
-  :root { --side-w: 260px; }
-  .search { width: 240px; }
-  .meta span:nth-child(n+3) { display: none; }
-}
+/* ── Phones (≤ 800 px): the map fills the screen; panels are sheets ───────── */
+.menu-toggle, .mini-legend, .menu-btn .ico { display: none; }
+
 @media (max-width: 800px) {
-  .app-body { position: relative; }
-  .side { position: absolute; top: 0; bottom: 0; z-index: 10; box-shadow: 0 0 24px rgba(0,0,0,0.2); }
-  .side.left { left: 0; }
-  .side.right { right: 0; }
-  .brand p, .hbtn:not(.icon):not(.lang) { display: none; }
-  .meta { display: none; }
-  .search { flex: 1; width: auto; }
-  .hover { display: none; }
-  .details, .bottom-title { width: 100%; }
-  .bottom-body { flex-direction: column; height: 50vh; }
-  .details { border-right: none; border-bottom: 1px solid var(--line); flex: none; max-height: 45%; }
+  .app { height: 100dvh; }
+  /* 16 px inputs: iOS does not zoom the page on focus */
+  input, select { font-size: 16px !important; }
+
+  .app-header { height: 48px; padding: 0 8px; gap: 6px; }
+  .menu-toggle { display: inline-flex; font-size: 18px; padding: 2px 10px; }
+  .brand { gap: 6px; flex: 1; min-width: 0; }
+  .brand > div { min-width: 0; }
+  .brand-logo { display: none; }
+  .brand h1 { font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand p { display: none; }
+  .header-actions { gap: 4px; }
+  .hbtn .lbl { display: none; }
+  .hbtn { padding: 4px 8px; }
+
+  /* Side panels: full-screen sheets over everything; rails hidden */
+  .rail { display: none; }
+  .side { position: fixed; inset: 0; width: 100%; z-index: 40; box-shadow: none; }
+  .side .collapse { font-size: 15px; padding: 10px 14px; color: var(--text); }
+  .side-top { justify-content: flex-end; }
+  .mode-tabs > button:not(.collapse) { padding: 12px 6px 10px; }
+
+  /* Bar above the map: search takes the width, menus become icons */
+  .metabar { height: auto; padding: 6px 8px; gap: 6px; flex-wrap: nowrap; }
+  .search { flex: 1; width: auto; min-width: 0; }
+  .search input { padding: 7px 28px; }
+  .search-results { position: fixed; left: 8px; right: 8px; top: 100px; width: auto; max-height: 60vh; }
+  .meta, .hover { display: none; }
+  .menus { gap: 4px; }
+  .menu-btn { padding: 6px 9px; }
+  .menu-btn .lbl, .menu-btn .caret { display: none; }
+  .menu-btn .ico { display: inline; }
+  .menu-panel { position: fixed; left: 8px; right: 8px; top: 100px; width: auto; max-height: 70vh; }
+  .notice { top: 52px; }
+
+  /* Map overlays: smaller view buttons, mini legend bottom-left */
+  .map-views { top: 8px; left: 8px; }
+  .map-views button { padding: 3px 7px; font-size: 11px; }
+  .mini-legend {
+    display: flex; position: absolute; left: 8px; bottom: 28px; z-index: 2; align-items: center; gap: 2px;
+    background: rgba(255,255,255,0.95); border: 1px solid var(--line-strong); border-radius: 6px; padding: 4px 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  }
+  .mini-legend i { font-style: normal; font-size: 10px; font-weight: 700; color: #111827; padding: 1px 4px; border-radius: 2px; }
+  .mini-legend span { font-size: 11.5px; font-weight: 600; margin-left: 6px; color: var(--accent); }
+  .maplibregl-ctrl-scale { display: none; }
+
+  /* Bottom sheet: one scrolling column (details, then the active tab) */
+  .bottom-bar { height: 40px; }
+  .bottom-title { width: auto; padding: 0 6px 0 10px; }
+  .bottom-title > span:first-child { display: none; }
+  .title-actions { margin-left: 0; }
+  .title-actions .btn.small { padding: 4px 8px; }
+  .tabs button { padding: 0 9px; font-size: 12px; }
+  .bottom.open .bottom-body { height: 52dvh; flex-direction: column; overflow-y: auto; }
+  .details { width: 100%; border-right: none; border-bottom: 1px solid var(--line); flex: none; overflow: visible; }
+  .bottom-tab { flex: none; min-height: 300px; overflow: visible; }
+  .scatter, .atlas { flex-direction: column; height: auto; }
+  .scatter-plot { height: 260px; flex: none; }
+  .scatter-side, .atlas-side { width: 100%; border-left: none; border-top: 1px solid var(--line); }
+  .atlas-img { height: 300px; flex: none; }
+  .ranking { height: auto; }
+  .ranking-bar { flex-wrap: wrap; }
+  .ranking-scroll { max-height: 360px; }
+  .ranking th:nth-child(4), .ranking td:nth-child(4) { display: none; }
+
+  /* About: full screen */
+  .modal-backdrop { padding: 0; }
+  .modal { width: 100%; height: 100%; border-radius: 0; }
+  .modal-tabs { overflow-x: auto; }
+  .modal-tabs button { white-space: nowrap; }
+  .figs { grid-template-columns: 1fr; }
+  .pca-bar { width: 22%; }
+
+  .swipe-label { top: 56px; }
 }
