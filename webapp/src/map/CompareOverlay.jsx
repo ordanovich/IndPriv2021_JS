@@ -18,7 +18,11 @@ export default function CompareOverlay({ mainMap }) {
   const otherTable = useTable(mode.id, other);
   const otherOnLeft = other < state.year;
   const [ratio, setRatio] = useState(0.5);
-  const [ready, setReady] = useState(false);
+  // The overlay map whose style has finished loading. Holding the instance
+  // (not a true/false flag) matters: switching year replaces the map, and in
+  // that same render a flag would still say "ready" while the new map is
+  // still loading — styling it then throws and took the whole app down.
+  const [loaded, setLoaded] = useState(null);
   const holder = useRef(null);
   const overlay = useRef(null);
   const live = useRef(state);
@@ -38,13 +42,15 @@ export default function CompareOverlay({ mainMap }) {
       interactive: false, attributionControl: false,
     });
     overlay.current = m;
+    // Basemap tile failures are handled by the main map's watchdog.
+    m.on("error", e => { if (e.sourceId !== "basemap") console.warn("compare map:", e.sourceId ?? "", e.error?.message ?? e); });
     m.on("load", () => {
       m.addLayer({ id: "anchor-base", type: "background", layout: { visibility: "none" } });
       addIndexSources(m, mode.years[other], live.current.lang);
       addUnitLayers(m);
       addBoundaryLayers(m);
       addBasemap(m, live.current.basemap, "anchor-base");
-      setReady(true);
+      if (overlay.current === m) setLoaded(m);
     });
     const sync = () => m.jumpTo({ center: mainMap.getCenter(), zoom: mainMap.getZoom() });
     mainMap.on("move", sync);
@@ -53,9 +59,10 @@ export default function CompareOverlay({ mainMap }) {
     return () => {
       mainMap.off("move", sync);
       ro.disconnect();
+      if (overlay.current === m) overlay.current = null;
       m.remove();
       div.remove();
-      setReady(false);
+      setLoaded(null);
       mapBus.compare = null;
     };
   }, [mainMap, other]);
@@ -66,22 +73,23 @@ export default function CompareOverlay({ mainMap }) {
     const pct = ratio * 100;
     holder.current.style.clipPath = otherOnLeft ? `inset(0 ${100 - pct}% 0 0)` : `inset(0 0 0 ${pct}%)`;
     mapBus.compare = { ratio, otherOnLeft };
-  }, [ratio, otherOnLeft, ready]);
+  }, [ratio, otherOnLeft, loaded]);
 
   // Same styling as the main map, with the other year's own breaks.
   useEffect(() => {
     const m = overlay.current;
-    if (!ready || !m) return;
+    if (!m || loaded !== m) return;
     styleUnits(m, {
       classes: state.classes, colors: PALETTES[state.colorblind ? "cb" : "std"],
       filters: state.filters, opacity: state.opacity, table: otherTable,
     });
     showBoundaries(m, state.boundaries);
-  }, [ready, state.classes, state.colorblind, state.filters, state.opacity, state.boundaries, otherTable]);
+  }, [loaded, state.classes, state.colorblind, state.filters, state.opacity, state.boundaries, otherTable]);
 
   useEffect(() => {
-    if (ready) addBasemap(overlay.current, state.basemap, "anchor-base");
-  }, [ready, state.basemap]);
+    const m = overlay.current;
+    if (m && loaded === m) addBasemap(m, state.basemap, "anchor-base");
+  }, [loaded, state.basemap]);
 
   const drag = e => {
     e.preventDefault();

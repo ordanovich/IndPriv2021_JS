@@ -3,6 +3,7 @@
 import maplibregl from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import { BASEMAPS, DIM_COLOR, NO_DATA_COLOR } from "../config";
+import { basemapUrl, ensureBasemapProtocol } from "./basemapHealth";
 
 let protocolReady = false;
 export function ensureProtocol() {
@@ -71,8 +72,9 @@ export function addBasemap(map, id, beforeId) {
   if (map.getSource("basemap")) map.removeSource("basemap");
   const b = BASEMAPS.find(x => x.id === id);
   if (!b?.tiles) return;
+  ensureBasemapProtocol();
   map.addSource("basemap", {
-    type: "raster", tiles: b.tiles, tileSize: 256, maxzoom: b.maxzoom ?? 19, attribution: b.attribution,
+    type: "raster", tiles: b.tiles.map(basemapUrl), tileSize: 256, maxzoom: b.maxzoom ?? 19, attribution: b.attribution,
   });
   map.addLayer({ id: "basemap", type: "raster", source: "basemap" }, beforeId);
 }

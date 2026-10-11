@@ -41,8 +41,13 @@ export default function MetaBar() {
       </div>
       {state.notice && (
         <div className="notice">
-          {state.notice}
-          <button onClick={() => set({ notice: null })}>✕</button>
+          <span>{state.notice.text ?? state.notice}</span>
+          {state.notice.action && (
+            <button className="notice-action" onClick={() => set(state.notice.action.patch)}>
+              {state.notice.action.label}
+            </button>
+          )}
+          <button onClick={() => set({ notice: null })} aria-label="✕">✕</button>
         </div>
       )}
     </div>

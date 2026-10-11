@@ -6,16 +6,27 @@ import { activeFilterCount } from "../data";
 import { BASEMAPS, MAX_BOUNDS, PALETTES, VIEWS, WMS_CATALOG, wmsTileUrl } from "../config";
 import { mapBus } from "./mapBus";
 import { hoverStore } from "./hoverStore";
+import { basemapHealth, probe } from "./basemapHealth";
 import {
   addBasemap, addBoundaryLayers, addIndexSources, addUnitLayers, ensureProtocol,
   setIndexYear, showBoundaries, styleUnits,
 } from "./indexLayers";
 import CompareOverlay from "./CompareOverlay";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 function rectGeoJSON(r) {
   if (!r) return { type: "FeatureCollection", features: [] };
   const ring = [[r.west, r.south], [r.east, r.south], [r.east, r.north], [r.west, r.north], [r.west, r.south]];
   return { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ring] } }] };
+}
+
+// On phones keep the credits folded behind the (i) button. MapLibre unfolds
+// them whenever their content changes (first load, another basemap), so fold
+// them again once the map settles.
+function foldCredits(map) {
+  if (!window.matchMedia("(max-width: 800px)").matches) return;
+  map.once("idle", () => map.getContainer().querySelector(".maplibregl-ctrl-attrib")
+    ?.classList.remove("maplibregl-compact-show"));
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -30,6 +41,10 @@ export default function MapView() {
   live.current = app;
   const hoverId = useRef(null);
   const yearCfg = mode.years[state.year];
+  // Basemap fallback in place: { from, to } (the user's choice, the stand-in).
+  const fallback = useRef(null);
+  const tried = useRef(new Set());
+  const restores = useRef(0);
 
   // Create the map once.
   useEffect(() => {
@@ -84,12 +99,6 @@ export default function MapView() {
       map.addLayer({ id: "rect-fill", type: "fill", source: "rect", paint: { "fill-color": "#2563eb", "fill-opacity": 0.08 } });
       map.addLayer({ id: "rect-line", type: "line", source: "rect", paint: { "line-color": "#2563eb", "line-width": 2, "line-dasharray": [2, 1] } });
       addBasemap(map, live.current.state.basemap, "anchor-base");
-      // On phones keep the credits folded behind the (i) button. MapLibre
-      // unfolds them once they have content, so fold them when it settles.
-      if (window.matchMedia("(max-width: 800px)").matches) {
-        map.once("idle", () => map.getContainer().querySelector(".maplibregl-ctrl-attrib")
-          ?.classList.remove("maplibregl-compact-show"));
-      }
       setReady(true);
     });
 
@@ -130,26 +139,36 @@ export default function MapView() {
       s({ selected: { year: st.year, id: tb.id[i] }, panels: { ...st.panels, bottom: true } });
     });
 
-    // Basemap watchdog: if the chosen basemap keeps failing, use its fallback.
-    let errors = 0, lastError = 0;
-    const tried = new Set();
-    map.on("error", e => {
-      if (e.sourceId !== "basemap") return;
-      const now = Date.now();
-      errors = now - lastError > 15000 ? 1 : errors + 1;
-      lastError = now;
-      if (errors < 6) return;
-      errors = 0;
+    // Basemap watchdog: if the basemap's service is failing (most recent
+    // tiles fail even after retries, not just a few slow ones), switch to
+    // its fallback. The notice offers going back.
+    const unwatch = basemapHealth.subscribe(() => {
+      if (!basemapHealth.failing()) return;
+      basemapHealth.reset();
       const { state: st, set: s, t: tt } = live.current;
       const cur = BASEMAPS.find(b => b.id === st.basemap);
-      tried.add(cur.id);
-      const next = BASEMAPS.find(b => b.id === cur.fallback && !tried.has(b.id));
-      if (next) s({ basemap: next.id, notice: tt.basemapFallback(next.name[st.lang]) });
+      if (!cur?.fallback) return;
+      tried.current.add(cur.id);
+      const next = BASEMAPS.find(b => b.id === cur.fallback && !tried.current.has(b.id));
+      if (!next) return;
+      const from = fallback.current?.from ?? cur.id;
+      fallback.current = { from, to: next.id };
+      const name = BASEMAPS.find(b => b.id === from).name[st.lang];
+      s({
+        basemap: next.id,
+        notice: {
+          text: tt.basemapFallback(next.name[st.lang]),
+          action: { label: tt.basemapBack(name), patch: { basemap: from, notice: null } },
+        },
+      });
     });
+
+    // Basemap tile failures are counted above; log anything else.
+    map.on("error", e => { if (e.sourceId !== "basemap") console.warn("map:", e.sourceId ?? "", e.error?.message ?? e); });
 
     const ro = new ResizeObserver(() => map.resize());
     ro.observe(container.current);
-    return () => { ro.disconnect(); mapBus.detach(); map.remove(); };
+    return () => { unwatch(); ro.disconnect(); mapBus.detach(); map.remove(); };
   }, []);
 
   // Year → swap the tile sources.
@@ -192,9 +211,39 @@ export default function MapView() {
     if (!state.initialBbox && app.selectedIndex != null) mapBus.fitUnit(table, app.selectedIndex);
   }, [ready, table]);
 
-  // Basemap.
+  // Basemap. Any change other than the watchdog's own ends the fallback.
   useEffect(() => {
-    if (ready) addBasemap(mapRef.current, state.basemap, "anchor-base");
+    if (!ready) return;
+    basemapHealth.reset();
+    if (fallback.current && state.basemap !== fallback.current.to) {
+      fallback.current = null;
+      tried.current.clear();
+    }
+    addBasemap(mapRef.current, state.basemap, "anchor-base");
+    foldCredits(mapRef.current);
+  }, [ready, state.basemap]);
+
+  // While on a fallback, check the original service every minute and return
+  // to it after two good answers in a row (at most twice per visit, so a
+  // service that keeps dropping does not make the map flip back and forth).
+  useEffect(() => {
+    const fb = fallback.current;
+    if (!ready || !fb || state.basemap !== fb.to || restores.current >= 2) return;
+    const from = BASEMAPS.find(b => b.id === fb.from);
+    let good = 0, busy = false, stopped = false;
+    const timer = setInterval(async () => {
+      if (busy) return;
+      busy = true;
+      const ok = await probe(from.tiles[0]);
+      busy = false;
+      if (stopped) return;
+      good = ok ? good + 1 : 0;
+      if (good < 2) return;
+      restores.current++;
+      const { set: s, state: st, t: tt } = live.current;
+      s({ basemap: from.id, notice: tt.basemapRestored(from.name[st.lang]) });
+    }, 60000);
+    return () => { stopped = true; clearInterval(timer); };
   }, [ready, state.basemap]);
 
   // WMS overlays.
@@ -296,7 +345,11 @@ export default function MapView() {
           </button>
         )}
       </div>
-      {ready && state.compare && <CompareOverlay mainMap={mapRef.current} />}
+      {ready && state.compare && (
+        <ErrorBoundary onError={() => set({ compare: false, notice: t.compareFailed })}>
+          <CompareOverlay mainMap={mapRef.current} />
+        </ErrorBoundary>
+      )}
     </div>
   );
 }

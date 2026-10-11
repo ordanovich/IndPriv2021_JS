@@ -9,6 +9,7 @@ import MetaBar from "./components/MetaBar";
 import BottomPanel from "./components/BottomPanel";
 import AboutModal from "./components/AboutModal";
 import MapView from "./map/MapView";
+import ErrorBoundary, { CrashScreen } from "./components/ErrorBoundary";
 
 // When the year changes, move the selection to the same territory in the new
 // year: the same unit if its boundaries did not change, otherwise the unit
@@ -73,8 +74,10 @@ function Shell() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <Shell />
-    </AppProvider>
+    <ErrorBoundary fallback={<CrashScreen />}>
+      <AppProvider>
+        <Shell />
+      </AppProvider>
+    </ErrorBoundary>
   );
 }

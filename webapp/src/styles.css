@@ -155,10 +155,23 @@ button:disabled { cursor: default; opacity: 0.45; }
 }
 .qdot { display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 3px; font-size: 11px; font-weight: 700; color: #111827; }
 .notice {
-  position: absolute; left: 10px; right: 10px; top: 46px; background: #fffbeb; border: 1px solid #fcd34d;
+  /* below the Península/Canarias buttons and left of the zoom buttons */
+  position: absolute; left: 10px; right: 56px; top: 88px; z-index: 3; background: #fffbeb; border: 1px solid #fcd34d;
   border-radius: var(--radius); padding: 5px 10px; font-size: 12px; display: flex; justify-content: space-between;
+  align-items: center; gap: 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
 }
 .notice button { border: none; background: none; }
+.notice > span { flex: 1; }
+.notice .notice-action { color: var(--accent); font-weight: 600; text-decoration: underline; white-space: nowrap; margin-left: 8px; }
+
+.crash-screen {
+  max-width: 460px; margin: 15vh auto 0; padding: 24px 16px; text-align: center; color: var(--text); font-size: 15px; line-height: 1.5;
+}
+.crash-screen p { margin: 0 0 14px; }
+.crash-screen p[lang="en"] { color: var(--muted); font-size: 14px; }
+.crash-screen button {
+  margin-top: 6px; padding: 9px 18px; border: none; border-radius: var(--radius); background: var(--accent); color: #fff; font-size: 15px;
+}
 
 .search { position: relative; width: 330px; flex: none; }
 .search input { width: 100%; border: 1px solid var(--line-strong); border-radius: 18px; padding: 6px 28px 6px 28px; background: #fff; }
@@ -422,7 +435,7 @@ button:disabled { cursor: default; opacity: 0.45; }
   .menu-btn .lbl, .menu-btn .caret { display: none; }
   .menu-btn .ico { display: inline; }
   .menu-panel { position: fixed; left: 8px; right: 8px; top: 100px; width: auto; max-height: 70vh; }
-  .notice { top: 52px; }
+  .notice { top: 90px; left: 8px; right: 52px; flex-wrap: wrap; }
 
   /* Map overlays: smaller view buttons, mini legend bottom-left */
   .map-views { top: 8px; left: 8px; }
