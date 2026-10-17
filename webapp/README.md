@@ -91,6 +91,45 @@ carpeta `v2/`; la demo v1 sigue en la raíz). Sin la exportación GeoJSON exacta
 (límite de 1 GB de Pages). Compila fuera de Dropbox porque Dropbox bloquea
 `dist/` mientras sincroniza.
 
+### Versiones guardadas y cómo volver a una
+
+Cada versión que se da por buena queda marcada con dos etiquetas de git, una
+para el código y otra para lo publicado en Pages (que es lo único que guarda
+también los datos, porque `webapp/public/data/` no está en git):
+
+| Etiqueta | Apunta a | Qué es |
+|---|---|---|
+| `v2-preview-2026-10-11` | rama `v2`, commit `612225b` | Código de la versión que revisó el equipo de la SEE (13–17 oct 2026). |
+| `v2-preview-2026-10-11-pages` | rama `gh-pages`, commit `57612e7` | Esa misma versión tal como se publicó en `/v2/`: compilado + datos (`v2/data/ct/`, sin `geo/`). |
+
+Los datos de esa versión son los generados el 2026-10-09 con
+`data_pipeline/02_build_web_data.py` (validación `RESULT: OK`).
+
+Para ver o recuperar esa versión:
+
+```
+git checkout v2-preview-2026-10-11              # el código, para consultarlo (volver: git checkout v2)
+git diff v2-preview-2026-10-11 -- webapp/src    # qué ha cambiado desde entonces
+```
+
+Para volver a publicar en Pages exactamente lo de entonces (deshace lo
+publicado después en `/v2/`, sin tocar la demo v1 de la raíz). Se hace en una
+copia de trabajo fuera de Dropbox, como `publish-preview.sh` (Git Bash):
+
+```
+git fetch origin gh-pages --tags
+git worktree add -f -B gh-pages "$TEMP/pages-restore" origin/gh-pages
+cd "$TEMP/pages-restore"
+git rm -rq v2 && git checkout v2-preview-2026-10-11-pages -- v2
+git commit -m "v2 preview: volver a la versión del 2026-10-11"
+git push origin gh-pages
+cd - && git worktree remove --force "$TEMP/pages-restore"
+```
+
+Antes de cada nueva publicación que sustituya a una revisada, crear sus dos
+etiquetas igual (`git tag -a <nombre> <commit> -m "..."` y `git push origin --tags`)
+y añadir la fila a esta tabla.
+
 ### Comprobar la interfaz sin abrir el navegador
 
 `scripts/ui-check/` (capturas, emulación de iPhone, varias resoluciones): ver su README.
