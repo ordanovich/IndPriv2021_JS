@@ -17,20 +17,28 @@ function boxOf(table, test) {
   return w < e ? { west: w, south: s, east: e, north: n } : null;
 }
 
-const inSpain = (lon, lat) => lon > -18.5 && lon < 4.6 && lat > 27.4 && lat < 44.0;
+// Last guard before moving the map: a point inside Spain's extent (this also
+// rejects the 0,0 that CartoCiudad gives when it has no point to hand).
+const inSpain = (lon, lat) => Number.isFinite(lon) && Number.isFinite(lat) &&
+  lon > -18.5 && lon < 4.6 && lat > 27.4 && lat < 44.0;
 const within = (p, ms) => Promise.race([p, new Promise(r => setTimeout(() => r(null), ms))]);
 
 // Addresses and postal codes. CartoCiudad (official, IGN) and Photon
 // (OpenStreetMap) are asked at once; CartoCiudad's answers go first when it
 // responds in time, Photon covers the times it does not.
+// CartoCiudad's candidates carry coordinates only for street numbers; streets,
+// postcodes and towns come with 0,0 and are located with `find` when chosen.
 async function geocode(q, signal, onPartial) {
   const cc = fetch(GEOCODER.cartociudad(q), { signal }).then(r => r.json()).then(arr =>
-    arr.filter(a => Number.isFinite(a.lat) && Number.isFinite(a.lng)).map(a => ({
-      kind: "addr", label: a.address, lon: a.lng, lat: a.lat,
-      sub: [a.postalCode, a.muni, a.province].filter(Boolean).join(" · "),
-    }))).catch(() => null);
+    arr.filter(a => a.id != null || inSpain(a.lng, a.lat)).map(a => {
+      const at = inSpain(a.lng, a.lat) ? { lon: a.lng, lat: a.lat } : { lon: null, lat: null, find: a };
+      return a.type === "Codpost"
+        ? { kind: "postcode", label: `CP ${a.address}`, sub: [a.muni, a.province].filter(Boolean).join(", "), ...at }
+        : { kind: "addr", label: a.address, sub: [a.postalCode, a.muni, a.province].filter(Boolean).join(" · "), ...at };
+    })).catch(() => null);
+  // Photon's bbox also takes in Portugal and north Africa: keep Spain only.
   const ph = fetch(GEOCODER.photon(q), { signal }).then(r => r.json()).then(js =>
-    (js.features || []).filter(f => inSpain(...f.geometry.coordinates)).map(f => {
+    (js.features || []).filter(f => f.properties.countrycode === "ES" && inSpain(...f.geometry.coordinates)).map(f => {
       const p = f.properties;
       const [lon, lat] = f.geometry.coordinates;
       if (p.type === "other" && /^\d{5}$/.test(p.name || "")) {
@@ -45,11 +53,17 @@ async function geocode(q, signal, onPartial) {
     })).catch(() => null);
   let a = null, b = null;
   const merged = () => {
-    const seen = new Set();
-    return [...(a || []), ...(b || [])].filter(r => {
-      const k = `${r.label}|${r.lon.toFixed(4)}|${r.lat.toFixed(4)}`;
-      return !seen.has(k) && seen.add(k);
-    });
+    const out = new Map();
+    for (const r of [...(a || []), ...(b || [])]) {
+      // A postcode is listed once, whichever service found it, keeping the
+      // place name if either gives one.
+      const k = r.kind === "postcode" ? r.label
+        : r.find ? `${r.label}|${r.find.type}|${r.find.id}` : `${r.label}|${r.lon.toFixed(4)}|${r.lat.toFixed(4)}`;
+      const prev = out.get(k);
+      if (!prev) out.set(k, r);
+      else if (!prev.sub && r.sub) out.set(k, { ...prev, sub: r.sub });
+    }
+    return [...out.values()];
   };
   // Whichever answers first is shown at once; the other is merged in later.
   await Promise.all([
@@ -57,6 +71,15 @@ async function geocode(q, signal, onPartial) {
     within(ph, 8000).then(r => { b = r; onPartial(merged()); }),
   ]);
   return merged();
+}
+
+// Coordinates of a chosen result, asking CartoCiudad for them when needed.
+async function locate(r) {
+  if (!r.find) return inSpain(r.lon, r.lat) ? r : null;
+  const f = r.find;
+  const js = await within(fetch(GEOCODER.cartociudadFind(f.id, f.type, f.portalNumber))
+    .then(res => res.json()).catch(() => null), 8000);
+  return js && inSpain(js.lng, js.lat) ? { ...r, lon: js.lng, lat: js.lat } : null;
 }
 
 let marker = null;
@@ -126,11 +149,15 @@ export default function Search() {
 
   const results = [...local, ...addresses.filter(a => a.kind === "postcode"), ...addresses.filter(a => a.kind === "addr")];
 
-  const choose = r => {
+  const choose = async r => {
     setOpen(false);
-    setQ(r.kind === "unit" ? r.label : r.label);
-    const map = mapBus.get();
+    setQ(r.label);
     if (marker) { marker.remove(); marker = null; }
+    if (r.kind === "postcode" || r.kind === "addr") {
+      r = await locate(r);
+      if (!r) { set({ notice: t.searchNotFound }); return; }
+    }
+    const map = mapBus.get();
     if (r.kind === "unit") {
       set({ selected: { year: state.year, id: table.id[r.i] } });
       mapBus.fitUnit(table, r.i);

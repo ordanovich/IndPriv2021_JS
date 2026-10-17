@@ -57,7 +57,7 @@ export default function Legend() {
                     title={t.legendClick} aria-pressed={on} onClick={() => toggle(q)}>
               <i className="sw" style={{ background: colors[q - 1] }} />
               <span className="lbl">
-                <b>Q{q}</b> {t.qLabels[q - 1]}
+                <b>Q{q}</b> <span title={t.qLabels[q - 1]}>{t.qShort[q - 1]}</span>
                 {b && <small>{fmtNum(lang, b[q - 1])} – {fmtNum(lang, b[q])}</small>}
               </span>
               <span className="bar"><span style={{ width: pct + "%", background: colors[q - 1] }} /></span>
