@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { EMPTY_FILTERS, MOBILE_QUERY, useApp } from "../state";
+import { EMPTY_FILTERS, useApp } from "../state";
 import { activeFilterCount } from "../data";
 import { BASEMAPS, MAX_BOUNDS, PALETTES, VIEWS, WMS_CATALOG, wmsTileUrl } from "../config";
 import { mapBus } from "./mapBus";
@@ -21,11 +21,10 @@ function rectGeoJSON(r) {
   return { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ring] } }] };
 }
 
-// On phones keep the credits folded behind the (i) button. MapLibre unfolds
-// them whenever their content changes (first load, another basemap), so fold
-// them again once the map settles.
+// Keep the credits folded behind the (i) button (they open on tap/click).
+// MapLibre unfolds them whenever their content changes (first load, another
+// basemap), so fold them again once the map settles.
 function foldCredits(map) {
-  if (!window.matchMedia(MOBILE_QUERY).matches) return;
   map.once("idle", () => map.getContainer().querySelector(".maplibregl-ctrl-attrib")
     ?.classList.remove("maplibregl-compact-show"));
 }
@@ -367,8 +366,8 @@ export default function MapView() {
         <div className="map-loader" role="status" aria-live="polite">
           <div className="map-loader-card">
             <img src="images/logo.jpg" alt="" onError={e => { e.currentTarget.style.display = "none"; }} />
-            <span className="spinner" aria-hidden="true" />
-            <span>{t.loadingMap}</span>
+            <span className="loader-bars" aria-hidden="true"><b /><b /><b /><b /><b /></span>
+            <span className="loader-text">{t.loadingMap}</span>
           </div>
         </div>
       )}
