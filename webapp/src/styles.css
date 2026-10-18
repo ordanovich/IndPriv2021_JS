@@ -363,6 +363,13 @@ button:disabled { cursor: default; opacity: 0.45; }
 .atlas-side { width: 240px; flex: none; padding: 10px 12px; border-left: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
 /* Scroll instead of squashing the controls when the panel is short */
 .atlas-side > * { flex: none; }
+/* Continuo / Quintiles: full width, two equal buttons that read as buttons */
+.atlas-side .segmented { display: flex; width: 100%; border-radius: 8px; }
+.atlas-side .segmented button {
+  flex: 1; padding: 7px 10px; font-size: 13px; color: var(--text); background: #f3f4f6; cursor: pointer;
+}
+.atlas-side .segmented button:hover:not(.on) { background: #e5e7eb; }
+.atlas-side .segmented button.on { background: var(--text); color: #fff; }
 .atlas-nav { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 .atlas-nav button { border: 1px solid var(--line-strong); background: #fff; border-radius: 4px; padding: 1px 9px; }
 .kv { display: flex; justify-content: space-between; font-size: 12px; }
@@ -589,6 +596,7 @@ button:disabled { cursor: default; opacity: 0.45; }
   .app.m .bottom.sheet .details.empty { padding: 16px; }
   .app.m .bottom.sheet .tabs { position: sticky; top: 0; z-index: 2; background: #fff; border-bottom: 1px solid var(--line); }
   .app.m .bottom.sheet .tabs button { min-height: 44px; padding: 0 12px; font-size: 13px; }
+  .app.m .atlas-side .segmented button { min-height: 44px; font-size: 14px; }
 
   /* Menú: sheet from the bottom over a dimmed map */
   .m-menu { position: fixed; inset: 0; z-index: 50; background: rgba(17, 24, 39, 0.32); display: flex; align-items: flex-end; }
@@ -602,10 +610,11 @@ button:disabled { cursor: default; opacity: 0.45; }
   .m-menu-title { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .m-menu-title b { font-size: 15px; }
   .m-menu-title small { font-size: 12px; color: var(--muted); }
-  .m-quick { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .m-quick { flex: none; display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
   .m-quick-item { display: flex; align-items: center; gap: 10px; }
   .m-quick-item .field-label { margin: 0; }
-  .m-quick .segmented button { min-height: 44px; min-width: 64px; padding: 0 12px; font-size: 14px; }
+  .m-quick .segmented button { min-height: 44px; min-width: 52px; padding: 0 12px; font-size: 14px; }
+  .m-quick .m-chip { flex: 1; min-width: 0; justify-content: center; white-space: nowrap; }
   .m-chip {
     min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid var(--line-strong); background: #fff;
     font-size: 14px; font-weight: 600; color: var(--text); display: inline-flex; align-items: center; gap: 6px;

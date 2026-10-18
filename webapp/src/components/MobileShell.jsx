@@ -100,10 +100,9 @@ export function MobileMenu({ onAbout }) {
         </div>
         {/* Quick settings, in sight as soon as the Menú opens */}
         <div className="m-quick">
-          <div className="m-quick-item">
-            <span className="field-label">{t.language}</span>
+          <div className="m-quick-item" aria-label={t.language}>
             <Segmented value={lang} onChange={v => set({ lang: v })}
-                       options={[{ value: "es", label: "Español" }, { value: "en", label: "English" }]} />
+                       options={[{ value: "es", label: "ES", title: "Español" }, { value: "en", label: "EN", title: "English" }]} />
           </div>
           <button className={"m-chip" + (state.colorblind ? " on" : "")} aria-pressed={state.colorblind}
                   onClick={() => set({ colorblind: !state.colorblind })}>
