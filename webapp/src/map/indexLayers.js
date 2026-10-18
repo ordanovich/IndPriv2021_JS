@@ -93,6 +93,22 @@ export function setIndexYear(map, yearCfg) {
   map.getSource("units").setUrl(pmtiles(yearCfg.tiles));
   map.getSource("bounds").setUrl(pmtiles(yearCfg.bounds));
   map.getSource("gaps").setUrl(pmtiles(yearCfg.gaps));
+  nudgeUntilLoaded(map);
+}
+
+// After setUrl the map sometimes stays grey until the next interaction (team
+// review, 2011 ↔ 2021 in Chrome and Edge): ask for repaints until the new tiles
+// are in, for at most ~8 s.
+function nudgeUntilLoaded(map) {
+  let tries = 0;
+  const loaded = () => ["units", "bounds", "gaps"].every(id => map.getSource(id) && map.isSourceLoaded(id));
+  const tick = () => {
+    if (!map.getStyle()) return;              // map removed meanwhile
+    map.triggerRepaint();
+    if (++tries < 32 && !(loaded() && map.areTilesLoaded())) setTimeout(tick, 250);
+  };
+  map.once("sourcedata", tick);
+  setTimeout(tick, 250);
 }
 
 // Section fills and outlines, and the hatched areas with no sections.

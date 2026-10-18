@@ -27,8 +27,8 @@ export default function BottomPanel() {
           <span>{t.details}</span>
           {table && selectedIndex != null && (
             <span className="title-actions">
-              <button className="btn small" onClick={() => mapBus.fitUnit(table, selectedIndex)}>⌖ {t.flyTo}</button>
-              <button className="btn small" title={t.clearSelection + " (Esc)"} onClick={() => set({ selected: null })}>✕ {t.clearSelection}</button>
+              <button className="btn small" title={t.flyTo} onClick={() => mapBus.fitUnit(table, selectedIndex)}>⌖<span className="lbl"> {t.flyTo}</span></button>
+              <button className="btn small" title={t.clearSelection + " (Esc)"} onClick={() => set({ selected: null })}>✕<span className="lbl"> {t.clearSelection}</span></button>
             </span>
           )}
         </div>

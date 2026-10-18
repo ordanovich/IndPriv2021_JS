@@ -29,6 +29,7 @@ function OtherYear({ i }) {
             {matches.slice(0, stable ? 1 : 6).map(m => (
               <li key={m.i}>
                 <button className="link" title={t.goToYear(otherYear)} onClick={() => go(m.i)}>{other.id[m.i]}</button>
+                <span className="muted small">{other.names.mun[other.mun[m.i]]}</span>
                 <span>IP <b>{fmtNum(state.lang, other.ip[m.i])}</b></span>
                 <QuintileChip q={other.q[m.i]} colors={colors} />
                 {!stable && <small className="muted">{t.overlapOf(m.pThis, m.pOther)}</small>}
@@ -52,12 +53,14 @@ export default function Details() {
   const pct = percentile(table, ip);
   return (
     <div className="details">
+      {/* Sticky: the unit and where it is stay in view while the ficha scrolls */}
       <div className="details-head">
-        <div>
-          <div className="details-id">{mode.idLabel} {table.id[i]}</div>
-          <div className="details-name">{table.names.mun[table.mun[i]]}</div>
-          <div className="muted small">{table.names.prov[table.prov[i]]} · {table.names.ccaa[table.ccaa[i]]}</div>
-        </div>
+        <div className="details-id">{mode.idLabel} {table.id[i]}</div>
+        <dl className="details-place">
+          <dt>{t.municipality}</dt><dd className="details-name">{table.names.mun[table.mun[i]] ?? "—"}</dd>
+          <dt>{t.province}</dt><dd>{table.names.prov[table.prov[i]] ?? "—"}</dd>
+          <dt>{t.ccaa}</dt><dd>{table.names.ccaa[table.ccaa[i]] ?? "—"}</dd>
+        </dl>
       </div>
       <div className="details-ip">
         <div>
