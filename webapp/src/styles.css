@@ -483,7 +483,9 @@ button:disabled { cursor: default; opacity: 0.45; }
   .mini-legend .ml-open { font-size: 11.5px; font-weight: 600; margin-left: 6px; color: var(--accent); padding: 0 2px; gap: 3px; }
   /* quintiles selected: the others fade, the selected get a dark ring */
   .mini-legend.has-sel .ml-q:not(.on) i { opacity: 0.3; }
-  .mini-legend .ml-q.on i { box-shadow: 0 0 0 2px #111827; }
+  /* ring drawn inside the chip: iPhone Safari leaves a stale frame when a ring
+     painted outside the chip is removed while the chip fades */
+  .mini-legend .ml-q.on i { box-shadow: inset 0 0 0 2px #111827; }
   .mini-legend button { -webkit-tap-highlight-color: transparent; }
   .mini-legend .ml-q:focus-visible { outline: none; }
   .mini-legend .ml-q:focus-visible i { outline: 2px solid var(--accent); outline-offset: 2px; }
