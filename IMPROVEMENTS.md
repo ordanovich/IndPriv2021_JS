@@ -1,5 +1,5 @@
 # Atlas de Privación de España — Improvement Brief
-> Instructions for an autonomous Claude Code session. Read this document in full before touching any file.
+> Development brief. Read this document in full before touching any file.
 
 ---
 
