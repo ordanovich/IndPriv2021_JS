@@ -145,8 +145,9 @@ button:disabled { cursor: default; opacity: 0.45; }
   flex: none; height: 44px; display: flex; align-items: center; gap: 14px; padding: 0 10px;
   background: var(--panel); border-bottom: 1px solid var(--line); position: relative; z-index: 3;
 }
-.meta { flex: 1; min-width: 0; display: flex; gap: 10px; align-items: baseline; white-space: nowrap; overflow: hidden; }
-.meta span { color: var(--muted); font-size: 12px; flex: none; }
+.meta-title { flex: none; white-space: nowrap; }
+.meta { flex: 1 1 0; min-width: 0; display: flex; gap: 10px; align-items: baseline; white-space: nowrap; overflow: hidden; }
+.meta span { color: var(--muted); font-size: 12px; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .meta span.src { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .meta span::before { content: "·"; margin-right: 10px; color: var(--line-strong); }
 .hover {
@@ -173,7 +174,8 @@ button:disabled { cursor: default; opacity: 0.45; }
   margin-top: 6px; padding: 9px 18px; border: none; border-radius: var(--radius); background: var(--accent); color: #fff; font-size: 15px;
 }
 
-.search { position: relative; width: 330px; flex: none; }
+/* shrinks first (down to 180 px) so the title above the map always fits */
+.search { position: relative; flex: 0 1 330px; min-width: 180px; }
 .search input { width: 100%; border: 1px solid var(--line-strong); border-radius: 18px; padding: 6px 28px 6px 28px; background: #fff; }
 .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-52%); color: var(--muted); font-size: 15px; }
 .search-clear { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); border: none; background: none; color: var(--muted); }
@@ -188,16 +190,27 @@ button:disabled { cursor: default; opacity: 0.45; }
 .search-results li.group { cursor: default; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); font-weight: 700; padding-top: 8px; }
 .search-results li.none { cursor: default; color: var(--muted); }
 
-.menus { flex: none; display: flex; gap: 6px; }
-.menu { position: relative; }
+.menus { flex: 0 1 auto; min-width: 0; display: flex; gap: 6px; }
+.menu { position: relative; flex: none; }
+/* Base map button when the bar is short of space (container queries on .metabar):
+   "Mapa base: name" → "🗺 name…" → "🗺"; the caret always stays */
+.metabar { container-type: inline-size; }
+.menus .menu:first-child { flex: 0 1 auto; min-width: 0; }
+.menus .menu:first-child .menu-btn { max-width: 100%; overflow: hidden; }
+.menus .menu:first-child .lbl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@container (max-width: 760px) {
+  .menus .menu:first-child .pre { display: none; }
+  .menus .menu:first-child .ico { display: inline; }
+}
+@container (max-width: 560px) { .menus .menu:first-child .lbl { display: none; } }
 .menu-btn {
   border: 1px solid var(--line-strong); background: #fff; border-radius: var(--radius); padding: 4px 10px;
   font-size: 12.5px; white-space: nowrap; display: flex; align-items: center; gap: 5px; max-width: 260px;
 }
-.menu-btn b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+.menu-btn b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .menu-btn:hover, .menu-btn.open { background: #f3f4f6; }
 .menu-btn.active { border-color: var(--accent); color: var(--accent); }
-.menu-btn .caret { color: var(--muted); font-size: 10px; }
+.menu-btn .caret { color: var(--muted); font-size: 10px; flex: none; }
 .menu-btn .plus { font-weight: 800; font-size: 15px; line-height: 1; }
 .menu-btn .badge { margin-left: 2px; }
 .menu-panel {
@@ -449,7 +462,7 @@ button:disabled { cursor: default; opacity: 0.45; }
   .search { flex: 1; width: auto; min-width: 0; }
   .search input { padding: 7px 28px; }
   .search-results { position: fixed; left: 8px; right: 8px; top: 100px; width: auto; max-height: 60vh; }
-  .meta, .hover { display: none; }
+  .meta, .meta-title, .hover { display: none; }
   .menus { gap: 4px; }
   .menu-btn { padding: 6px 9px; }
   .menu-btn .lbl, .menu-btn .caret { display: none; }

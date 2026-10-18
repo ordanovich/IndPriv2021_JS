@@ -47,8 +47,9 @@ export default function MetaBar() {
   return (
     <div className="metabar">
       <Search />
+      {/* the title never shrinks; the count only uses the space left over */}
+      <strong className="meta-title" title={src}>{t.index} {state.year}</strong>
       <div className="meta" title={src}>
-        <strong>{t.index} {state.year}</strong>
         {table && <span>{t.unitsCount(fmtInt(lang, table.n), mode.units[lang])}</span>}
       </div>
       <HoverReadout />

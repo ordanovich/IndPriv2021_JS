@@ -126,7 +126,7 @@ export function BasemapMenu() {
   const { state, t } = useApp();
   const current = BASEMAPS.find(b => b.id === state.basemap);
   return (
-    <Menu label={<><span className="ico">🗺</span><span className="lbl">{t.basemap}: <b>{current?.name[state.lang]}</b></span></>}>
+    <Menu label={<><span className="ico">🗺</span><span className="lbl"><span className="pre">{t.basemap}: </span><b>{current?.name[state.lang]}</b></span></>}>
       <BasemapList />
     </Menu>
   );
