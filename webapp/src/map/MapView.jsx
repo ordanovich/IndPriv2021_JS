@@ -422,7 +422,11 @@ export default function MapView() {
           const q = k + 1, on = state.filters.quintiles.includes(q);
           return (
             <button key={q} className={"ml-q" + (on ? " on" : "")} aria-pressed={on} title={`Q${q} · ${t.qLabels[k]}`}
-                    onClick={() => app.setFilters({ quintiles: on ? state.filters.quintiles.filter(x => x !== q) : [...state.filters.quintiles, q].sort() })}>
+                    onClick={e => {
+                      // a tap would otherwise leave the focus ring on the chip
+                      if (e.detail > 0) e.currentTarget.blur();
+                      app.setFilters({ quintiles: on ? state.filters.quintiles.filter(x => x !== q) : [...state.filters.quintiles, q].sort() });
+                    }}>
               <i data-q={q} style={{ background: c }}>Q{q}</i>
             </button>
           );

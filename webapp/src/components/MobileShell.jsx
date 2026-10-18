@@ -105,7 +105,7 @@ export function MobileMenu({ onAbout }) {
                        options={[{ value: "es", label: "ES", title: "Español" }, { value: "en", label: "EN", title: "English" }]} />
           </div>
           <button className={"m-chip" + (state.colorblind ? " on" : "")} aria-pressed={state.colorblind}
-                  onClick={() => set({ colorblind: !state.colorblind })}>
+                  title={t.colorblindTitle} onClick={() => set({ colorblind: !state.colorblind })}>
             <span aria-hidden="true">◑</span> {t.colorblind}
           </button>
         </div>

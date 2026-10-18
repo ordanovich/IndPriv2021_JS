@@ -29,7 +29,7 @@ export default function Header({ onAbout }) {
         <button className="hbtn" onClick={() => startTour(t, false).catch(() => {})} title={t.showTour}>? <span className="lbl">{t.guide}</span></button>
         <button className="hbtn" onClick={onAbout} title={t.about}>ⓘ <span className="lbl">{t.about}</span></button>
         <button className="hbtn" onClick={share} title={t.share}>{shared ? "✓" : "🔗"} <span className="lbl">{shared ? t.shareDone : t.share}</span></button>
-        <button className={"hbtn icon" + (state.colorblind ? " on" : "")} title={t.colorblind}
+        <button className={"hbtn icon" + (state.colorblind ? " on" : "")} title={t.colorblindTitle} aria-label={t.colorblind}
                 aria-pressed={state.colorblind} onClick={() => set({ colorblind: !state.colorblind })}>◑</button>
         <button className="hbtn lang" title={t.langSwitchTitle}
                 onClick={() => set({ lang: state.lang === "es" ? "en" : "es" })}>
