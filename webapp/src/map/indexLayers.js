@@ -16,8 +16,8 @@ const abs = rel => new URL(rel, document.baseURI).href;
 export const pmtiles = rel => "pmtiles://" + abs(rel);
 
 const DATA_ATTRIBUTION = {
-  es: "Índice: Duque et al. (2026), Sociedad Española de Epidemiología · Secciones: © INE",
-  en: "Index: Duque et al. (2026), Spanish Society of Epidemiology · Tracts: © INE",
+  es: "Índice: Duque et al., Gaceta Sanitaria, 2026 (in press) · Secciones: © INE",
+  en: "Index: Duque et al., Gaceta Sanitaria, 2026 (in press) · Tracts: © INE",
 };
 
 // ── Style expressions ────────────────────────────────────────────────────────
