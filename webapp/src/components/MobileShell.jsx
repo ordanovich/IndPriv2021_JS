@@ -130,9 +130,9 @@ export function MobileMenu({ onAbout }) {
   );
 }
 
-// Starts the first-visit tour once the phone layout is on screen
-export function TourStarter() {
+// Starts the first-visit tour of the layout on screen (phone or desktop)
+export function TourStarter({ mobile }) {
   const { t } = useApp();
-  useEffect(() => { maybeStartTour(t); }, []);
+  useEffect(() => { maybeStartTour(t, mobile); }, [mobile]);
   return null;
 }

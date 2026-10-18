@@ -15,6 +15,7 @@ import CompareOverlay from "./CompareOverlay";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { useIsMobile } from "../hooks";
 import { INTRO_ON, markIntroPending, prepareFlight, runIntro } from "./intro";
+import IntroSplash from "../components/IntroSplash";
 
 function rectGeoJSON(r) {
   if (!r) return { type: "FeatureCollection", features: [] };
@@ -26,8 +27,9 @@ function rectGeoJSON(r) {
 // MapLibre unfolds them whenever their content changes (first load, another
 // basemap), so fold them again once the map settles.
 // First loader: shown at least this long from opening the page, then dissolved
-const BOOT_MIN_MS = 3000;
-const LOADER_FADE_MS = 700;
+// (the animated version's splash a little longer, and it opens more slowly)
+const BOOT_MIN_MS = INTRO_ON ? 3600 : 3000;
+const LOADER_FADE_MS = INTRO_ON ? 1000 : 700;
 
 function foldCredits(map) {
   map.once("idle", () => map.getContainer().querySelector(".maplibregl-ctrl-attrib")
@@ -398,7 +400,8 @@ export default function MapView() {
         <button onClick={() => mapRef.current?.fitBounds(VIEWS.canarias, { duration: 800 })}>{t.canarias}</button>
       </div>
       {state.drawing && <div className="map-hint">{t.drawing} · Esc</div>}
-      {(loading === "map" || loading === "fading") && (
+      {INTRO_ON && (loading === "map" || loading === "fading") && <IntroSplash leaving={loading === "fading"} />}
+      {!INTRO_ON && (loading === "map" || loading === "fading") && (
         <div className={"map-loader" + (loading === "fading" ? " out" : "")} role="status" aria-live="polite">
           <div className="map-loader-card">
             <img src="images/logo.jpg" alt="" onError={e => { e.currentTarget.style.display = "none"; }} />

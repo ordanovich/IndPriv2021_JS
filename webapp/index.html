@@ -24,7 +24,16 @@
       .boot span:last-child { animation: boot-breathe 1.6s ease-in-out infinite; }
       @keyframes boot-breathe { 50% { opacity: .55; } }
       @media (prefers-reduced-motion: reduce) { .boot .bars b, .boot span:last-child { animation: none; } .boot .bars b { transform: scaleY(.7); } }
+      /* Animated version (?intro=1): only the splash's background until it takes over */
+      html[data-intro] .boot { background: #f6f8fb; }
+      html[data-intro] .boot > * { display: none; }
     </style>
+    <script>
+      try {
+        if (new URLSearchParams(location.search).get("intro") === "1" && !matchMedia("(prefers-reduced-motion: reduce)").matches)
+          document.documentElement.dataset.intro = "pending";
+      } catch (_) {}
+    </script>
   </head>
   <body>
     <div id="root"><div class="boot" role="status"><img src="images/logo.jpg" alt="Sociedad Española de Epidemiología" /><span class="bars" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b></span><span>Cargando el mapa…</span></div></div>

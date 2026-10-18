@@ -74,7 +74,7 @@ function Shell() {
       {mobile && <MobileMenu onAbout={() => setAbout(true)} />}
       <AboutModal open={about} onClose={() => setAbout(false)} />
       <SelectionCarrier />
-      {mobile && <TourStarter />}
+      <TourStarter mobile={mobile} />
     </div>
   );
 }

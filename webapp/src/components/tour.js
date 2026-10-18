@@ -1,18 +1,24 @@
-// Guided tour for phones (Driver.js, MIT). Driver.js and its styles are loaded
-// only when the tour runs, so the desktop bundle does not grow.
-// Shown once: a flag in localStorage. If storage is blocked (private mode),
-// the tour is not shown automatically; "Ver guía" in the Menú still works.
-const KEY = "ip21.tour.v1";
+// Guided tour (Driver.js, MIT) for phones and for the desktop layout.
+// Driver.js and its styles are loaded only when the tour runs.
+// Shown once per layout: a flag in localStorage. If storage is blocked
+// (private mode) it is not shown automatically; "Ver guía" still works.
+const KEYS = { mobile: "ip21.tour.v1", desktop: "ip21.tour.desktop.v1" };
 
-// Elements highlighted, in the order of t.tour (i18n.js). ".tour-pin" is a
-// marker added in the middle of the map for the "select a tract" step.
-const TARGETS = [".m-search", ".m-year", ".tour-pin", ".sheet-grip", ".m-menu-btn"];
+// Elements highlighted, in the order of t.tour / t.tourDesktop (i18n.js).
+// ".tour-pin" is a marker added in the middle of the map. Steps whose
+// element is not on screen (e.g. a collapsed panel) are left out.
+const TARGETS = {
+  mobile: [".m-search", ".m-year", ".tour-pin", ".sheet-grip", ".m-menu-btn"],
+  desktop: [".metabar .search", ".side.left .layers .segmented", ".side.left .section", ".tour-pin", ".bottom",
+            ".side.right .legend", ".side.right .section:last-child", ".metabar .menus", ".header-actions"],
+};
+const layout = mobile => (mobile ? "mobile" : "desktop");
 
-function seen() {
-  try { return window.localStorage.getItem(KEY) === "1"; } catch (_) { return true; }
+function seen(mobile) {
+  try { return window.localStorage.getItem(KEYS[layout(mobile)]) === "1"; } catch (_) { return true; }
 }
-function markSeen() {
-  try { window.localStorage.setItem(KEY, "1"); } catch (_) { /* storage blocked */ }
+function markSeen(mobile) {
+  try { window.localStorage.setItem(KEYS[layout(mobile)], "1"); } catch (_) { /* storage blocked */ }
 }
 
 function addPin() {
@@ -25,7 +31,7 @@ function addPin() {
 }
 const removePin = () => document.querySelectorAll(".tour-pin").forEach(p => p.remove());
 
-export async function startTour(t) {
+export async function startTour(t, mobile = true) {
   const [{ driver }] = await Promise.all([import("driver.js"), import("driver.js/dist/driver.css")]);
   addPin();
   const steps = [
@@ -35,8 +41,11 @@ export async function startTour(t) {
         showButtons: ["next"], nextBtnText: t.tourStart, popoverClass: "ip21-tour ip21-tour-welcome",
       },
     },
-    ...TARGETS
-      .map((element, k) => ({ element, popover: { title: t.tour[k][0], description: t.tour[k][1] } }))
+    ...TARGETS[layout(mobile)]
+      .map((element, k) => {
+        const [title, description] = (mobile ? t.tour : t.tourDesktop)[k];
+        return { element, popover: { title: mobile ? title : `${k + 1} · ${title}`, description } };
+      })
       .filter(s => document.querySelector(s.element)),
   ];
   const d = driver({
@@ -61,19 +70,19 @@ export async function startTour(t) {
       skip.addEventListener("click", () => drv.destroy());
       popover.footerButtons.prepend(skip);
     },
-    onDestroyed: () => { removePin(); markSeen(); },
+    onDestroyed: () => { removePin(); markSeen(mobile); },
   });
   d.drive();
 }
 
 // First visit: start once the map has loaded (the loader is gone), at most ~15 s
-export function maybeStartTour(t) {
-  if (seen()) return;
+export function maybeStartTour(t, mobile = true) {
+  if (seen(mobile)) return;
   let waited = 0;
   const go = () => {
     const busy = document.querySelector(".map-loader") || document.documentElement.dataset.intro;
     if (busy && waited < 15000) { waited += 300; setTimeout(go, 300); return; }
-    setTimeout(() => startTour(t).catch(() => { removePin(); }), 500);
+    setTimeout(() => startTour(t, mobile).catch(() => { removePin(); }), 500);
   };
   go();
 }

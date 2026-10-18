@@ -13,11 +13,11 @@ export const INTRO_ON = typeof window !== "undefined"
 
 const FLIGHT_MS = 1700;
 const STEP_MS = 250;                 // between quintile classes
-const UI_MS = 1300;                  // until the interface has fully arrived
+const UI_MS = 2100;                  // until the interface has fully arrived
 const easeOut = t => 1 - Math.pow(1 - t, 3);
 const html = () => document.documentElement;
 
-// From the first render: interface hidden, loader full screen
+// From the first render (the splash covers the screen meanwhile)
 export function markIntroPending() {
   if (INTRO_ON) html().dataset.intro = "pending";
 }
@@ -26,6 +26,15 @@ export function markIntroPending() {
 export function prepareFlight(map) {
   const z = map.getZoom(), c = map.getCenter();
   map.jumpTo({ center: [c.lng + 4, c.lat + 3.5], zoom: Math.max(map.getMinZoom(), z - 1.3) });
+}
+
+// Histogram bars rise left to right; legend bars grow in quintile order
+function staggerBars(on) {
+  const rects = [...document.querySelectorAll(".hist rect")];
+  rects.forEach((r, i) => { r.style.animationDelay = on ? `${0.55 + (i / Math.max(1, rects.length)) * 0.7}s` : ""; });
+  for (const el of document.querySelectorAll(".legend-row[data-q] .bar span")) {
+    el.style.animationDelay = on ? `${0.35 + Number(el.closest("[data-q]").dataset.q) * 0.14}s` : "";
+  }
 }
 
 function paintLegend(k) {
@@ -48,11 +57,13 @@ export function runIntro(map, { flight, getOpacity }) {
     if (flight && map.isMoving()) map.stop();
     if (map.getLayer("units-fill")) map.setPaintProperty("units-fill", "fill-opacity", getOpacity());
     paintLegend(null);
+    staggerBars(false);
     delete html().dataset.intro;
     for (const ev of ["pointerdown", "wheel", "keydown"]) window.removeEventListener(ev, end, true);
   };
   for (const ev of ["pointerdown", "wheel", "keydown"]) window.addEventListener(ev, end, true);
 
+  staggerBars(true);
   html().dataset.intro = "run";
   if (flight) map.fitBounds(VIEWS.peninsula, { duration: FLIGHT_MS, easing: easeOut });
 

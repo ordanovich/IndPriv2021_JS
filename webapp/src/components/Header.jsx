@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useApp } from "../state";
 import { copyText } from "./ui";
+import { startTour } from "./tour";
 
 export default function Header({ onAbout }) {
   const { state, set, setPanels, t } = useApp();
@@ -25,6 +26,7 @@ export default function Header({ onAbout }) {
         </div>
       </div>
       <nav className="header-actions">
+        <button className="hbtn" onClick={() => startTour(t, false).catch(() => {})} title={t.showTour}>? <span className="lbl">{t.guide}</span></button>
         <button className="hbtn" onClick={onAbout} title={t.about}>ⓘ <span className="lbl">{t.about}</span></button>
         <button className="hbtn" onClick={share} title={t.share}>{shared ? "✓" : "🔗"} <span className="lbl">{shared ? t.shareDone : t.share}</span></button>
         <button className={"hbtn icon" + (state.colorblind ? " on" : "")} title={t.colorblind}
