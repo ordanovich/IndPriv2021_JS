@@ -49,7 +49,7 @@ export default function CompareOverlay({ mainMap }) {
       addIndexSources(m, mode.years[other], live.current.lang);
       addUnitLayers(m);
       addBoundaryLayers(m);
-      addBasemap(m, live.current.basemap, "anchor-base");
+      addBasemap(m, live.current.basemap, "anchor-base").catch(() => {});
       if (overlay.current === m) setLoaded(m);
     });
     const sync = () => m.jumpTo({ center: mainMap.getCenter(), zoom: mainMap.getZoom() });
@@ -88,7 +88,7 @@ export default function CompareOverlay({ mainMap }) {
 
   useEffect(() => {
     const m = overlay.current;
-    if (m && loaded === m) addBasemap(m, state.basemap, "anchor-base");
+    if (m && loaded === m) addBasemap(m, state.basemap, "anchor-base").catch(() => {});
   }, [loaded, state.basemap]);
 
   const drag = e => {

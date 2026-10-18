@@ -32,6 +32,11 @@ function record(ok) {
   listeners.forEach(fn => fn());
 }
 
+// A vector basemap whose style cannot be loaded at all: an outage straight away
+export function reportBasemapOutage() {
+  for (let k = 0; k < MIN_FAILURES; k++) record(false);
+}
+
 export const basemapHealth = {
   subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
   reset() { results = []; },

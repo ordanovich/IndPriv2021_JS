@@ -33,20 +33,26 @@ function Tabs({ tabs, active }) {
 
 // Phones: bottom sheet. Closed: one line about the selection. Open: the
 // ficha. Full: ficha and the tabs. Swipe or tap the handle to change.
+// Without a selection there is no ficha: the sheet goes straight from the
+// closed line to the statistics (tabs).
 function Sheet({ tabs, active }) {
   const { state, set, setPanels, table, selectedIndex, t } = useApp();
   const colors = useColors();
+  const sel = table && selectedIndex != null;
   const open = state.panels.bottom;
-  const full = open && state.panels.sheetFull;
+  const full = open && (state.panels.sheetFull || !sel);
   const start = useRef(null);
   const size = s => setPanels(s === "closed" ? { bottom: false, sheetFull: false }
     : s === "open" ? { bottom: true, sheetFull: false } : { bottom: true, sheetFull: true });
   const current = full ? "full" : open ? "open" : "closed";
-  const bigger = { closed: "open", open: "full", full: "full" };
-  const smaller = { closed: "closed", open: "closed", full: "open" };
+  const bigger = sel ? { closed: "open", open: "full", full: "full" } : { closed: "full", full: "full" };
+  const smaller = sel ? { closed: "closed", open: "closed", full: "open" } : { closed: "closed", full: "closed" };
+  const tap = current === "closed" ? bigger.closed : current === "open" ? "closed" : smaller.full;
 
   // Capture the pointer: the finger usually ends the swipe outside the handle
+  // (not on a button inside the grip: capturing would swallow its click)
   const down = e => {
+    if (e.target.closest?.("button")) return;
     start.current = e.clientY;
     e.currentTarget.setPointerCapture?.(e.pointerId);
   };
@@ -56,15 +62,14 @@ function Sheet({ tabs, active }) {
     start.current = null;
     if (dy < -30) size(bigger[current]);
     else if (dy > 30) size(smaller[current]);
-    else size(current === "closed" ? "open" : current === "open" ? "closed" : "open");   // tap
+    else size(tap);
   };
-  const sel = table && selectedIndex != null;
 
   return (
     <div className={"bottom sheet" + (open ? " open" : "") + (full ? " full" : "")}>
       <div className="sheet-grip" onPointerDown={down} onPointerUp={up} onPointerCancel={() => { start.current = null; }}>
         <div className="sheet-handle" role="button" tabIndex={0} aria-label={t.sheetToggle} title={t.sheetToggle}
-             onKeyDown={e => (e.key === "Enter" || e.key === " ") && size(bigger[current] === current ? "open" : bigger[current])}>
+             onKeyDown={e => (e.key === "Enter" || e.key === " ") && size(tap)}>
           <span />
         </div>
         {!open && (
@@ -75,27 +80,32 @@ function Sheet({ tabs, active }) {
                 <span className="peek-ip">IP <b>{Number.isFinite(table.ip[selectedIndex]) ? fmtNum(state.lang, table.ip[selectedIndex]) : "—"}</b></span>
                 <QuintileChip q={table.q[selectedIndex]} colors={colors} />
               </>
-            ) : <span className="muted">{t.noSelectionMobile}</span>}
+            ) : (
+              <>
+                <span className="muted peek-hint">{t.noSelectionMobile}</span>
+                <button className="btn sheet-pill" onClick={() => size("full")}>▴ {t.sheetStats}</button>
+              </>
+            )}
           </div>
         )}
       </div>
       {open && (
         <>
           <div className="sheet-actions">
+            {!sel && <b className="sheet-title">{t.sheetStats}</b>}
             {sel && (
               <>
-                <button className="m-btn flat" title={t.flyTo} aria-label={t.flyTo}
-                        onClick={() => mapBus.fitUnit(table, selectedIndex)}>⌖</button>
-                <button className="m-btn flat" title={t.clearSelection} aria-label={t.clearSelection}
-                        onClick={() => set({ selected: null })}>✕</button>
+                <button className="btn sheet-pill" title={t.flyTo} onClick={() => mapBus.fitUnit(table, selectedIndex)}>⤢ {t.centerShort}</button>
+                <button className="btn sheet-pill" title={t.clearSelection} onClick={() => set({ selected: null })}>✕ {t.clearShort}</button>
               </>
             )}
-            <button className="btn sheet-more" onClick={() => size(full ? "open" : "full")}>
-              {full ? "▾ " + t.sheetLess : "▴ " + t.sheetMore}
+            <button className="btn sheet-pill sheet-more"
+                    onClick={() => size(!sel ? "closed" : full ? "open" : "full")}>
+              {!sel ? "▾ " + t.sheetClose : full ? "▾ " + t.sheetLess : "▴ " + t.sheetMore}
             </button>
           </div>
           <div className="bottom-body">
-            {sel ? <Details /> : <div className="details empty"><p className="muted">{t.noSelectionMobile}</p></div>}
+            {sel && <Details />}
             {full && (
               <>
                 <Tabs tabs={tabs} active={active} />

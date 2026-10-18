@@ -3,9 +3,8 @@
 // components as on desktop; only where they are shown changes.
 import React, { useEffect, useState } from "react";
 import { useApp } from "../state";
-import { MODES, VIEWS } from "../config";
+import { MODES } from "../config";
 import { activeFilterCount } from "../data";
-import { mapBus } from "../map/mapBus";
 import { copyText, Section, Segmented } from "./ui";
 import Search from "./Search";
 import { Notice } from "./MetaBar";
@@ -79,7 +78,6 @@ export function MobileMenu({ onAbout }) {
   const lang = state.lang;
   const sec = state.panels.menuSection;
   const nFilters = activeFilterCount(state.filters);
-  const go = view => { close(); mapBus.get()?.fitBounds(VIEWS[view], { duration: 800 }); };
   const share = () => copyText(window.location.href).then(() => {
     setShared(true);
     setTimeout(() => setShared(false), 1600);
@@ -107,12 +105,6 @@ export function MobileMenu({ onAbout }) {
           {S("basemap", t.basemap, <BasemapList />)}
           {S("wms", t.wmsAndFiles, <LayersList />)}
           {S("export", t.export, <ExportPanel />)}
-          {S("goto", t.goTo, (
-            <div className="m-row">
-              <button className="btn" onClick={() => go("peninsula")}>{t.peninsula}</button>
-              <button className="btn" onClick={() => go("canarias")}>{t.canarias}</button>
-            </div>
-          ))}
           {S("unit", t.unitType, <ModeButtons />)}
           <div className="m-menu-foot">
             <button className="m-item" onClick={() => { close(); onAbout(); }}><span aria-hidden="true">ⓘ</span> {t.about}</button>

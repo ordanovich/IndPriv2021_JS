@@ -3,7 +3,7 @@
 import maplibregl from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import { BASEMAPS, DIM_COLOR, NO_DATA_COLOR } from "../config";
-import { basemapUrl, ensureBasemapProtocol } from "./basemapHealth";
+import { basemapUrl, ensureBasemapProtocol, reportBasemapOutage } from "./basemapHealth";
 
 let protocolReady = false;
 export function ensureProtocol() {
@@ -67,16 +67,76 @@ function hatchImage() {
 
 // ── Layers ───────────────────────────────────────────────────────────────────
 
-export function addBasemap(map, id, beforeId) {
-  if (map.getLayer("basemap")) map.removeLayer("basemap");
+// Vector basemap styles, fetched once: { layers, glyphs, sprite, source }
+const vectorStyles = new Map();
+async function loadVectorStyle(url) {
+  if (!vectorStyles.has(url)) {
+    vectorStyles.set(url, (async () => {
+      const style = await (await fetch(url)).json();
+      const [name, src] = Object.entries(style.sources).find(([, s]) => s.type === "vector");
+      const tilejson = src.url ? await (await fetch(src.url)).json() : src;
+      return {
+        glyphs: style.glyphs, sprite: style.sprite,
+        source: { tiles: tilejson.tiles, minzoom: tilejson.minzoom ?? 0, maxzoom: tilejson.maxzoom ?? 14 },
+        // Only the vector layers (the style's raster relief is left out: lighter)
+        layers: style.layers.filter(l => l.type === "background" || l.source === name),
+      };
+    })().catch(e => { vectorStyles.delete(url); throw e; }));
+  }
+  return vectorStyles.get(url);
+}
+// A tile address of a basemap, for the watchdog's "is it back?" probe
+export async function basemapProbeTemplate(b) {
+  if (b?.tiles) return b.tiles[0];
+  if (!b?.vectorStyle) return null;
+  try { return (await loadVectorStyle(b.vectorStyle)).source.tiles[0]; } catch { return null; }
+}
+
+function removeBasemap(map) {
+  for (const l of map.getStyle().layers) if (l.id === "basemap" || l.id.startsWith("basemap-")) map.removeLayer(l.id);
   if (map.getSource("basemap")) map.removeSource("basemap");
+}
+
+// Raster basemaps go under the index (beforeId). Vector ones too, except
+// their place names, drawn above the index (and its outlines) so they stay
+// readable. Resolves when added; rejects if a vector style cannot be loaded.
+export async function addBasemap(map, id, beforeId) {
+  const token = (map.__basemapToken = (map.__basemapToken ?? 0) + 1);
+  removeBasemap(map);
   const b = BASEMAPS.find(x => x.id === id);
-  if (!b?.tiles) return;
   ensureBasemapProtocol();
-  map.addSource("basemap", {
-    type: "raster", tiles: b.tiles.map(basemapUrl), tileSize: 256, maxzoom: b.maxzoom ?? 19, attribution: b.attribution,
-  });
-  map.addLayer({ id: "basemap", type: "raster", source: "basemap" }, beforeId);
+  if (b?.tiles) {
+    map.addSource("basemap", {
+      type: "raster", tiles: b.tiles.map(basemapUrl), tileSize: 256, maxzoom: b.maxzoom ?? 19, attribution: b.attribution,
+    });
+    map.addLayer({ id: "basemap", type: "raster", source: "basemap" }, beforeId);
+    return;
+  }
+  if (!b?.vectorStyle) return;
+  let style;
+  try { style = await loadVectorStyle(b.vectorStyle); } catch (e) { reportBasemapOutage(); throw e; }
+  if (token !== map.__basemapToken || !map.getStyle()) return;     // another basemap was chosen meanwhile
+  removeBasemap(map);
+  if (style.glyphs) map.setGlyphs(style.glyphs);
+  if (style.sprite) map.setSprite(style.sprite);
+  map.addSource("basemap", { type: "vector", ...style.source, tiles: style.source.tiles.map(basemapUrl), attribution: b.attribution });
+  const labelsBefore = map.getLayer("units-hover") ? "units-hover" : undefined;
+  for (const l of style.layers) {
+    const layer = { ...l, id: "basemap-" + l.id };
+    if (l.type !== "background") layer.source = "basemap";
+    if (l.type === "symbol") {
+      // Place names in Spanish where OpenStreetMap has one, else the local
+      // name (the style shows English and a second script)
+      if (JSON.stringify(l.layout?.["text-field"] ?? "").includes("name")) {
+        layer.layout = { ...l.layout, "text-field": ["coalesce", ["get", "name:es"], ["get", "name"]] };
+      }
+      // Darker text with a white halo: legible over the index colours
+      layer.paint = { ...l.paint, "text-color": "#1f2937", "text-halo-color": "rgba(255,255,255,0.92)", "text-halo-width": 1.4 };
+      map.addLayer(layer, labelsBefore);
+    } else {
+      map.addLayer(layer, beforeId);
+    }
+  }
 }
 
 export function addIndexSources(map, yearCfg, lang) {

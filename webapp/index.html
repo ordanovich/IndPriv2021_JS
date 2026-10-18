@@ -5,9 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Atlas de Privación de España</title>
     <link rel="icon" href="favicon.ico" />
+    <!-- Loader shown before the app's code arrives (React replaces it); same
+         look as the map loader (.map-loader in styles.css) -->
+    <style>
+      .boot { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+              gap: 14px; background: #ffffff; color: #111827; font: 600 14px system-ui, -apple-system, "Segoe UI", sans-serif; }
+      .boot img { height: 44px; width: auto; }
+      .boot i { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #dbe3f4; border-top-color: #1d4ed8;
+                animation: boot-spin .8s linear infinite; }
+      @keyframes boot-spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) { .boot i { animation-duration: 2.4s; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="boot" role="status"><img src="images/logo.jpg" alt="Sociedad Española de Epidemiología" /><i aria-hidden="true"></i><span>Cargando el mapa…</span></div></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

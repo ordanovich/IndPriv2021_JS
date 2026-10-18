@@ -8,7 +8,7 @@ import { mapBus } from "./mapBus";
 import { hoverStore } from "./hoverStore";
 import { basemapHealth, probe } from "./basemapHealth";
 import {
-  addBasemap, addBoundaryLayers, addIndexSources, addUnitLayers, ensureProtocol,
+  addBasemap, addBoundaryLayers, addIndexSources, addUnitLayers, basemapProbeTemplate, ensureProtocol,
   setIndexYear, showBoundaries, styleUnits,
 } from "./indexLayers";
 import CompareOverlay from "./CompareOverlay";
@@ -99,7 +99,7 @@ export default function MapView() {
       map.addSource("rect", { type: "geojson", data: rectGeoJSON(null) });
       map.addLayer({ id: "rect-fill", type: "fill", source: "rect", paint: { "fill-color": "#2563eb", "fill-opacity": 0.08 } });
       map.addLayer({ id: "rect-line", type: "line", source: "rect", paint: { "line-color": "#2563eb", "line-width": 2, "line-dasharray": [2, 1] } });
-      addBasemap(map, live.current.state.basemap, "anchor-base");
+      addBasemap(map, live.current.state.basemap, "anchor-base").catch(() => {});   // failures: watchdog
       setReady(true);
     });
 
@@ -187,12 +187,35 @@ export default function MapView() {
     return () => map.removeControl(geo);
   }, [ready, mobile]);
 
+  // Loader: covers the map until the sections and the basemap are in
+  // ("map", first load) or shows a small notice ("year", after a switch).
+  // Never longer than 8 s: a slow basemap must not block the app.
+  const [loading, setLoading] = useState("map");
+  const [loadRound, setLoadRound] = useState(0);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready) return;
+    let done = false;
+    const finish = () => { if (!done) { done = true; setLoading(null); } };
+    const check = () => {
+      if (map.getSource("units") && map.isSourceLoaded("units") && map.areTilesLoaded()) finish();
+    };
+    map.on("idle", check);
+    const safety = setTimeout(finish, 8000);
+    check();
+    return () => { map.off("idle", check); clearTimeout(safety); };
+  }, [ready, loadRound]);
+
   // Year → swap the tile sources.
+  const firstYear = useRef(true);
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !yearCfg) return;
     if (hoverId.current != null) { hoverId.current = null; hoverStore.set(null); }
     setIndexYear(map, yearCfg);
+    if (firstYear.current) { firstYear.current = false; return; }
+    setLoading(l => l ?? "year");
+    setLoadRound(r => r + 1);
   }, [ready, state.mode, state.year]);
 
   // Colours, classes, filters, opacity.
@@ -235,7 +258,7 @@ export default function MapView() {
       fallback.current = null;
       tried.current.clear();
     }
-    addBasemap(mapRef.current, state.basemap, "anchor-base");
+    addBasemap(mapRef.current, state.basemap, "anchor-base").catch(() => {});
     foldCredits(mapRef.current);
   }, [ready, state.basemap]);
 
@@ -250,7 +273,8 @@ export default function MapView() {
     const timer = setInterval(async () => {
       if (busy) return;
       busy = true;
-      const ok = await probe(from.tiles[0]);
+      const tpl = await basemapProbeTemplate(from);
+      const ok = tpl ? await probe(tpl) : false;
       busy = false;
       if (stopped) return;
       good = ok ? good + 1 : 0;
@@ -339,6 +363,20 @@ export default function MapView() {
         <button onClick={() => mapRef.current?.fitBounds(VIEWS.canarias, { duration: 800 })}>{t.canarias}</button>
       </div>
       {state.drawing && <div className="map-hint">{t.drawing} · Esc</div>}
+      {loading === "map" && (
+        <div className="map-loader" role="status" aria-live="polite">
+          <div className="map-loader-card">
+            <img src="images/logo.jpg" alt="" onError={e => { e.currentTarget.style.display = "none"; }} />
+            <span className="spinner" aria-hidden="true" />
+            <span>{t.loadingMap}</span>
+          </div>
+        </div>
+      )}
+      {loading === "year" && (
+        <div className="map-loading-chip" role="status" aria-live="polite">
+          <span className="spinner small" aria-hidden="true" />{t.loadingYear(state.year)}
+        </div>
+      )}
       <button className="mini-legend" aria-label={t.legend}
               onClick={() => app.setPanels(mobile ? { menu: true, menuSection: "legend" } : { right: true, left: false })}>
         {PALETTES[state.colorblind ? "cb" : "std"].map((c, k) => <i key={k} style={{ background: c }}>Q{k + 1}</i>)}

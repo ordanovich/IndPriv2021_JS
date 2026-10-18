@@ -86,6 +86,18 @@ const IGN_WMTS = layer =>
 // The first basemap is the default. If its tiles keep failing the map
 // switches to `fallback` on its own, so the map is never left blank.
 export const BASEMAPS = [
+  // Vector basemap: sharp on any screen and light (55 layers, ~12 KB tiles).
+  // Free, no key, no fee; data © OpenStreetMap (ODbL). Its place names are
+  // drawn above the index so they stay readable (indexLayers.js).
+  {
+    id: "ofm-gris",
+    name: { es: "OpenFreeMap · gris (nítido)", en: "OpenFreeMap · grey (sharp)" },
+    vectorStyle: "https://tiles.openfreemap.org/styles/positron",
+    attribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> · ' +
+      '© <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> · ' +
+      'Datos © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
+    fallback: "ign-gris",
+  },
   {
     id: "ign-gris",
     name: { es: "IGN · callejero gris", en: "IGN · grey street map" },
