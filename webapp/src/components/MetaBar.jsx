@@ -22,8 +22,25 @@ function HoverReadout() {
   );
 }
 
+// Messages such as "outside Spain" (also used by the phone top bar)
+export function Notice() {
+  const { state, set } = useApp();
+  if (!state.notice) return null;
+  return (
+    <div className="notice">
+      <span>{state.notice.text ?? state.notice}</span>
+      {state.notice.action && (
+        <button className="notice-action" onClick={() => set(state.notice.action.patch)}>
+          {state.notice.action.label}
+        </button>
+      )}
+      <button onClick={() => set({ notice: null })} aria-label="✕">✕</button>
+    </div>
+  );
+}
+
 export default function MetaBar() {
-  const { state, set, mode, table, t } = useApp();
+  const { state, mode, table, t } = useApp();
   const lang = state.lang;
   const src = mode.years[state.year]?.source?.[lang];
 
@@ -39,17 +56,7 @@ export default function MetaBar() {
         <BasemapMenu />
         <LayersMenu />
       </div>
-      {state.notice && (
-        <div className="notice">
-          <span>{state.notice.text ?? state.notice}</span>
-          {state.notice.action && (
-            <button className="notice-action" onClick={() => set(state.notice.action.patch)}>
-              {state.notice.action.label}
-            </button>
-          )}
-          <button onClick={() => set({ notice: null })} aria-label="✕">✕</button>
-        </div>
-      )}
+      <Notice />
     </div>
   );
 }

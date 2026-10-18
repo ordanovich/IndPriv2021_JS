@@ -105,31 +105,38 @@ function AddWms() {
   );
 }
 
-export function BasemapMenu() {
-  const { state, set, t } = useApp();
+// Menu contents, also shown in the phone Menú (components/MobileShell.jsx)
+export function BasemapList() {
+  const { state, set } = useApp();
   const lang = state.lang;
+  return (
+    <div className="radio-list">
+      {BASEMAPS.map(b => (
+        <label key={b.id} className="radio">
+          <input type="radio" name="basemap" checked={state.basemap === b.id}
+                 onChange={() => set({ basemap: b.id, notice: null })} />
+          <span>{b.name[lang]}</span>
+        </label>
+      ))}
+    </div>
+  );
+}
+
+export function BasemapMenu() {
+  const { state, t } = useApp();
   const current = BASEMAPS.find(b => b.id === state.basemap);
   return (
-    <Menu label={<><span className="ico">🗺</span><span className="lbl">{t.basemap}: <b>{current?.name[lang]}</b></span></>}>
-      <div className="radio-list">
-        {BASEMAPS.map(b => (
-          <label key={b.id} className="radio">
-            <input type="radio" name="basemap" checked={state.basemap === b.id}
-                   onChange={() => set({ basemap: b.id, notice: null })} />
-            <span>{b.name[lang]}</span>
-          </label>
-        ))}
-      </div>
+    <Menu label={<><span className="ico">🗺</span><span className="lbl">{t.basemap}: <b>{current?.name[state.lang]}</b></span></>}>
+      <BasemapList />
     </Menu>
   );
 }
 
-export function LayersMenu() {
+export function LayersList() {
   const { state, set, t } = useApp();
   const lang = state.lang;
   const fileRef = useRef(null);
   const [uploadError, setUploadError] = useState(null);
-  const count = state.wms.length + (state.upload ? 1 : 0);
 
   // A layer drawn under the index is invisible at high index opacity, so
   // turning one on makes the index see-through.
@@ -160,7 +167,7 @@ export function LayersMenu() {
   };
 
   return (
-    <Menu active={count > 0} label={<><span className="plus">+</span> <span className="lbl">{t.wms}</span>{count ? <span className="badge">{count}</span> : null}</>}>
+    <>
       <div className="wms-list">
         {WMS_CATALOG.map(w => (
           <Check key={w.id} checked={state.wms.includes(w.id)} onChange={v => toggle(w.id, v)}>
@@ -186,6 +193,16 @@ export function LayersMenu() {
       </div>
       <div className="field-hint">{t.uploadHelp}</div>
       {uploadError && <div className="error">{uploadError}</div>}
+    </>
+  );
+}
+
+export function LayersMenu() {
+  const { state, t } = useApp();
+  const count = state.wms.length + (state.upload ? 1 : 0);
+  return (
+    <Menu active={count > 0} label={<><span className="plus">+</span> <span className="lbl">{t.wms}</span>{count ? <span className="badge">{count}</span> : null}</>}>
+      <LayersList />
     </Menu>
   );
 }

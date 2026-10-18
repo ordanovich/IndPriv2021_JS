@@ -8,6 +8,7 @@ import RightPanel from "./components/RightPanel";
 import MetaBar from "./components/MetaBar";
 import BottomPanel from "./components/BottomPanel";
 import AboutModal from "./components/AboutModal";
+import { MobileMenu, MobileTopBar, TourStarter, YearSwitch } from "./components/MobileShell";
 import MapView from "./map/MapView";
 import ErrorBoundary, { CrashScreen } from "./components/ErrorBoundary";
 
@@ -40,7 +41,7 @@ function Shell() {
 
   const mobile = useIsMobile();
   useEffect(() => {
-    if (mobile && state.selected) set({ panels: { ...state.panels, bottom: true, left: false, right: false } });
+    if (mobile && state.selected) set({ panels: { ...state.panels, bottom: true, left: false, right: false, menu: false } });
   }, [mobile, state.selected?.id]);
 
   // Esc clears the selected unit, unless something else is open to close.
@@ -53,21 +54,27 @@ function Shell() {
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
   }, [state.drawing, state.selected]);
+  // Phones get their own layout (components/MobileShell.jsx). The map keeps
+  // its place in the tree, so switching layout does not rebuild it.
   return (
-    <div className="app">
-      <Header onAbout={() => setAbout(true)} />
+    <div className={"app" + (mobile ? " m" : "")}>
+      {!mobile && <Header onAbout={() => setAbout(true)} />}
       <div className="app-body">
-        <LeftPanel />
+        {!mobile && <LeftPanel />}
         <main className="center">
-          <MetaBar />
+          {!mobile && <MetaBar />}
           {mode.available ? <MapView /> : <div className="map-wrap placeholder">{t.modeUnavailable}</div>}
+          {mobile && <MobileTopBar />}
+          {mobile && <YearSwitch />}
           {loadError && <div className="load-error">{t.loadError} <code>{loadError}</code></div>}
           <BottomPanel />
         </main>
-        <RightPanel />
+        {!mobile && <RightPanel />}
       </div>
+      {mobile && <MobileMenu onAbout={() => setAbout(true)} />}
       <AboutModal open={about} onClose={() => setAbout(false)} />
       <SelectionCarrier />
+      {mobile && <TourStarter />}
     </div>
   );
 }

@@ -163,6 +163,32 @@ const es = {
   loading: "Cargando…",
   loadError: "No se pudieron cargar los datos.",
   modeUnavailable: "Esta unidad espacial aún no tiene datos.",
+
+  // Phones
+  menu: "Menú",
+  menuClose: "Cerrar menú",
+  unitType: "Unidad espacial",
+  goTo: "Ir a",
+  wmsAndFiles: "Capas WMS y archivos",
+  settings: "Ajustes",
+  language: "Idioma",
+  showTour: "Ver guía",
+  sheetMore: "Más datos",
+  sheetLess: "Menos",
+  sheetToggle: "Desliza o toca para ver más o menos datos",
+  noSelectionMobile: "Selecciona una sección del mapa para ver su ficha.",
+  locate: "Mi ubicación",
+  tourNext: "Siguiente",
+  tourPrev: "Anterior",
+  tourDone: "Entendido",
+  tourSkip: "Saltar",
+  tour: [
+    ["Buscar", "Busca una dirección, código postal o municipio."],
+    ["Año", "Selecciona aquí el año: 2011 o 2021."],
+    ["El mapa", "Selecciona una sección del mapa para ver su ficha."],
+    ["Los datos", "Desliza hacia arriba para ver los datos."],
+    ["Menú", "Aquí están los filtros, capas y descargas. También puedes volver a ver esta guía."],
+  ],
 };
 
 const en = {
@@ -326,6 +352,32 @@ const en = {
   loading: "Loading…",
   loadError: "The data could not be loaded.",
   modeUnavailable: "This spatial unit has no data yet.",
+
+  // Phones
+  menu: "Menu",
+  menuClose: "Close menu",
+  unitType: "Spatial unit",
+  goTo: "Go to",
+  wmsAndFiles: "WMS layers and files",
+  settings: "Settings",
+  language: "Language",
+  showTour: "Show guide",
+  sheetMore: "More data",
+  sheetLess: "Less",
+  sheetToggle: "Swipe or tap to see more or less data",
+  noSelectionMobile: "Select a tract on the map to see its details.",
+  locate: "My location",
+  tourNext: "Next",
+  tourPrev: "Back",
+  tourDone: "Got it",
+  tourSkip: "Skip",
+  tour: [
+    ["Search", "Search for an address, postcode or municipality."],
+    ["Year", "Select the year here: 2011 or 2021."],
+    ["The map", "Select a tract on the map to see its details."],
+    ["The data", "Swipe up to see the data."],
+    ["Menu", "Filters, layers and downloads are here. You can also replay this guide."],
+  ],
 };
 
 export const STRINGS = { es, en };

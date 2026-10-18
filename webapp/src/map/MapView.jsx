@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { EMPTY_FILTERS, useApp } from "../state";
+import { EMPTY_FILTERS, MOBILE_QUERY, useApp } from "../state";
 import { activeFilterCount } from "../data";
 import { BASEMAPS, MAX_BOUNDS, PALETTES, VIEWS, WMS_CATALOG, wmsTileUrl } from "../config";
 import { mapBus } from "./mapBus";
@@ -13,6 +13,7 @@ import {
 } from "./indexLayers";
 import CompareOverlay from "./CompareOverlay";
 import ErrorBoundary from "../components/ErrorBoundary";
+import { useIsMobile } from "../hooks";
 
 function rectGeoJSON(r) {
   if (!r) return { type: "FeatureCollection", features: [] };
@@ -24,7 +25,7 @@ function rectGeoJSON(r) {
 // them whenever their content changes (first load, another basemap), so fold
 // them again once the map settles.
 function foldCredits(map) {
-  if (!window.matchMedia("(max-width: 800px)").matches) return;
+  if (!window.matchMedia(MOBILE_QUERY).matches) return;
   map.once("idle", () => map.getContainer().querySelector(".maplibregl-ctrl-attrib")
     ?.classList.remove("maplibregl-compact-show"));
 }
@@ -170,6 +171,21 @@ export default function MapView() {
     ro.observe(container.current);
     return () => { unwatch(); ro.disconnect(); mapBus.detach(); map.remove(); };
   }, []);
+
+  // Phones: "my location" button under the zoom. The browser asks for
+  // permission only when it is pressed; the position never leaves the phone.
+  const mobile = useIsMobile();
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !mobile) return;
+    const geo = new maplibregl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      fitBoundsOptions: { maxZoom: 15 },
+      trackUserLocation: false,
+    });
+    map.addControl(geo, "top-right");
+    return () => map.removeControl(geo);
+  }, [ready, mobile]);
 
   // Year → swap the tile sources.
   useEffect(() => {
@@ -323,7 +339,8 @@ export default function MapView() {
         <button onClick={() => mapRef.current?.fitBounds(VIEWS.canarias, { duration: 800 })}>{t.canarias}</button>
       </div>
       {state.drawing && <div className="map-hint">{t.drawing} · Esc</div>}
-      <button className="mini-legend" onClick={() => app.setPanels({ right: true, left: false })} aria-label={t.legend}>
+      <button className="mini-legend" aria-label={t.legend}
+              onClick={() => app.setPanels(mobile ? { menu: true, menuSection: "legend" } : { right: true, left: false })}>
         {PALETTES[state.colorblind ? "cb" : "std"].map((c, k) => <i key={k} style={{ background: c }}>Q{k + 1}</i>)}
         <span>{t.legend} ›</span>
       </button>

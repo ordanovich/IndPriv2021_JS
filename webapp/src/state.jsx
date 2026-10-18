@@ -5,7 +5,9 @@ import { loadTable } from "./data";
 
 export const EMPTY_FILTERS = { ccaa: "", prov: "", mun: "", quintiles: [], degurba: 0, stable: false };
 
-export const MOBILE_QUERY = "(max-width: 800px)";
+// Phones: narrow screens, and phones held sideways (short touch screens).
+// Keep in sync with the phone @media rules in styles.css.
+export const MOBILE_QUERY = "(max-width: 800px), (max-height: 500px) and (pointer: coarse)";
 const isMobile = () => typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches;
 
 const DEFAULTS = {
@@ -28,9 +30,11 @@ const DEFAULTS = {
   rect: null,              // { west, south, east, north }
   drawing: false,
   scope: "filters",        // "filters" | "view" | "rect"
+  // menu / menuSection / sheetFull: phone layout only (Menú sheet, which of its
+  // sections is open, bottom sheet fully expanded)
   panels: isMobile()
-    ? { left: false, right: false, bottom: false, legend: true }
-    : { left: true, right: true, bottom: true, legend: true },
+    ? { left: false, right: false, bottom: false, legend: true, menu: false, menuSection: null, sheetFull: false }
+    : { left: true, right: true, bottom: true, legend: true, menu: false, menuSection: null, sheetFull: false },
   bottomTab: "dist",
   notice: null,
 };

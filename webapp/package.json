@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "driver.js": "1.8.0",
     "maplibre-gl": "5.24.0",
     "pmtiles": "4.5.0",
     "react": "18.3.1",
