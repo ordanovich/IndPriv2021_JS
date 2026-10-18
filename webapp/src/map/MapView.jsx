@@ -24,6 +24,10 @@ function rectGeoJSON(r) {
 // Keep the credits folded behind the (i) button (they open on tap/click).
 // MapLibre unfolds them whenever their content changes (first load, another
 // basemap), so fold them again once the map settles.
+// First loader: shown at least this long from opening the page, then dissolved
+const BOOT_MIN_MS = 3000;
+const LOADER_FADE_MS = 700;
+
 function foldCredits(map) {
   map.once("idle", () => map.getContainer().querySelector(".maplibregl-ctrl-attrib")
     ?.classList.remove("maplibregl-compact-show"));
@@ -189,13 +193,23 @@ export default function MapView() {
   // Loader: covers the map until the sections and the basemap are in
   // ("map", first load) or shows a small notice ("year", after a switch).
   // Never longer than 8 s: a slow basemap must not block the app.
+  // The first one stays at least BOOT_MIN_MS from opening the page (on
+  // purpose: the map is usually ready sooner), then dissolves ("fading").
   const [loading, setLoading] = useState("map");
+  const loadingNow = useRef(loading);
+  loadingNow.current = loading;
   const [loadRound, setLoadRound] = useState(0);
   useEffect(() => {
     const map = mapRef.current;
     if (!ready) return;
     let done = false;
-    const finish = () => { if (!done) { done = true; setLoading(null); } };
+    const finish = () => {
+      if (done) return;
+      done = true;
+      if (loadingNow.current !== "map") { setLoading(null); return; }
+      setTimeout(() => setLoading(cur => (cur === "map" ? "fading" : cur)),
+                 Math.max(0, BOOT_MIN_MS - performance.now()));
+    };
     const check = () => {
       if (map.getSource("units") && map.isSourceLoaded("units") && map.areTilesLoaded()) finish();
     };
@@ -204,6 +218,13 @@ export default function MapView() {
     check();
     return () => { map.off("idle", check); clearTimeout(safety); };
   }, [ready, loadRound]);
+
+  // End of the dissolve: remove the loader
+  useEffect(() => {
+    if (loading !== "fading") return;
+    const id = setTimeout(() => setLoading(cur => (cur === "fading" ? null : cur)), LOADER_FADE_MS);
+    return () => clearTimeout(id);
+  }, [loading]);
 
   // Year → swap the tile sources.
   const firstYear = useRef(true);
@@ -362,8 +383,8 @@ export default function MapView() {
         <button onClick={() => mapRef.current?.fitBounds(VIEWS.canarias, { duration: 800 })}>{t.canarias}</button>
       </div>
       {state.drawing && <div className="map-hint">{t.drawing} · Esc</div>}
-      {loading === "map" && (
-        <div className="map-loader" role="status" aria-live="polite">
+      {(loading === "map" || loading === "fading") && (
+        <div className={"map-loader" + (loading === "fading" ? " out" : "")} role="status" aria-live="polite">
           <div className="map-loader-card">
             <img src="images/logo.jpg" alt="" onError={e => { e.currentTarget.style.display = "none"; }} />
             <span className="loader-bars" aria-hidden="true"><b /><b /><b /><b /><b /></span>
