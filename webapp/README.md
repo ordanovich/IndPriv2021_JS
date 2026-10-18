@@ -19,6 +19,15 @@ basado en TerriaJS (etiqueta `v1.0.0`).
 - **Panel fijo**: filtros y capas a la izquierda, leyenda y exportación a la
   derecha, ficha y análisis abajo. Nada flota sobre el mapa.
 
+## Cómo citar
+
+> Duque, I., Gras-García, E. M., Ordanovich, D., Marí Dell'Olmo, M.,
+> Aguilar-Palacio, I., La Parra-Casado, D., Fernández-Villa, T. & Martín
+> Roncero, U., on behalf of the Social Determinants of Health working group of
+> the Spanish Society of Epidemiology (2026). Índice de privación 2021 en
+> España por sección censal de la Sociedad Española de Epidemiología.
+> *Gaceta Sanitaria*, in press.
+
 ## Requisitos
 
 - Python 3 con `geopandas`, `pyogrio` (GDAL ≥ 3.8, con driver PMTiles),
@@ -144,7 +153,8 @@ Todo en `src/config.js`:
 | Mapas base y su respaldo automático (menú «Mapa base» de la barra superior) | `BASEMAPS` |
 | Capas WMS ofrecidas por defecto (menú «+ Capas WMS») | `WMS_CATALOG` |
 | Paletas de color | `PALETTES` |
-| Cita y DOI | `CITATION` |
+| Cita del artículo (y DOI cuando exista) | `CITATION` |
+| Apertura animada (por defecto; `?intro=0` = versión tranquila) | `src/map/intro.js` |
 
 **Añadir la malla (grid):** generar sus datos con la misma estructura
 (teselas con las propiedades `i, q, ip, p, m, s`, teselas de límites y de

@@ -1,14 +1,14 @@
-// Opening sequence of the animated version (address ?intro=1): when the
+// Opening sequence of the animated version (the default): when the
 // loader dissolves, the camera glides into Spain, the sections light up
 // class by class (Q1 → Q5, the legend in step) and the interface rises in.
-// The calm version (no ?intro=1) never runs any of this.
+// The calm version (address ?intro=0) never runs any of this.
 // Skipped with prefers-reduced-motion; any touch, click, scroll or key ends it.
 // State lives on <html data-intro="pending|run"> so React's own class names
 // on .app are never touched (styles.css: "Animated version").
 import { VIEWS } from "../config";
 
 export const INTRO_ON = typeof window !== "undefined"
-  && new URLSearchParams(window.location.search).get("intro") === "1"
+  && new URLSearchParams(window.location.search).get("intro") !== "0"
   && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const FLIGHT_MS = 1700;

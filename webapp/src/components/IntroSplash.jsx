@@ -1,4 +1,4 @@
-// Full-screen opening of the animated version (?intro=1, see map/intro.js):
+// Full-screen opening of the animated version (default; ?intro=0 = calm version, see map/intro.js):
 // drifting quintile colours, logo, title word by word, subtitle, the colour
 // bars and a counter of the tracts. "leaving": it opens from the centre
 // (styles.css: "Animated version").

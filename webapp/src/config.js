@@ -184,15 +184,19 @@ export const ATLAS_DIR = "atlas/provinces/";
 export const ATLAS_NATIONAL_DIR = "atlas/national/";
 
 // ── Citation ─────────────────────────────────────────────────────────────────
+// Article accepted in Gaceta Sanitaria (in press). Same text in the atlas
+// (Indicador de Privación 2021/src/R/atlas_helpers.R, .atlas_citation()).
 export const CITATION = {
-  doi: null,   // set to "10.5281/zenodo.xxxxxxx" once published
+  doi: null,   // set to "10.xxxx/..." once the article has one
   year: 2026,
-  authors: "Duque, I., Gras-García, E. M., Ordanovich, D., Mari Dell-Olmo, M., " +
-    "Aguilar-Palacio, I., La Parra-Casado, D., Fernández-Villa, T., " +
-    "Martin Roncero, U., & Grupo de Determinantes Sociales de la Salud de la SEE",
-  title: {
-    es: "Atlas de Privación de España: Índice de Privación 2021 a nivel de sección censal",
-    en: "Atlas of Deprivation of Spain: 2021 Deprivation Index at census section level",
-  },
-  publisher: "Zenodo",
+  authors: "Duque, I., Gras-García, E. M., Ordanovich, D., Marí Dell'Olmo, M., " +
+    "Aguilar-Palacio, I., La Parra-Casado, D., Fernández-Villa, T. & Martín Roncero, U., " +
+    "on behalf of the Social Determinants of Health working group of the Spanish Society of Epidemiology",
+  // BibTeX: one entry per author, the working group as a corporate author
+  bibAuthors: ["Duque, I.", "Gras-García, E. M.", "Ordanovich, D.", "Marí Dell'Olmo, M.",
+    "Aguilar-Palacio, I.", "La Parra-Casado, D.", "Fernández-Villa, T.", "Martín Roncero, U.",
+    "{Social Determinants of Health working group of the Spanish Society of Epidemiology}"],
+  title: "Índice de privación 2021 en España por sección censal de la Sociedad Española de Epidemiología",
+  journal: "Gaceta Sanitaria",
+  status: "in press",
 };

@@ -11,7 +11,7 @@ function buildRecords(table, rows, t, vars) {
       CCAA: table.names.ccaa[table.ccaa[i]] ?? "",
       Provincia: table.names.prov[table.prov[i]] ?? "",
       Municipio: table.names.mun[table.mun[i]] ?? "",
-      Anio: Number(table.year),
+      Año: Number(table.year),
       IP: Number.isFinite(table.ip[i]) ? table.ip[i] : null,
       Quintil: table.q[i] || null,
       Quintil_etiqueta: table.q[i] ? t.qLabels[table.q[i] - 1] : "",
@@ -93,13 +93,13 @@ export default function ExportPanel() {
     });
     const out = {
       generado: new Date().toISOString(),
-      modo: mode.id, anio: table.year,
+      modo: mode.id, año: table.year,
       ambito: state.scope, filtros: state.filters, caja: box,
       cortes_quintiles: table.breaks,
       total: describe(rows.map(i => table.ip[i])),
       por_quintil: byQ,
     };
-    download(new Blob([JSON.stringify(out, null, 2)], { type: "application/json" }), `${base}_estadisticas.json`);
+    download(new Blob([JSON.stringify(out, null, 2)], { type: "application/json;charset=utf-8" }), `${base}_estadisticas.json`);
   });
 
   return (

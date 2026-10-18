@@ -170,7 +170,7 @@ Al hacer clic en cualquier sección censal, aparece un popup con:
 Accesible mediante el botón **ℹ Índice** en la barra superior. Contiene tres pestañas:
 - **Variables** — lista de las 9 variables del modelo final con sus correlaciones de Spearman (ρ) con el CP1, representadas como barras de color (azul = factor de riesgo, ámbar = factor protector); imagen del diccionario de variables y panel de mapas nacionales (puntuaciones Z)
 - **ACP/PCA** — estructura factorial del modelo: gráfico de loadings, estadísticos (47,2 % varianza explicada, KMO = 0,816, 9 variables); bloque de validación del índice (4 pruebas: correlaciones de Spearman con indicadores externos de renta, reconstrucción con Random Forest, Bootstrap PCA con B = 100 iteraciones, consistencia territorial por DEGURBA); glosario de siglas (ACP/PCA, CP1/PC1, KMO, ρ, w)
-- **Atlas** — acceso a los 5 volúmenes del atlas cartográfico estático (nacional, provincias, ciudades, conurbaciones, AUF) con enlace a DOI en Zenodo (pendiente de publicación)
+- **Atlas** — acceso a los 5 volúmenes del atlas cartográfico estático (nacional, provincias, ciudades, conurbaciones, AUF) y la cita: Duque, I., Gras-García, E. M., Ordanovich, D., Marí Dell'Olmo, M., Aguilar-Palacio, I., La Parra-Casado, D., Fernández-Villa, T. & Martín Roncero, U., on behalf of the Social Determinants of Health working group of the Spanish Society of Epidemiology (2026). Índice de privación 2021 en España por sección censal de la Sociedad Española de Epidemiología. *Gaceta Sanitaria*, in press.
 
 Las imágenes del panel son ampliables (clic → lightbox) y enlazables en nueva pestaña.
 

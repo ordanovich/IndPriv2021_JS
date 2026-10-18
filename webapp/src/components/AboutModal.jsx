@@ -54,8 +54,8 @@ const TEXT = {
     geomUse: "El gráfico 2011 ↔ 2021 y el filtro «mismo trazado» usan solo las secciones comparables. Para las demás, la ficha muestra a qué secciones del otro año corresponde y en qué proporción.",
     geomPrecision: "La geometría es la original del INE, sin simplificar: en el máximo nivel de detalle el error de representación es inferior a medio metro.",
     atlasTitle: "Atlas cartográfico",
-    atlasText: "El atlas estático incluye mapas a escala nacional, provincial, de ciudades, conurbaciones y áreas urbanas funcionales. Se publicará en Zenodo con DOI permanente.",
-    cite: "Citar", copyBib: "Copiar BibTeX", copied: "Copiado", doiPending: "[DOI pendiente]",
+    atlasText: "El atlas estático incluye mapas a escala nacional, provincial, de ciudades, conurbaciones y áreas urbanas funcionales.",
+    cite: "Cómo citar", copyBib: "Copiar BibTeX", copied: "Copiado",
     dict: "Diccionario de variables", natMap: "Mapa nacional del IP 2021", varMaps: "Mapas nacionales de las variables",
   },
   en: {
@@ -78,21 +78,21 @@ const TEXT = {
     geomUse: "The 2011 ↔ 2021 chart and the \"same boundaries\" filter use only comparable tracts. For the others, the details panel shows which tracts of the other year they correspond to, and by how much.",
     geomPrecision: "Geometry is INE's original, not simplified: at the deepest zoom the drawing error is below half a metre.",
     atlasTitle: "Cartographic atlas",
-    atlasText: "The static atlas includes national, provincial, city, conurbation and functional urban area maps. It will be published on Zenodo with a permanent DOI.",
-    cite: "Cite", copyBib: "Copy BibTeX", copied: "Copied", doiPending: "[DOI pending]",
+    atlasText: "The static atlas includes national, provincial, city, conurbation and functional urban area maps.",
+    cite: "How to cite", copyBib: "Copy BibTeX", copied: "Copied",
     dict: "Variable dictionary", natMap: "National map of IP 2021", varMaps: "National maps of the variables",
   },
 };
 
 function citation(lang) {
-  const title = CITATION.title[lang];
-  const doi = CITATION.doi ? `https://doi.org/${CITATION.doi}` : TEXT[lang].doiPending;
-  const apa = `${CITATION.authors} (${CITATION.year}). ${title}. ${CITATION.publisher}. ${doi}`;
-  const bib = `@misc{atlasPrivacionEspana${CITATION.year},
-  author    = {${CITATION.authors}},
-  title     = {${title}},
-  year      = {${CITATION.year}},
-  publisher = {${CITATION.publisher}},${CITATION.doi ? `\n  doi       = {${CITATION.doi}},` : ""}
+  const C = CITATION;
+  const doi = C.doi ? ` https://doi.org/${C.doi}` : "";
+  const apa = `${C.authors} (${C.year}). ${C.title}. ${C.journal}, ${C.status}.${doi}`;
+  const bib = `@article{duque${C.year}indice,
+  author  = {${C.bibAuthors.join(" and ")}},
+  title   = {{${C.title}}},
+  journal = {${C.journal}},
+  year    = {${C.year}},${C.doi ? `\n  doi     = {${C.doi}},` : `\n  note    = {${C.status}},`}
 }`;
   return { apa, bib };
 }

@@ -740,7 +740,7 @@ button:disabled { cursor: default; opacity: 0.45; }
 }
 @media (prefers-reduced-motion: reduce) { .driver-active-element { animation: none; } }
 
-/* ── Animated version (?intro=1: map/intro.js, components/IntroSplash.jsx) ────
+/* ── Animated version (default; ?intro=0 = calm: map/intro.js, components/IntroSplash.jsx) ────
    Only with html[data-intro]; the calm version never sets it.
    A full-screen splash (drifting quintile colours, logo, title word by word,
    colour bars, counter) opens from the centre while the interface pops in. */

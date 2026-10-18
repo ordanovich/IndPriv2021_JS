@@ -222,7 +222,7 @@ export default function MapView() {
     return () => { map.off("idle", check); clearTimeout(safety); };
   }, [ready, loadRound]);
 
-  // Animated version (?intro=1): camera glide, quintile wave, interface rising
+  // Animated version (default; ?intro=0 = calm): camera glide, quintile wave, interface rising
   // in, started as the loader dissolves. No glide when the link already
   // points somewhere (a selection or a view).
   const introFlight = useRef(INTRO_ON && !state.initialBbox && !state.selected);
