@@ -8,7 +8,7 @@ const KEYS = { mobile: "ip21.tour.v1", desktop: "ip21.tour.desktop.v1" };
 // ".tour-pin" is a marker added in the middle of the map. Steps whose
 // element is not on screen (e.g. a collapsed panel) are left out.
 const TARGETS = {
-  mobile: [".m-search", ".m-year", ".tour-pin", ".sheet-grip", ".m-menu-btn"],
+  mobile: [".m-search", ".m-year", ".mini-legend", ".tour-pin", ".sheet-grip", ".m-menu-btn"],
   desktop: [".metabar .search", ".side.left .layers .segmented", ".side.left .section", ".tour-pin", ".bottom",
             ".side.right .legend", ".side.right .section:last-child", ".metabar .menus", ".header-actions"],
 };

@@ -32,7 +32,7 @@ export default function IntroSplash({ leaving }) {
     <div className={"intro-splash" + (leaving ? " leaving" : "")} role="status" aria-live="polite" aria-label={t.loadingMap}>
       <div className="intro-aurora" aria-hidden="true"><i /><i /><i /></div>
       <div className="intro-content">
-        <img className="intro-logo" src="images/logo.jpg" alt="Sociedad Española de Epidemiología" />
+        <img className="intro-logo" src="images/logo_see.png" alt="Sociedad Española de Epidemiología" />
         <h1 className="intro-title">
           {words.map((w, i) => (
             <span key={i} style={{ animationDelay: `${0.45 + i * 0.09}s` }}>{w}{i < words.length - 1 ? " " : ""}</span>

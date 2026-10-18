@@ -19,7 +19,7 @@ export default function Header({ onAbout }) {
       <button className="hbtn menu-toggle" aria-label={t.filters + " · " + t.layers}
               onClick={() => setPanels({ left: !state.panels.left, right: false })}>☰</button>
       <div className="brand">
-        <img src="images/logo.jpg" alt="" className="brand-logo" onError={e => { e.currentTarget.style.display = "none"; }} />
+        <img src="images/logo_see.png" alt="" className="brand-logo" onError={e => { e.currentTarget.style.display = "none"; }} />
         <div>
           <h1>{t.appTitle}</h1>
           <p>{t.appSubtitle}</p>

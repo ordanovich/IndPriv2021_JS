@@ -91,7 +91,7 @@ export function MobileMenu({ onAbout }) {
     <div className="m-menu" onClick={close}>
       <div className="m-menu-sheet" role="dialog" aria-modal="true" aria-label={t.menu} onClick={e => e.stopPropagation()}>
         <div className="m-menu-head">
-          <img src="images/logo.jpg" alt="SEE" className="m-menu-logo" onError={e => { e.currentTarget.style.display = "none"; }} />
+          <img src="images/logo_see.png" alt="SEE" className="m-menu-logo" onError={e => { e.currentTarget.style.display = "none"; }} />
           <div className="m-menu-title">
             <b>{t.appTitle}</b>
             <small>{t.appSubtitle}</small>

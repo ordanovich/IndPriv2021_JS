@@ -189,9 +189,10 @@ const es = {
   tour: [
     ["1 · Buscador", "Arriba está el buscador: escribe una dirección, un código postal o un municipio y el mapa irá allí."],
     ["2 · Año", "Con este botón eliges el año del índice: 2011 o 2021."],
-    ["3 · Secciones", "Selecciona cualquier sección del mapa: quedará marcada y abajo aparecerá su ficha."],
-    ["4 · Datos", "Desliza hacia arriba este panel para ver la ficha completa y las estadísticas."],
-    ["5 · Menú", "Aquí están los filtros, las capas, la leyenda, las descargas y esta misma guía."],
+    ["3 · Quintiles", "Selecciona Q1…Q5 para ver solo esa clase en el mapa; selecciónala otra vez para verlas todas."],
+    ["4 · Secciones", "Selecciona cualquier sección del mapa: quedará marcada y abajo aparecerá su ficha."],
+    ["5 · Datos", "Desliza hacia arriba este panel para ver la ficha completa y las estadísticas."],
+    ["6 · Menú", "Aquí están los filtros, las capas, la leyenda, las descargas y esta misma guía."],
   ],
   tourDesktop: [
     ["Buscador", "Escribe una dirección, un código postal, un municipio o un CUSEC y el mapa irá allí."],
@@ -401,9 +402,10 @@ const en = {
   tour: [
     ["1 · Search", "The search bar is at the top: type an address, a postcode or a municipality and the map goes there."],
     ["2 · Year", "This button sets the year of the index: 2011 or 2021."],
-    ["3 · Tracts", "Select any tract on the map: it gets outlined and its details appear below."],
-    ["4 · Data", "Swipe this panel up to see the full details and the statistics."],
-    ["5 · Menu", "Filters, layers, the legend, downloads and this guide are here."],
+    ["3 · Quintiles", "Select Q1…Q5 to show only that class on the map; select it again to show them all."],
+    ["4 · Tracts", "Select any tract on the map: it gets outlined and its details appear below."],
+    ["5 · Data", "Swipe this panel up to see the full details and the statistics."],
+    ["6 · Menu", "Filters, layers, the legend, downloads and this guide are here."],
   ],
   tourDesktop: [
     ["Search", "Type an address, a postcode, a municipality or a tract code and the map goes there."],

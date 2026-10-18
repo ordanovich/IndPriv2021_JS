@@ -404,7 +404,7 @@ export default function MapView() {
       {!INTRO_ON && (loading === "map" || loading === "fading") && (
         <div className={"map-loader" + (loading === "fading" ? " out" : "")} role="status" aria-live="polite">
           <div className="map-loader-card">
-            <img src="images/logo.jpg" alt="" onError={e => { e.currentTarget.style.display = "none"; }} />
+            <img src="images/logo_see.png" alt="" onError={e => { e.currentTarget.style.display = "none"; }} />
             <span className="loader-bars" aria-hidden="true"><b /><b /><b /><b /><b /></span>
             <span className="loader-text">{t.loadingMap}</span>
           </div>
@@ -415,11 +415,23 @@ export default function MapView() {
           <span className="spinner small" aria-hidden="true" />{t.loadingYear(state.year)}
         </div>
       )}
-      <button className="mini-legend" aria-label={t.legend}
-              onClick={() => app.setPanels(mobile ? { menu: true, menuSection: "legend" } : { right: true, left: false })}>
-        {PALETTES[state.colorblind ? "cb" : "std"].map((c, k) => <i key={k} data-q={k + 1} style={{ background: c }}>Q{k + 1}</i>)}
-        <span>{t.legend} ›</span>
-      </button>
+      {/* Q chips filter the map by quintile (same filter as the legend and the
+          Filters panel; select again to remove); "Leyenda ›" opens the legend */}
+      <div className={"mini-legend" + (state.filters.quintiles.length ? " has-sel" : "")} role="group" aria-label={t.legend}>
+        {PALETTES[state.colorblind ? "cb" : "std"].map((c, k) => {
+          const q = k + 1, on = state.filters.quintiles.includes(q);
+          return (
+            <button key={q} className={"ml-q" + (on ? " on" : "")} aria-pressed={on} title={`Q${q} · ${t.qLabels[k]}`}
+                    onClick={() => app.setFilters({ quintiles: on ? state.filters.quintiles.filter(x => x !== q) : [...state.filters.quintiles, q].sort() })}>
+              <i data-q={q} style={{ background: c }}>Q{q}</i>
+            </button>
+          );
+        })}
+        <button className="ml-open" aria-label={t.legend}
+                onClick={() => app.setPanels(mobile ? { menu: true, menuSection: "legend" } : { right: true, left: false })}>
+          <span>{t.legend}</span> ›
+        </button>
+      </div>
       <div className="map-actions">
         {activeFilterCount(state.filters) > 0 && (
           <button title={t.clearFilters} aria-label={t.clearFilters}
