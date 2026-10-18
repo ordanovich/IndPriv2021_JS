@@ -53,7 +53,7 @@ export default function Legend() {
           const on = selected.includes(q);
           const dim = selected.length > 0 && !on;
           return (
-            <button key={q} className={"legend-row" + (on ? " on" : "") + (dim ? " dim" : "")}
+            <button key={q} data-q={q} className={"legend-row" + (on ? " on" : "") + (dim ? " dim" : "")}
                     title={t.legendClick} aria-pressed={on} onClick={() => toggle(q)}>
               <i className="sw" style={{ background: colors[q - 1] }} />
               <span className="lbl">

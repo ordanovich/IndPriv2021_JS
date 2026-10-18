@@ -14,6 +14,7 @@ import {
 import CompareOverlay from "./CompareOverlay";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { useIsMobile } from "../hooks";
+import { INTRO_ON, markIntroPending, prepareFlight, runIntro } from "./intro";
 
 function rectGeoJSON(r) {
   if (!r) return { type: "FeatureCollection", features: [] };
@@ -219,6 +220,20 @@ export default function MapView() {
     return () => { map.off("idle", check); clearTimeout(safety); };
   }, [ready, loadRound]);
 
+  // Animated version (?intro=1): camera glide, quintile wave, interface rising
+  // in, started as the loader dissolves. No glide when the link already
+  // points somewhere (a selection or a view).
+  const introFlight = useRef(INTRO_ON && !state.initialBbox && !state.selected);
+  const introEnd = useRef(null);
+  useEffect(() => { markIntroPending(); return () => { introEnd.current?.(); delete document.documentElement.dataset.intro; }; }, []);
+  useEffect(() => { if (ready && introFlight.current) prepareFlight(mapRef.current); }, [ready]);
+  useEffect(() => {
+    if (!INTRO_ON || loading !== "fading" || introEnd.current) return;
+    introEnd.current = runIntro(mapRef.current, {
+      flight: introFlight.current, getOpacity: () => live.current.state.opacity,
+    });
+  }, [loading]);
+
   // End of the dissolve: remove the loader
   useEffect(() => {
     if (loading !== "fading") return;
@@ -399,7 +414,7 @@ export default function MapView() {
       )}
       <button className="mini-legend" aria-label={t.legend}
               onClick={() => app.setPanels(mobile ? { menu: true, menuSection: "legend" } : { right: true, left: false })}>
-        {PALETTES[state.colorblind ? "cb" : "std"].map((c, k) => <i key={k} style={{ background: c }}>Q{k + 1}</i>)}
+        {PALETTES[state.colorblind ? "cb" : "std"].map((c, k) => <i key={k} data-q={k + 1} style={{ background: c }}>Q{k + 1}</i>)}
         <span>{t.legend} ›</span>
       </button>
       <div className="map-actions">

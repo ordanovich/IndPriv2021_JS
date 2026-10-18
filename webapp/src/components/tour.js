@@ -71,7 +71,8 @@ export function maybeStartTour(t) {
   if (seen()) return;
   let waited = 0;
   const go = () => {
-    if (document.querySelector(".map-loader") && waited < 15000) { waited += 300; setTimeout(go, 300); return; }
+    const busy = document.querySelector(".map-loader") || document.documentElement.dataset.intro;
+    if (busy && waited < 15000) { waited += 300; setTimeout(go, 300); return; }
     setTimeout(() => startTour(t).catch(() => { removePin(); }), 500);
   };
   go();

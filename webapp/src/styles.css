@@ -737,3 +737,28 @@ button:disabled { cursor: default; opacity: 0.45; }
   .app.m .m-year { bottom: 10px; right: calc(var(--m-side) + 16px); }
   .app.m .map-actions { top: calc(214px + var(--m-top)); right: calc(var(--m-side) + 16px); }
 }
+
+/* ── Animated version (?intro=1, map/intro.js) ───────────────────────────────
+   Only with html[data-intro]; the calm version never sets it.
+   pending: interface hidden and the loader over the whole screen.
+   run: the loader dissolves while the interface rises in, one after another. */
+html[data-intro] .map-loader { position: fixed; inset: 0; z-index: 60; }
+html[data-intro="pending"] :is(.app-header, .side, .rail, .metabar, .bottom, .m-top, .map-views, .m-year,
+  .mini-legend, .map-actions, .maplibregl-ctrl-top-right, .maplibregl-ctrl-bottom-right) { opacity: 0; }
+@keyframes intro-rise { from { opacity: 0; transform: translateY(12px); } }
+html[data-intro="run"] :is(.app-header, .side, .rail, .metabar, .bottom, .m-top, .map-views, .m-year,
+  .mini-legend, .map-actions, .maplibregl-ctrl-top-right, .maplibregl-ctrl-bottom-right) {
+  animation: intro-rise 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+/* order of arrival: top first, then the sides, then the bottom */
+html[data-intro="run"] :is(.app-header, .m-top)                       { animation-delay: 0.10s; }
+html[data-intro="run"] :is(.side.left, .rail.left, .map-views)         { animation-delay: 0.20s; }
+html[data-intro="run"] :is(.metabar, .maplibregl-ctrl-top-right)       { animation-delay: 0.28s; }
+html[data-intro="run"] :is(.side.right, .rail.right, .map-actions)     { animation-delay: 0.36s; }
+html[data-intro="run"] :is(.mini-legend, .maplibregl-ctrl-bottom-right) { animation-delay: 0.46s; }
+html[data-intro="run"] .m-year                                         { animation-delay: 0.54s; }
+html[data-intro="run"] .bottom                                         { animation-delay: 0.62s; }
+/* legend chip of the class that just lit up */
+@keyframes intro-pop { 40% { transform: scale(1.12); } }
+.intro-pop { animation: intro-pop 0.35s ease-out; }
+.legend-row[data-q], .mini-legend [data-q] { transition: opacity 0.25s ease; }
