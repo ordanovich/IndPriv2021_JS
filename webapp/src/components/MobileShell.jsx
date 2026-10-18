@@ -98,6 +98,18 @@ export function MobileMenu({ onAbout }) {
           </div>
           <button className="m-btn flat" aria-label={t.menuClose} title={t.menuClose} onClick={close}>✕</button>
         </div>
+        {/* Quick settings, in sight as soon as the Menú opens */}
+        <div className="m-quick">
+          <div className="m-quick-item">
+            <span className="field-label">{t.language}</span>
+            <Segmented value={lang} onChange={v => set({ lang: v })}
+                       options={[{ value: "es", label: "Español" }, { value: "en", label: "English" }]} />
+          </div>
+          <button className={"m-chip" + (state.colorblind ? " on" : "")} aria-pressed={state.colorblind}
+                  onClick={() => set({ colorblind: !state.colorblind })}>
+            <span aria-hidden="true">◑</span> {t.colorblind}
+          </button>
+        </div>
         <div className="m-menu-body">
           {S("filters", t.filters, <Filters />, nFilters ? <span className="badge">{nFilters}</span> : null)}
           {S("layers", t.layers, <Layers />)}
@@ -109,15 +121,6 @@ export function MobileMenu({ onAbout }) {
           <div className="m-menu-foot">
             <button className="m-item" onClick={() => { close(); onAbout(); }}><span aria-hidden="true">ⓘ</span> {t.about}</button>
             <button className="m-item" onClick={share}><span aria-hidden="true">{shared ? "✓" : "🔗"}</span> {shared ? t.shareDone : t.share}</button>
-            <label className="m-item">
-              <input type="checkbox" checked={state.colorblind} onChange={e => set({ colorblind: e.target.checked })} />
-              <span aria-hidden="true">◑</span> {t.colorblind}
-            </label>
-            <div className="m-item">
-              <span>{t.language}</span>
-              <Segmented value={lang} onChange={v => set({ lang: v })}
-                         options={[{ value: "es", label: "ES" }, { value: "en", label: "EN" }]} />
-            </div>
             <button className="m-item" onClick={() => { close(); setTimeout(() => startTour(t).catch(() => {}), 300); }}>
               <span aria-hidden="true">?</span> {t.showTour}
             </button>

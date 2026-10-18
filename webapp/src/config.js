@@ -91,7 +91,7 @@ export const BASEMAPS = [
   // drawn above the index so they stay readable (indexLayers.js).
   {
     id: "ofm-gris",
-    name: { es: "OpenFreeMap · gris (nítido)", en: "OpenFreeMap · grey (sharp)" },
+    name: { es: "OpenFreeMap · gris", en: "OpenFreeMap · grey" },
     vectorStyle: "https://tiles.openfreemap.org/styles/positron",
     attribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> · ' +
       '© <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> · ' +
